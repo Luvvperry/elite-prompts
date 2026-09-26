@@ -907,6 +907,8 @@ Request: "${text}"`
 // ============================================================================
 // VITE / STATIC SERVING
 // ============================================================================
+export default app;
+
 async function startServer() {
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
@@ -928,7 +930,9 @@ async function startServer() {
   });
 }
 
-startServer().catch(err => {
-  console.error("Failed to start server:", err);
-  process.exit(1);
-});
+if (process.env.VERCEL !== '1') {
+  startServer().catch(err => {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  });
+}
