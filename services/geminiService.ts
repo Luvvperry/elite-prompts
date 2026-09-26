@@ -157,7 +157,10 @@ export const magicEnhanceIdea = async (
     const message = typeof data === 'object' && data !== null && 'error' in data
       ? String((data as { error?: unknown }).error || 'SERVER_ERROR')
       : 'SERVER_ERROR';
-    throw new Error(message);
+    if (response.status === 429 || /429|RESOURCE_EXHAUSTED|quota/i.test(message)) {
+      throw new Error('RATE_LIMIT');
+    }
+    throw new Error(response.status >= 500 ? 'SERVER_ERROR' : 'UNKNOWN');
   }
 
   const enhanced = typeof data === 'object' && data !== null && 'enhanced' in data
