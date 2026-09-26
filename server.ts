@@ -665,7 +665,7 @@ ${isSpanish
   ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Keep in its exact standard English snapshot formula as established.
 - V2: Output in Portuguese (Português Brasil) using the exact curly braces {} structure.
-- V3: Output in Portuguese (Português Brasil), as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use labels such as "luz", "materiais e reflexos", "profundidade e foco" and never English labels such as "light", "materials", "focus" or "effect". Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
   : `CRITICAL LANGUAGE REQUIREMENT:
 - V1 remains in its exact legacy English formula.
 - V2 must be generated in English using curly braces {}.
