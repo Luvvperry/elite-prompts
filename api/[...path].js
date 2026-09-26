@@ -212,11 +212,17 @@ app.post("/api/generate-prompts", async (req, res) => {
     const { mode, modality, selectedTypeId = modality, promptLanguage, ideaText, references, settings } = req.body;
     const ai = getAiClient();
     const settingsContext = formatSettingsContext(settings);
-    const isSpanish = promptLanguage === "es";
-    const isPortuguese = promptLanguage === "pt";
-    const isEnglish = promptLanguage === "en";
+    const rawPromptLanguage = String(promptLanguage ?? "").trim().toLowerCase();
+    const normalizedPromptLanguage = rawPromptLanguage === "pt" || rawPromptLanguage === "pt-br" || rawPromptLanguage.includes("portugu") ? "pt" : rawPromptLanguage === "es" || rawPromptLanguage.includes("span") || rawPromptLanguage.includes("espa\xF1") ? "es" : "en";
+    const isSpanish = normalizedPromptLanguage === "es";
+    const isPortuguese = normalizedPromptLanguage === "pt";
+    const isEnglish = normalizedPromptLanguage === "en";
+    const requestedLanguageName = isPortuguese ? "Brazilian Portuguese" : isSpanish ? "Spanish" : "English";
     const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
+HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
+Write V2, V3, and every natural-language value in autoDetected in ${requestedLanguageName}.
+Do not translate the requested language into English and do not mix languages. The only exception is V1's explicitly preserved legacy English formula.
 Your mission is to construct three (3) distinct, highly specialized prompt engines for an image or scene:
 - V1: ORIGINAL / OPTICAL (LOCKED 1:1 LEGACY ENGINE)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
@@ -610,7 +616,11 @@ SETTINGS & GUIDANCE:
 ${settingsContext}
 `;
     }
-    contentsParts.push({ text: userTextDescription });
+    contentsParts.push({
+      text: `OUTPUT LANGUAGE LOCK: Generate all requested natural-language content in ${requestedLanguageName}. Keep V1 in its preserved legacy English formula only; V2, V3, and autoDetected must be entirely in ${requestedLanguageName}.
+
+${userTextDescription}`
+    });
     if (references && references.length > 0) {
       for (const ref of references) {
         if (ref.dataUrl && ref.dataUrl.includes(",")) {
