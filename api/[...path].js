@@ -693,13 +693,13 @@ ${settingsContext}
   }
 });
 app.post("/api/magic-enhance", async (req, res) => {
+  const rawIdea = typeof req.body?.rawIdea === "string" ? req.body.rawIdea.trim() : "";
+  const modality = req.body?.modality || "person";
+  if (!rawIdea) return res.json({ enhanced: "" });
+
   try {
-    const { rawIdea, modality } = req.body;
-    if (!rawIdea || !rawIdea.trim()) {
-      return res.json({ enhanced: rawIdea || "" });
-    }
     const ai = getAiClient();
-    const prompt = `
+const prompt = `
 YOU ARE AN EXPERT IN CASUAL IPHONE REALISM AND SPATIAL PHOTOGRAPHIC EXPANSION.
 A user has written this raw photo idea:
 """${rawIdea}"""
@@ -733,15 +733,34 @@ CORE DIRECTIVES:
 - Return ONLY the enhanced idea text.
 - Match the exact language of the user's input (Portuguese, Spanish, or English).
 `;
-    const result = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: prompt,
-      config: { temperature: 0.2 }
-    });
-    res.json({ enhanced: result.text?.trim() || rawIdea });
+    const models = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.1-flash-lite"];
+    let lastError;
+
+    for (let attempt = 0; attempt < models.length; attempt++) {
+      try {
+        const result = await ai.models.generateContent({
+          model: models[attempt],
+          contents: prompt,
+          config: { temperature: 0.2 }
+        });
+        const enhanced = result.text?.trim();
+        if (enhanced) return res.json({ enhanced });
+        throw new Error("Empty response from model");
+      } catch (error) {
+        lastError = error;
+        console.warn(`Magic Enhance attempt ${attempt + 1} (${models[attempt]}) failed: ${error?.message || error}`);
+        if (attempt < models.length - 1) await wait(500 * (attempt + 1));
+      }
+    }
+
+    throw lastError || new Error("All Magic Enhance models failed");
   } catch (error) {
     console.error("Magic enhance error:", error);
-    res.status(500).json({ error: error.message || "Failed to enhance idea", enhanced: req.body?.rawIdea || "" });
+    return res.status(502).json({
+      error: error?.message || "Failed to enhance idea",
+      enhanced: rawIdea,
+      retryable: true
+    });
   }
 });
 app.post("/api/refine-prompt", async (req, res) => {

@@ -135,7 +135,11 @@ export const magicEnhanceIdea = async (
   rawIdea: string,
   modality: ModalityType
 ): Promise<string> => {
-  if (!rawIdea || rawIdea.trim().length === 0) return rawIdea;
+  const trimmedIdea = rawIdea?.trim() || '';
+  if (!trimmedIdea) return rawIdea;
+
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
   try {
     const response = await fetch('/api/magic-enhance', {
@@ -144,20 +148,28 @@ export const magicEnhanceIdea = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        rawIdea,
+        rawIdea: trimmedIdea,
         modality,
       }),
+      signal: controller.signal,
     });
 
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return rawIdea;
+      throw new Error(data.error || `Magic Enhance server error (${response.status})`);
     }
 
-    const data = await response.json();
-    return data.enhanced || rawIdea;
+    const enhanced = typeof data.enhanced === 'string' ? data.enhanced.trim() : '';
+    if (!enhanced) throw new Error('Magic Enhance returned an empty result');
+    return enhanced;
   } catch (e) {
-    console.error("Magic Enhance failed:", e);
-    return rawIdea;
+    const error = e instanceof DOMException && e.name === 'AbortError'
+      ? new Error('Magic Enhance timed out')
+      : e;
+    console.error('Magic Enhance failed:', error);
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 };
 
