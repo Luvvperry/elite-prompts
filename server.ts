@@ -844,13 +844,24 @@ CORE DIRECTIVES:
 - Match the exact language of the user's input (Portuguese, Spanish, or English).
 `;
 
-    const result = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: { temperature: 0.2 }
-    });
-
-    res.json({ enhanced: result.text?.trim() || rawIdea });
+    const magicModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+    let lastError: any = null;
+    for (const model of magicModels) {
+      try {
+        const result = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: { temperature: 0.2 }
+        });
+        const enhanced = result.text?.trim();
+        if (enhanced) return res.json({ enhanced });
+        throw new Error('EMPTY_ENHANCE_RESPONSE');
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`Magic Enhance model ${model} failed: ${error.message}`);
+      }
+    }
+    throw lastError || new Error('Failed to enhance idea');
   } catch (error: any) {
     console.error("Magic enhance error:", error);
     res.status(500).json({ error: error.message || "Failed to enhance idea", enhanced: req.body?.rawIdea || '' });
