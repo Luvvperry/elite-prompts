@@ -133,43 +133,32 @@ export const generatePrompts = async (
 // Magic Enhance for User Idea
 export const magicEnhanceIdea = async (
   rawIdea: string,
-  modality: ModalityType,
-  signal?: AbortSignal
+  modality: ModalityType
 ): Promise<string> => {
-  const input = typeof rawIdea === 'string' ? rawIdea.trim() : '';
-  if (!input) throw new Error('EMPTY_ENHANCE_INPUT');
+  if (!rawIdea || rawIdea.trim().length === 0) return rawIdea;
 
-  const response = await fetch('/api/magic-enhance', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ rawIdea: input, modality }),
-    signal,
-  });
-
-  let data: unknown = null;
   try {
-    data = await response.json();
-  } catch {
-    throw new Error(response.ok ? 'INVALID_ENHANCE_RESPONSE' : 'SERVER_ERROR');
-  }
+    const response = await fetch('/api/magic-enhance', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        rawIdea,
+        modality,
+      }),
+    });
 
-  if (!response.ok) {
-    const message = typeof data === 'object' && data !== null && 'error' in data
-      ? String((data as { error?: unknown }).error || 'SERVER_ERROR')
-      : 'SERVER_ERROR';
-    if (response.status === 429 || /429|RESOURCE_EXHAUSTED|quota/i.test(message)) {
-      throw new Error('RATE_LIMIT');
+    if (!response.ok) {
+      return rawIdea;
     }
-    throw new Error(response.status >= 500 ? 'SERVER_ERROR' : 'UNKNOWN');
-  }
 
-  const enhanced = typeof data === 'object' && data !== null && 'enhanced' in data
-    ? (data as { enhanced?: unknown }).enhanced
-    : null;
-  if (typeof enhanced !== 'string' || !enhanced.trim()) {
-    throw new Error('EMPTY_ENHANCE_RESPONSE');
+    const data = await response.json();
+    return data.enhanced || rawIdea;
+  } catch (e) {
+    console.error("Magic Enhance failed:", e);
+    return rawIdea;
   }
-  return enhanced.trim();
 };
 
 // Refine Prompt with Specific Delta

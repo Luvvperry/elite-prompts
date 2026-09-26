@@ -252,22 +252,12 @@ app.post('/api/generate-prompts', async (req: Request, res: Response) => {
     const ai = getAiClient();
     const settingsContext = formatSettingsContext(settings);
 
-    // Normalize UI codes and locale names so language selection never silently falls back.
-    const rawPromptLanguage = String(promptLanguage ?? '').trim().toLowerCase();
-    const normalizedPromptLanguage =
-      rawPromptLanguage === 'pt' || rawPromptLanguage === 'pt-br' || rawPromptLanguage.includes('portugu') ? 'pt' :
-      rawPromptLanguage === 'es' || rawPromptLanguage.includes('span') || rawPromptLanguage.includes('españ') ? 'es' :
-      'en';
-    const isSpanish = normalizedPromptLanguage === 'es';
-    const isPortuguese = normalizedPromptLanguage === 'pt';
-    const isEnglish = normalizedPromptLanguage === 'en';
-    const requestedLanguageName = isPortuguese ? 'Brazilian Portuguese' : isSpanish ? 'Spanish' : 'English';
+    const isSpanish = promptLanguage === 'es';
+    const isPortuguese = promptLanguage === 'pt';
+    const isEnglish = promptLanguage === 'en';
 
     const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
-HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
-Write V2, V3, and every natural-language value in autoDetected in ${requestedLanguageName}.
-Do not translate the requested language into English and do not mix languages. The only exception is V1's explicitly preserved legacy English formula.
 Your mission is to construct three (3) distinct, highly specialized prompt engines for an image or scene:
 - V1: ORIGINAL / OPTICAL (LOCKED 1:1 LEGACY ENGINE)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
@@ -600,44 +590,6 @@ IPHONE / SMARTPHONE CAPTURE RULES
 - For low light smartphone photos, use digital sensor noise / computational sharpening behavior, not analog film grain.
 
 ==================================================
-V3 RECONSTRUCTION SPECIFICATION — APPLY ONLY TO V3
-==================================================
-V3 is not a longer version of V2. It is a direct natural-language reconstruction of the photographed scene, using only the evidence and instructions available.
-
-TRUTH PRIORITY:
-1. explicit user text and requested facts;
-2. visible or reliably assigned reference-image evidence;
-3. explicit locks and manual settings;
-4. auto-detected context;
-5. conservative physical completion.
-Never overwrite a higher-priority fact with a guess. Never invent unreadable logos, brands, jewelry, tattoos, car details, locations, or background objects.
-
-ADAPTIVE BLOCKS:
-- Use natural-language blocks with curly braces {}, not headings, checklists, JSON, phases, reports, or meta-instructions.
-- Include only blocks that matter to the selected type and actual scene. Do not add hands, skin, vehicle, flash, food, or other categories when they are absent or irrelevant.
-- For people, resolve identity evidence, hairline, facial proportions, skin tone/texture, clothing, body orientation, weight distribution, legs, feet, hands, gaze, expression, and contacts with objects or surfaces.
-- For two or more people, keep each identity, wardrobe, action, gaze, hands, and accessories separate; describe their spacing and interaction explicitly.
-- For objects/POV, prioritize support, weight, contact patches, orientation, scale, surface curvature, occlusion, wear, fingerprints, packaging, grease/crumbs, reflections, and surrounding context. Never make an object float or turn the result into a clean product advertisement.
-- For vehicles, resolve the visible side, doors, windows, roofline, steering wheel/seat when relevant, tire contact, body curvature, reflections, and the exact physical contact with a person or object.
-
-PHYSICAL AND SPATIAL RESOLUTION:
-- Silently resolve camera position, subject distance, foreground/midground/background, viewer-left/viewer-right, occlusion, scale, contact, orientation, perspective, and the photographed moment before writing.
-- Describe actions with who, which hand, what object, where, contact, and orientation. Replace vague phrases such as “natural pose”, “relaxed pose”, or “hands naturally positioned” with concrete biomechanics.
-- Make clothing respond to posture: material, cut, drape, folds, tension, bunching, compression, and overlap. Make materials respond to light: matte cotton, linen, leather, glass, metal, paint, wood, stone, food, and plastic only where present and visible.
-
-SMARTPHONE-FIRST CAPTURE:
-- If unspecified, use a rear smartphone main camera at 1x with handheld framing and natural wide perspective. Preserve selected 0.5x, 1x, 2x, or 3x behavior exactly; never convert it into a professional-camera look.
-- Resolve camera height, distance, direction, tilt, orientation, framing, crop, and subject scale. A distant subject must not become a close-up.
-- Do not add artificial portrait bokeh, professional shallow depth of field, 35mm/50mm/85mm language, cinema language, or film grain unless explicitly requested. Low light uses digital/high-ISO/chroma/shadow noise, not analog grain.
-- Daylight without requested flash means flash off. When direct phone flash is present, show near-field exposure, localized highlights, short nearby shadows, rapid falloff, and a darker distant background; never light an entire distant space uniformly.
-- Add only causal imperfections: motion blur, camera shake, focus miss, digital noise, uneven exposure, white-balance mismatch, compression, crooked framing, lens smudge, or flash clipping only when justified by movement, light, distance, or camera behavior. Do not dump them all into the prompt.
-
-STYLE AND COMPLETENESS:
-- The output must be one paste-ready direct image prompt, with natural clauses and adaptive {} blocks. It must not look like a technical document and must not expose reasoning.
-- Avoid buzzwords such as cinematic, masterpiece, award-winning, luxury atmosphere, editorial photography, 8K, hyperrealistic, photorealistic masterpiece, film still, anamorphic, or beautiful composition unless the user explicitly asks for them.
-- Each sentence must add geometry, physics, action, material, composition, lighting, or evidence. State each important fact once in its best block; do not repeat camera, flash, realism, or iPhone details.
-- V3 must be substantially more physically informative than V2 without padding. End with the selected aspect ratio/format when relevant.
-==================================================
 V3 FINAL QUALITY GATE
 ==================================================
 Before returning V3, silently verify:
@@ -665,7 +617,7 @@ ${isSpanish
   ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Keep in its exact standard English snapshot formula as established.
 - V2: Output in Portuguese (Português Brasil) using the exact curly braces {} structure.
-- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use labels such as "luz", "materiais e reflexos", "profundidade e foco" and never English labels such as "light", "materials", "focus" or "effect". Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V3: Output in Portuguese (Português Brasil), as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
   : `CRITICAL LANGUAGE REQUIREMENT:
 - V1 remains in its exact legacy English formula.
 - V2 must be generated in English using curly braces {}.
@@ -706,11 +658,7 @@ ${settingsContext}
 `;
     }
 
-    contentsParts.push({
-      text: `OUTPUT LANGUAGE LOCK: Generate all requested natural-language content in ${requestedLanguageName}. Keep V1 in its preserved legacy English formula only; V2, V3, and autoDetected must be entirely in ${requestedLanguageName}.
-
-${userTextDescription}`
-    });
+    contentsParts.push({ text: userTextDescription });
 
     if (references && references.length > 0) {
       for (const ref of references) {
@@ -844,24 +792,13 @@ CORE DIRECTIVES:
 - Match the exact language of the user's input (Portuguese, Spanish, or English).
 `;
 
-    const magicModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
-    let lastError: any = null;
-    for (const model of magicModels) {
-      try {
-        const result = await ai.models.generateContent({
-          model,
-          contents: prompt,
-          config: { temperature: 0.2 }
-        });
-        const enhanced = result.text?.trim();
-        if (enhanced) return res.json({ enhanced });
-        throw new Error('EMPTY_ENHANCE_RESPONSE');
-      } catch (error: any) {
-        lastError = error;
-        console.warn(`Magic Enhance model ${model} failed: ${error.message}`);
-      }
-    }
-    throw lastError || new Error('Failed to enhance idea');
+    const result = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: { temperature: 0.2 }
+    });
+
+    res.json({ enhanced: result.text?.trim() || rawIdea });
   } catch (error: any) {
     console.error("Magic enhance error:", error);
     res.status(500).json({ error: error.message || "Failed to enhance idea", enhanced: req.body?.rawIdea || '' });

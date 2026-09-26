@@ -293,8 +293,7 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<FullSettings>(defaultSettings);
   const [generation, setGeneration] = useState<GenerationOutput | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [magicStatus, setMagicStatus] = useState<'idle' | 'enhancing' | 'success' | 'error' | 'timeout'>('idle');
-  const isMagicEnhancing = magicStatus === 'enhancing';
+  const [isMagicEnhancing, setIsMagicEnhancing] = useState<boolean>(false);
   const [detectedParams, setDetectedParams] = useState<AutoDetectedParams | undefined>(undefined);
 
   // Modals & Drawers
@@ -306,8 +305,6 @@ const App: React.FC = () => {
   const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
   const [toast, setToast] = useState<ToastPayload>(null);
   const magicRequestIdRef = useRef(0);
-  const magicControllerRef = useRef<AbortController | null>(null);
-  const ideaRevisionRef = useRef(0);
 
   // Presets & History persistence
   const [presets, setPresets] = useState<PresetItem[]>(() => {
@@ -372,13 +369,10 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Unmount cleanup is intentionally separate from configuration changes.
-    return () => {
-      magicRequestIdRef.current += 1;
-      magicControllerRef.current?.abort();
-      magicControllerRef.current = null;
-    };
-  }, []);
+    // Invalidate an in-flight Magic Enhance when the capture context changes.
+    magicRequestIdRef.current += 1;
+    setIsMagicEnhancing(false);
+  }, [mode, modality]);
 
   const showToast = useCallback((type: 'success' | 'error' | 'info', message: string) => {
     setToast({ id: Date.now(), type, message });
@@ -425,67 +419,45 @@ const App: React.FC = () => {
     setReferences(prev => prev.map(r => r.id === id ? { ...r, subjectAssignment } : r));
   }, []);
 
-  const handleIdeaChange = useCallback((nextIdea: string) => {
-    ideaRevisionRef.current += 1;
-    setIdeaText(nextIdea);
-  }, []);
-
-  // Magic Enhance Idea — request lifecycle is fully owned here; prompt logic is untouched.
+  // Magic Enhance Idea — resilient client wrapper; prompt logic remains untouched.
   const handleMagicEnhance = useCallback(async () => {
     const originalIdea = ideaText;
-    if (!originalIdea.trim() || isMagicEnhancing || magicControllerRef.current) return;
+    if (!originalIdea.trim() || isMagicEnhancing) return;
 
-    const requestContext = { idea: originalIdea, modality, inputRevision: ideaRevisionRef.current };
     const requestId = ++magicRequestIdRef.current;
-    magicControllerRef.current?.abort();
-    const controller = new AbortController();
-    magicControllerRef.current = controller;
-    setMagicStatus('enhancing');
+    setIsMagicEnhancing(true);
 
     const uiMessage: Record<Language, string> = {
-      pt: 'Magic Enhance não conseguiu concluir. Tente novamente.',
-      es: 'Magic Enhance no pudo completarse. Inténtalo de nuevo.',
-      en: 'Magic Enhance couldn’t finish. Try again.'
+      pt: 'Não foi possível melhorar a ideia. Tente novamente.',
+      es: 'No fue posible mejorar la idea. Inténtalo de nuevo.',
+      en: 'Couldn’t enhance the idea. Try again.'
     };
 
-    let timedOut = false;
-    const timeoutId = window.setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, 45000);
-    const logMagic = (message: string) => {
-      if (import.meta.env.DEV) console.debug(`[MAGIC] ${message}`, requestId);
-    };
+    let timeoutId: number | undefined;
     try {
-      logMagic('request started');
-      const enhanced = await magicEnhanceIdea(requestContext.idea, requestContext.modality, controller.signal);
-      logMagic('API resolved');
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = window.setTimeout(() => reject(new Error('MAGIC_ENHANCE_TIMEOUT')), 25000);
+      });
+
+      const enhanced = await Promise.race([
+        magicEnhanceIdea(originalIdea, modality),
+        timeoutPromise
+      ]);
+
       if (requestId !== magicRequestIdRef.current) return;
-      if (ideaRevisionRef.current === requestContext.inputRevision) {
-        handleIdeaChange(enhanced);
-      }
-      setMagicStatus('success');
-      logMagic('success');
-    } catch (error: any) {
-      if (requestId !== magicRequestIdRef.current) return;
-      if (timedOut) {
-        setMagicStatus('timeout');
-        showToast('error', lang === 'pt' ? 'Magic Enhance demorou demais. Tente novamente.' : uiMessage[lang]);
-        logMagic('timeout');
-      } else if (error?.name === 'AbortError') {
-        setMagicStatus('error');
-        logMagic('aborted');
-      } else {
-        setMagicStatus('error');
+      if (typeof enhanced !== 'string' || !enhanced.trim()) throw new Error('MAGIC_ENHANCE_EMPTY');
+      setIdeaText(current => current === originalIdea ? enhanced.trim() : current);
+    } catch (e) {
+      if (requestId === magicRequestIdRef.current) {
+        console.error(e);
+        setIdeaText(current => current.trim() ? current : originalIdea);
         showToast('error', uiMessage[lang]);
-        if (import.meta.env.DEV) console.debug('[MAGIC] error', requestId, error);
       }
     } finally {
-      window.clearTimeout(timeoutId);
-      if (magicControllerRef.current === controller) magicControllerRef.current = null;
-      logMagic('cleanup');
+      if (timeoutId) window.clearTimeout(timeoutId);
+      if (requestId === magicRequestIdRef.current) setIsMagicEnhancing(false);
     }
-  }, [ideaText, modality, isMagicEnhancing, lang, showToast, handleIdeaChange]);
+  }, [ideaText, modality, isMagicEnhancing, lang, showToast]);
 
   // Generate All Prompts
   const handleGenerate = async () => {
@@ -665,7 +637,7 @@ const App: React.FC = () => {
                   onModalityChange={handleModalityChange}
                   selectedTypeId={selectedTypeId}
                   ideaText={ideaText}
-                  onIdeaChange={handleIdeaChange}
+                  onIdeaChange={setIdeaText}
                   references={references}
                   onAddReferences={handleAddReferences}
                   onRemoveReference={handleRemoveReference}
