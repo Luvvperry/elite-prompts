@@ -30,7 +30,7 @@ const MobileCommandDock: React.FC<MobileCommandDockProps> = ({
   isLoading,
   hasOutput
 }) => {
-  const ui = copy[lang];
+  const ui = copy[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
   const t = translations[lang];
 
   return (

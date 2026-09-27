@@ -187,13 +187,13 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
       doorState: 'Door state', closed: 'Closed', openDoor: 'Open door', seatPosition: 'Seat position', driverSeat: 'Driver seat', passengerSeat: 'Passenger seat',
       contextFocus: 'Context focus', expandAll: 'Expand all', collapseAll: 'Collapse all', surfaceMaterial: 'Surface material', customSurfaceDetails: 'Custom surface details', surfacePlaceholder: 'e.g. weathered teak, polished white marble, brushed stainless counter', cameraModeIndependent: 'Camera mode (independent from device)', cameraFeelDemeanor: 'Camera feel / demeanor', environmentCondition: 'Environment condition', exteriorColorFinish: 'Exterior color / finish', interiorColorUpholstery: 'Interior color / upholstery', exteriorPlaceholder: 'e.g. metallic black, matte silver, nardo grey', interiorPlaceholder: 'e.g. cognac leather, charcoal alcantara'
     }
-  }[lang];
+  }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   const detectedLabels: Record<string, string> = ({
     pt: { subjectCount: 'Pessoas', pose: 'Pose', behavior: 'Comportamento', gaze: 'Olhar', expression: 'Expressão', camera: 'Câmera', lens: 'Lente', distance: 'Distância', framing: 'Enquadramento', flash: 'Flash', time: 'Horário', environment: 'Ambiente', vehicle: 'Veículo', activity: 'Ação', lighting: 'Iluminação' },
     es: { subjectCount: 'Personas', pose: 'Pose', behavior: 'Comportamiento', gaze: 'Mirada', expression: 'Expresión', camera: 'Cámara', lens: 'Lente', distance: 'Distancia', framing: 'Encuadre', flash: 'Flash', time: 'Hora', environment: 'Ambiente', vehicle: 'Vehículo', activity: 'Acción', lighting: 'Iluminación' },
     en: { subjectCount: 'Subjects', pose: 'Pose', behavior: 'Behavior', gaze: 'Gaze', expression: 'Expression', camera: 'Camera', lens: 'Lens', distance: 'Distance', framing: 'Framing', flash: 'Flash', time: 'Time', environment: 'Environment', vehicle: 'Vehicle', activity: 'Activity', lighting: 'Lighting' }
-  } as const)[lang];
+  } as const)[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   const activeModalityLabel = (t.modalities as Record<string, string>)[modality] || modality.replace(/_/g, ' ');
   const activeTypeLabel = selectedTypeId ? ((t.options.typesList as Record<string, string>)[selectedTypeId] || selectedTypeId.replace(/_/g, ' ')) : '';

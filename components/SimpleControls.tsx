@@ -76,7 +76,7 @@ const SimpleControls: React.FC<SimpleControlsProps> = ({
       cameraLibrary: 'Camera library',
       captureFormat: 'Output format', options: 'options', empty: 'No matching options found', clear: 'Clear filter', done: 'Done', selectHint: 'Tap to select · Esc to close'
     }
-  }[lang];
+  }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   // Camera Bottom Sheet State
   const [isCameraSheetOpen, setIsCameraSheetOpen] = useState(false);

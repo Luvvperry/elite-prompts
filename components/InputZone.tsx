@@ -110,7 +110,7 @@ const InputZone: React.FC<InputZoneProps> = ({
       recent: 'Recent',
       favorites: 'Favorites', options: 'options', empty: 'No matching options found', clear: 'Clear filter', done: 'Done', selectHint: 'Tap to select · Esc to close'
     }
-  }[lang];
+  }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Type bottom sheet state

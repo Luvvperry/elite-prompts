@@ -641,7 +641,7 @@ const App: React.FC = () => {
     pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', liveWorkspace: 'Workspace ativo', kicker: 'Laboratório de imagem / 05 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
     es: { input: 'Entrada', controls: 'Controles', output: 'Salida', liveWorkspace: 'Workspace activo', kicker: 'Laboratorio de imagen / 05 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
     en: { input: 'Input', controls: 'Controls', output: 'Output', liveWorkspace: 'Active workspace', kicker: 'Image laboratory / 05 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
-  }[lang];
+  }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   return (
     <div className={`app-shell min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>

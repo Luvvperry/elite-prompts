@@ -31,7 +31,7 @@ const StudioStatusRail: React.FC<StudioStatusRailProps> = ({
   onToggleFocus,
   onOpenCommand
 }) => {
-  const ui = copy[lang];
+  const ui = copy[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
   const t = translations[lang];
   const activeType = useMemo(() => TYPE_LIBRARY.find(item => item.id === selectedTypeId), [selectedTypeId]);
   const typeLabel = activeType ? (t.options.typesList[activeType.labelKey] || activeType.labelKey.replace(/_/g, ' ')) : selectedTypeId;

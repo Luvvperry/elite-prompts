@@ -49,7 +49,7 @@ const copy = {
 
 const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
   const { isOpen, onClose, lang } = props;
-  const ui = copy[lang];
+  const ui = copy[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 

@@ -28,7 +28,7 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
     pt: { search: 'Buscar no histórico...', noMatch: 'Nenhum prompt correspondente encontrado.' },
     es: { search: 'Buscar en el historial...', noMatch: 'No se encontraron prompts coincidentes.' },
     en: { search: 'Search history...', noMatch: 'No matching prompts found.' }
-  }[lang];
+  }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   const [searchQuery, setSearchQuery] = React.useState('');
 
