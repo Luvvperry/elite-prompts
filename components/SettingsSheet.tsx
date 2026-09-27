@@ -1,14 +1,12 @@
 import React, { useEffect } from 'react';
 import { FullSettings, Language } from '../types';
-import { Bookmark, ChevronRight, Focus, Globe2, History, Moon, Settings as SettingsIcon, Sun, X, Zap } from 'lucide-react';
+import { Bookmark, ChevronRight, Focus, Globe2, History, Settings as SettingsIcon, X, Zap } from 'lucide-react';
 
 interface SettingsSheetProps {
   isOpen: boolean;
   onClose: () => void;
   lang: Language;
   onOpenLanguage: () => void;
-  isDark: boolean;
-  onToggleTheme: () => void;
   settings: FullSettings;
   onUpdateSettings: (settings: FullSettings) => void;
   onOpenHistory: () => void;
@@ -36,8 +34,6 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
   onClose,
   lang,
   onOpenLanguage,
-  isDark,
-  onToggleTheme,
   settings,
   onUpdateSettings,
   onOpenHistory,
@@ -80,11 +76,6 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
               <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[var(--surface-main)] border border-[var(--border-main)] flex items-center justify-center text-[var(--text-secondary)]"><Globe2 size={15} /></div><div><div className="text-xs font-medium text-[var(--text-primary)]">{ui.language}</div><div className="text-[10px] text-[var(--text-muted)]">{langNames[lang]}</div></div></div>
               <ChevronRight size={15} className="text-[var(--text-muted)]" />
             </button>
-
-            <div className={row}>
-              <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[var(--surface-main)] border border-[var(--border-main)] flex items-center justify-center text-[var(--text-secondary)]">{isDark ? <Moon size={15} /> : <Sun size={15} />}</div><div><div className="text-xs font-medium text-[var(--text-primary)]">{ui.appearance}</div><div className="text-[10px] text-[var(--text-muted)]">{isDark ? ui.dark : ui.light}</div></div></div>
-              <button type="button" onClick={onToggleTheme} className="px-3 py-1.5 rounded-lg border border-[var(--border-main)] bg-[var(--surface-main)] text-[11px] font-medium text-[var(--text-primary)]">{isDark ? ui.switchLight : ui.switchDark}</button>
-            </div>
 
             <div className={row}>
               <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[var(--surface-main)] border border-[var(--border-main)] flex items-center justify-center text-[var(--text-secondary)]"><Focus size={15} /></div><div><div className="text-xs font-medium text-[var(--text-primary)]">{ui.focus}</div><div className="text-[10px] text-[var(--text-muted)]">{ui.focusSub}</div></div></div>

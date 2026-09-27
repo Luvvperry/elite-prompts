@@ -1,19 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Bookmark, Clock3, Focus, Globe2, History, Moon, Search, Settings, SlidersHorizontal, Sparkles, Sun, X } from 'lucide-react';
+import { Bookmark, Clock3, Focus, Globe2, History, Search, Settings, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 import { Language, ViewMode } from '../types';
 
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   lang: Language;
-  isDark: boolean;
   focusMode: boolean;
   viewMode: ViewMode;
   onOpenLanguage: () => void;
   onOpenSettings: () => void;
   onOpenPresets: () => void;
   onOpenHistory: () => void;
-  onToggleTheme: () => void;
   onToggleFocus: () => void;
   onSetViewMode: (mode: ViewMode) => void;
   onJump: (target: 'input' | 'settings' | 'output') => void;
@@ -84,10 +82,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = (props) => {
     { id: 'history', label: ui.history, detail: ui.historyD, icon: History, run: runAndClose(props.onOpenHistory), keywords: 'history previous prompt' },
     { id: 'language', label: ui.language, detail: lang.toUpperCase(), icon: Globe2, run: runAndClose(props.onOpenLanguage), keywords: 'language idioma português english español prompt output' },
     { id: 'settings', label: ui.appSettings, detail: ui.settingsD2, icon: Settings, run: runAndClose(props.onOpenSettings), keywords: 'app settings preferences' },
-    { id: 'theme', label: ui.theme, detail: props.isDark ? ui.darkToLight : ui.lightToDark, icon: props.isDark ? Sun : Moon, run: runAndClose(props.onToggleTheme), keywords: 'theme dark light appearance' },
     { id: 'focus', label: ui.focus, detail: props.focusMode ? ui.onToOff : ui.offToOn, icon: Focus, run: runAndClose(props.onToggleFocus), keywords: 'focus immersive mode' }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [ui, props.viewMode, props.isDark, props.focusMode, lang]);
+  ], [ui, props.viewMode, props.focusMode, lang]);
 
   const normalized = query.trim().toLowerCase();
   const filtered = normalized

@@ -286,10 +286,6 @@ const App: React.FC = () => {
     return stored ? normalizePromptLanguage(stored) : 'auto';
   });
 
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    const stored = localStorage.getItem('ep_theme');
-    return stored ? stored === 'dark' : true;
-  });
 
   // App Workflow States
   const [mode, setMode] = useState<InputMode>('image');
@@ -352,17 +348,12 @@ const App: React.FC = () => {
     return [];
   });
 
-  // Dark Mode Sync with DOM
+  // Elite Prompts is intentionally dark-only on the hosted Vercel edition.
   useEffect(() => {
-    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('ep_theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('ep_theme', 'light');
-    }
-  }, [isDark]);
+    document.documentElement.dataset.theme = 'dark';
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('ep_theme', 'dark');
+  }, []);
 
   // Persist Language selections
   useEffect(() => {
@@ -669,8 +660,6 @@ const App: React.FC = () => {
       <Header
         lang={lang}
         onOpenLanguageSheet={() => setIsLanguageSheetOpen(true)}
-        isDark={isDark}
-        onToggleTheme={() => setIsDark(!isDark)}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenPresets={() => setIsPresetsOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -863,8 +852,6 @@ const App: React.FC = () => {
           setIsSettingsOpen(false);
           setIsLanguageSheetOpen(true);
         }}
-        isDark={isDark}
-        onToggleTheme={() => setIsDark(!isDark)}
         settings={settings}
         onUpdateSettings={setSettings}
         onOpenHistory={() => {
@@ -885,14 +872,12 @@ const App: React.FC = () => {
         isOpen={isCommandOpen}
         onClose={() => setIsCommandOpen(false)}
         lang={lang}
-        isDark={isDark}
         focusMode={focusMode}
         viewMode={viewMode}
         onOpenLanguage={() => setIsLanguageSheetOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenPresets={() => setIsPresetsOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
-        onToggleTheme={() => setIsDark(v => !v)}
         onToggleFocus={() => setFocusMode(v => !v)}
         onSetViewMode={setViewMode}
         onJump={scrollToSection}
