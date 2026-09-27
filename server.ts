@@ -110,7 +110,7 @@ V1 QUALITY BAR:
 // ============================================================================
 const V4_SCENE_LOCK_INSTRUCTION = `
 ENGINE 4: V4 — HUMAN IPHONE MOMENT RECONSTRUCTION
-V4 is the long-form, reference-faithful engine. It must produce one very large, direct, paste-ready image prompt, normally 500–850 words depending on scene complexity. Do not summarize. Do not explain the method. Do not return a short prompt.
+V4 is the long-form, reference-faithful engine. It must produce one very large, direct, paste-ready image prompt, normally 500–850 words depending on scene complexity. Use at least 12 dense natural-language sentences and fully expand every block before ending. Do not summarize. Do not explain the method. Do not return a short prompt or stop after the first paragraph.
 
 Use this exact semantic mold, translated completely into the requested output language and adapted to the actual reference/idea:
 "Create an image with the main [person/object] from the uploaded photo. They are wearing: (every visible garment, exact color, fabric, cut, closure, small wrinkles, compression, and how the clothing falls on the body). Physical appearance: (natural, believable proportions and only visible identity evidence, with no exaggerated anatomy). They are: {the exact real place and time, the ordinary physical environment, foreground/midground/background, surfaces, clutter, nearby people and objects, with no staged set, no model pose and no cinematic composition}. Around them: (only relevant objects with exact position, ownership, orientation, contact and scale). Main action: {the precise spontaneous moment, body mechanics, which hand does what, contact with surfaces and the direction of the gaze}. The photo is taken: (by whom, from what real distance, with a rear smartphone camera, as an unplanned click inside the moment). Photo imperfections: (only causally justified motion blur, imperfect autofocus, uneven exposure, digital noise, phone compression, slight framing error and small out-of-focus areas). Angle: (camera height, side/front relation, distance, tilt, crop and natural perspective without changing body proportions). Photo format: (requested platform, vertical/horizontal ratio and imperfect amateur framing). Light: (real source, direction, hardness, falloff, flash state, shadow behavior, reflected highlights and distant-background exposure). Skin: (unretouched pores, tiny tonal variations, natural texture and no beauty smoothing). Camera simulation: (rear smartphone, plausible 24–26mm equivalent main lens, plausible aperture/ISO/shutter behavior chosen for the actual light, no portrait mode, no artificial background blur, discreet computational HDR, imperfect auto white balance and ordinary mobile color)."
@@ -123,7 +123,7 @@ The result must feel like a real imperfect iPhone snapshot, not an advertisement
 
 const V5_MASTER_ADAPTIVE_INSTRUCTION = `
 ENGINE 5: V5 — LIVED-IN SMARTPHONE REALITY MASTER
-V5 is the most powerful long-form engine. Invent this engine as a master prompt for images that feel accidentally captured by a real person on a normal rear iPhone. It must be substantially long and information-dense, normally 700–1100 words for a complex reference. Never output a short summary, a checklist, a report, a negative-prompt dump or a meta-prompt.
+V5 is the most powerful long-form engine. Invent this engine as a master prompt for images that feel accidentally captured by a real person on a normal rear iPhone. It must be substantially long and information-dense, normally 700–1100 words for a complex reference. Use at least 16 dense natural-language sentences and fully expand every physical block before ending. Never output a short summary, a checklist, a report, a negative-prompt dump or a meta-prompt.
 
 Construct one continuous paste-ready prompt with this hidden order, but do not expose headings or numbered sections in the output: begin with the exact subject and identity/reference fidelity; build the real environment as a lived-in place rather than a set; map every important relationship between people, objects, surfaces and empty space; describe the micro-moment of action and human behavior; describe clothing, hair, skin, hands, feet and posture as physical responses to that moment; place the photographer and phone in a believable position; then resolve optics, focus, exposure, light transport, materials, reflections, motion, compression and amateur framing.
 
@@ -805,6 +805,7 @@ ${userTextDescription}`
           config: {
             systemInstruction: systemPrompt,
             temperature: 0.15,
+            maxOutputTokens: 12000,
             responseMimeType: "application/json",
             responseSchema: {
               type: Type.OBJECT,
