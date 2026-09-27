@@ -1788,3 +1788,59 @@ body, .app-shell {
   .image-instructions-label { margin-bottom: 14px; font-size: 10px; }
   .image-instructions-textarea { min-height: 126px; padding: 15px; font-size: 14px; border-radius: 14px; }
 }
+
+/* Final all-black premium pass: visual-only, no behavior changes. */
+html, body, #root,
+body.dark,
+.dark .app-shell,
+.dark .pro-shell,
+.dark .studio-main {
+  background: #000 !important;
+}
+
+.ep-universe,
+.ep-universe-nebula,
+.ep-universe-star,
+.ep-universe-orbit,
+.ep-universe-core,
+.cosmic-canvas {
+  display: none !important;
+}
+
+.dark {
+  --bg-main: #000000;
+  --bg-deep: #000000;
+  --surface-main: #080808;
+  --surface-secondary: #0d0d0d;
+  --surface-elevated: #111111;
+  --border-main: rgba(255,255,255,.12);
+  --border-active: rgba(255,255,255,.28);
+  --border-subtle: rgba(255,255,255,.07);
+  --text-primary: #ffffff;
+  --text-secondary: #a6a6aa;
+  --text-muted: #707074;
+  --selected-bg: #ffffff;
+  --selected-text: #000000;
+  --shadow-soft: 0 12px 34px rgba(0,0,0,.45);
+  --shadow-float: 0 24px 80px rgba(0,0,0,.72);
+}
+
+.dark .workspace-header,
+.dark .context-bar,
+.dark .workspace-panel,
+.dark .prompt-console,
+.dark .studio-settings-pane,
+.dark .studio-input-pane,
+.dark .studio-output-column,
+.dark .control-row,
+.dark .idea-editor,
+.dark .reference-card,
+.dark .quick-start-card {
+  background-image: none !important;
+  box-shadow: none;
+}
+
+.dark button:hover,
+.dark .context-action:hover {
+  box-shadow: none;
+}
