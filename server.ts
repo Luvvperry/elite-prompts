@@ -109,45 +109,32 @@ V1 QUALITY BAR:
 // V4 / V5 — ADDITIVE ENGINES (V1/V2/V3 remain unchanged)
 // ============================================================================
 const V4_SCENE_LOCK_INSTRUCTION = `
-ENGINE 4: V4 — SCENE-LOCK CONSISTENCY ENGINE
-V4 is a production-grade reconstruction that prioritizes internal consistency over decorative detail.
-It must be a direct, paste-ready image prompt, never a report or a meta-prompt.
+ENGINE 4: V4 — HUMAN IPHONE MOMENT RECONSTRUCTION
+V4 is the long-form, reference-faithful engine. It must produce one very large, direct, paste-ready image prompt, normally 500–850 words depending on scene complexity. Do not summarize. Do not explain the method. Do not return a short prompt.
 
-Build one coherent scene graph in natural language with adaptive {curly-brace} blocks:
-- subject and reference locks: preserve only visible or explicitly requested identity evidence, clothing, accessories, pose, object ownership and count;
-- spatial graph: viewer-left/right, foreground/mid-ground/background, distances, occlusions, contact points and relative scale;
-- action mechanics: who does what, which hand touches what, support, weight transfer, pressure, folds and believable body/object contact;
-- optical capture: device class, lens mode, camera height/distance/tilt, crop, perspective distortion, autofocus and depth behavior;
-- light transport: source, direction, hardness, falloff, bounce, contact shadows, reflections and near/far exposure;
-- material response: only visible materials, with texture, roughness, gloss, translucency, wear and compression where physically supported;
-- causal imperfections: select only flaws explained by motion, distance, exposure or phone processing.
+Use this exact semantic mold, translated completely into the requested output language and adapted to the actual reference/idea:
+"Create an image with the main [person/object] from the uploaded photo. They are wearing: (every visible garment, exact color, fabric, cut, closure, small wrinkles, compression, and how the clothing falls on the body). Physical appearance: (natural, believable proportions and only visible identity evidence, with no exaggerated anatomy). They are: {the exact real place and time, the ordinary physical environment, foreground/midground/background, surfaces, clutter, nearby people and objects, with no staged set, no model pose and no cinematic composition}. Around them: (only relevant objects with exact position, ownership, orientation, contact and scale). Main action: {the precise spontaneous moment, body mechanics, which hand does what, contact with surfaces and the direction of the gaze}. The photo is taken: (by whom, from what real distance, with a rear smartphone camera, as an unplanned click inside the moment). Photo imperfections: (only causally justified motion blur, imperfect autofocus, uneven exposure, digital noise, phone compression, slight framing error and small out-of-focus areas). Angle: (camera height, side/front relation, distance, tilt, crop and natural perspective without changing body proportions). Photo format: (requested platform, vertical/horizontal ratio and imperfect amateur framing). Light: (real source, direction, hardness, falloff, flash state, shadow behavior, reflected highlights and distant-background exposure). Skin: (unretouched pores, tiny tonal variations, natural texture and no beauty smoothing). Camera simulation: (rear smartphone, plausible 24–26mm equivalent main lens, plausible aperture/ISO/shutter behavior chosen for the actual light, no portrait mode, no artificial background blur, discreet computational HDR, imperfect auto white balance and ordinary mobile color)."
 
-V4 QUALITY GATE:
-Every clause must agree with every other clause. Never place the camera inside an object, merge subjects, float objects, contradict the selected aspect ratio, or add a random cinematic look. Preserve explicit user instructions above all inference. Do not invent brands, logos, locations or accessories. Use dense but readable natural language and end with the requested format/crop intent.
+Expand every parenthetical and curly-brace block with specific scene evidence. The final prompt must continue beyond this mold with a long physical coherence pass written as natural clauses: clothing must fall according to posture; hands, fingers, feet and weight distribution must be human; reflections must follow the surface; shadows must follow the light; distant people must behave independently; objects must have weight and contact; the camera must occupy a physically possible position. Use the uploaded reference as the authority for identity, count, wardrobe and visible details. If a detail is unclear, describe it conservatively instead of inventing brands, text, landmarks or accessories.
+
+REAL PHONE PHOTOGRAPHY RULES:
+The result must feel like a real imperfect iPhone snapshot, not an advertisement, render, fashion editorial or AI image. Prefer ordinary observational language over hype. No cinematic color grade, anamorphic look, studio key light, perfect symmetry, plastic skin, fake bokeh, excessive sharpness, 8K, glossy luxury styling, impossible architecture or spotless surfaces. Keep tiny human irregularities: asymmetrical posture, relaxed fingers, clothing bunching, imperfect gaze timing, lived-in objects, mixed exposure, sensor noise and slightly crooked framing. Choose ISO, shutter and flash behavior that agree with the scene; never paste a random camera specification that contradicts daylight, distance or movement. Return only the final long prompt in the requested language, without headings, analysis, quotation marks or instructions to another AI.
 `;
 
 const V5_MASTER_ADAPTIVE_INSTRUCTION = `
-ENGINE 5: V5 — MASTER ADAPTIVE IMAGE PROMPT
-V5 is the highest-fidelity adaptive engine: a single final prompt engineered to survive different image generators while preserving the actual scene.
-It is not a longer V3, not a checklist, and not a technical report. Output only a beautiful, direct, executable image prompt.
+ENGINE 5: V5 — LIVED-IN SMARTPHONE REALITY MASTER
+V5 is the most powerful long-form engine. Invent this engine as a master prompt for images that feel accidentally captured by a real person on a normal rear iPhone. It must be substantially long and information-dense, normally 700–1100 words for a complex reference. Never output a short summary, a checklist, a report, a negative-prompt dump or a meta-prompt.
 
-Synthesize the strongest evidence into a layered but fluid prompt:
-1. lock the subject/reference facts, object count, wardrobe and explicit user intent;
-2. establish the scene's spatial anchor and relational geometry before adding adjectives;
-3. describe the decisive action and contact mechanics with no ambiguous pronouns;
-4. encode camera position, lens behavior, perspective, framing and focus in physically compatible terms;
-5. encode real light behavior, material response, shadows and reflections as causes and consequences;
-6. add only the fewest high-value imperfections that make the capture believable;
-7. finish with aspect ratio, crop, output purpose and a concise anti-artifact constraint when relevant.
+Construct one continuous paste-ready prompt with this hidden order, but do not expose headings or numbered sections in the output: begin with the exact subject and identity/reference fidelity; build the real environment as a lived-in place rather than a set; map every important relationship between people, objects, surfaces and empty space; describe the micro-moment of action and human behavior; describe clothing, hair, skin, hands, feet and posture as physical responses to that moment; place the photographer and phone in a believable position; then resolve optics, focus, exposure, light transport, materials, reflections, motion, compression and amateur framing.
 
-V5 MUST FEEL SPECIFIC, NOT DECORATIVE:
-- Prefer measurable or relational language (viewer-left, half a step behind, compressed against the seat, light falling off before the background) over hype.
-- Preserve uncertainty honestly: if evidence is unclear, use a conservative description rather than hallucinating detail.
-- Never overwrite an explicit instruction with a visual guess.
-- Never merge limbs, clothing, objects or reflections between subjects.
-- Never add studio polish, fake bokeh, luxury clichés, generic landmarks, film language or invented text unless explicitly requested.
-- Use natural-language clauses and adaptive {curly-brace} blocks only where they improve control; no headings, numbered sections, JSON or analysis.
-- The final result must be ready to paste into an image generator without any instruction addressed to another AI.
+V5 must feel observed, not designed. Include subtle human behavior that a generator usually misses: a gaze that lands slightly late, shoulders that are not perfectly level, fingers resting without posing, weight distributed unevenly, a shirt pulling at one side, fabric compressed where the body touches a rail or seat, hair moved by air, a bottle or phone placed without decorative intent, background people absorbed in their own actions, and small signs that the location is actually used. Never invent these when the reference disproves them; adapt them to visible evidence.
+
+Use a long natural prompt made of adaptive clauses and occasional {curly-brace} blocks. The blocks should cover: subject/reference lock; wardrobe and body; exact place and time; scene geometry; surrounding objects; action and contact; expression and gaze; photographer position; rear-iPhone capture; lens and perspective; focus behavior; natural skin; light and flash; shadows and reflections; materials and wear; motion and imperfections; format and crop. Every block must add an image-changing fact. Keep explicit user instructions above all inference. Preserve the exact number of people and objects. Do not merge identities, limbs, garments, reflections or ownership.
+
+REALISM TARGET:
+The photo must look like an unplanned phone photo with imperfect computational processing, not like a commercial image. Use plausible 24–26mm equivalent rear-camera perspective, no portrait mode and no artificial blur. Select realistic exposure values only when they agree with the light; allow digital noise, focus misses, highlight clipping, rolling-shutter softness, mild motion blur, compression, auto-white-balance drift and an imperfect crop when causally justified. Flash must be direct and local when selected, with hard near shadows, bright skin/fabric highlights and real falloff into the background; never wash an entire distant scene evenly. Daylight without requested flash remains flash-off. Preserve pores, fine hair, small skin variations and material texture without beauty retouching. Make every shadow, reflection, fold, contact patch and perspective line obey physics.
+
+Do not use cinematic, editorial, masterpiece, hyperrealistic, luxury campaign, perfect composition, professional studio, glossy skin, fake bokeh, 3D render, illustration, fantasy lighting, random props, unreadable invented text or generic “beautiful” filler unless explicitly requested. The context may be luxurious, but the capture must remain casual, human and slightly flawed. Return only one very long final image prompt in the requested language, with no explanation, no visible framework, no headings and no instruction addressed to an AI.
 `;
 
 // Helper to format settings guidance for prompt generation
@@ -356,8 +343,8 @@ Your mission is to construct five (5) distinct, highly specialized prompt engine
 - V1: SMART NATURAL SNAPSHOT (COMPACT, PHYSICALLY RESOLVED)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
 - V3: FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT, EXTREME PHYSICAL SPECIFICITY)
-- V4: SCENE-LOCK CONSISTENCY (RELATIONAL PHYSICS AND CROSS-CLAUSE VALIDATION)
-- V5: MASTER ADAPTIVE IMAGE PROMPT (MAXIMUM GENERATOR-ROBUST FIDELITY)
+- V4: HUMAN IPHONE MOMENT RECONSTRUCTION (LONG-FORM REFERENCE-FAITHFUL PROMPT)
+- V5: LIVED-IN SMARTPHONE REALITY MASTER (LONG-FORM HUMAN SNAPSHOT SYNTHESIS)
 
 ==================================================
 CENTRAL FOUNDATIONAL PRINCIPLE:

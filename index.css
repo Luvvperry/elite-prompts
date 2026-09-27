@@ -1233,3 +1233,77 @@ select, input[type="text"], input[type="number"] { min-height: 42px; }
 @keyframes ep-panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes ep-rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes ep-content-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+
+/* Elite Prompts premium studio skin — Vercel build only. */
+:root {
+  --ep-amber: #e8a86a;
+  --ep-amber-bright: #ffd2a0;
+  --ep-ink: #090a0c;
+  --ep-ink-2: #111317;
+  --ep-line: rgba(255,255,255,.095);
+}
+.app-shell {
+  background:
+    radial-gradient(900px 500px at 72% -8%, rgba(199,126,67,.11), transparent 68%),
+    radial-gradient(760px 520px at 12% 78%, rgba(70,86,118,.12), transparent 70%),
+    var(--pro-bg) !important;
+}
+.app-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .16;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
+.pro-rail {
+  width: 78px !important;
+  border-right-color: var(--ep-line) !important;
+  background: linear-gradient(180deg, rgba(14,15,18,.96), rgba(9,10,12,.88)) !important;
+  box-shadow: 10px 0 40px rgba(0,0,0,.16);
+}
+.pro-rail-top { gap: 22px !important; }
+.pro-brand { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.pro-brand-mark {
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px;
+  color: #17110c; background: linear-gradient(135deg, var(--ep-amber-bright), var(--ep-amber));
+  font: 850 11px/1 Inter, sans-serif; letter-spacing: -.08em;
+  box-shadow: 0 8px 22px rgba(232,168,106,.18), inset 0 1px 0 rgba(255,255,255,.55);
+}
+.pro-brand-name { color: rgba(255,255,255,.45); font: 750 6px/1.35 Inter, sans-serif; letter-spacing: .16em; text-align: center; }
+.pro-rail .pro-nav-button { color: rgba(255,255,255,.56); }
+.pro-rail .pro-nav-button:hover { color: var(--ep-amber-bright); background: rgba(232,168,106,.09); border-color: rgba(232,168,106,.18); }
+.pro-rail .pro-rail-rule { background: var(--ep-line); }
+.mobile-brand { display: inline-flex; align-items: center; gap: 8px; min-width: max-content; }
+.mobile-brand .pro-brand-mark { width: 27px; height: 27px; border-radius: 8px; font-size: 9px; }
+.mobile-brand-name { color: var(--pro-text); font: 800 9px/1 Inter, sans-serif; letter-spacing: .14em; }
+.pro-shell { padding-left: 78px !important; }
+.studio-frame { max-width: 1780px !important; margin: 0 auto; }
+.pro-studio-grid { border-radius: 20px !important; border-color: rgba(255,255,255,.09) !important; box-shadow: 0 28px 100px rgba(0,0,0,.19); }
+@media (min-width: 1280px) { .pro-studio-grid > section { padding: 20px !important; } }
+.pane-eyebrow { color: var(--ep-amber-bright) !important; font-size: 10px !important; letter-spacing: .14em !important; text-transform: uppercase; }
+.pane-description { color: var(--pro-text-3); font-size: 10px; letter-spacing: .01em; }
+.workspace-panel, .prompt-console, .advanced-panel-shell > * {
+  border-radius: 16px !important; border-color: rgba(255,255,255,.105) !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pro-panel) 94%, white 6%), var(--pro-panel)) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.10) !important;
+}
+.workspace-panel:hover, .prompt-console:hover { border-color: rgba(232,168,106,.24) !important; }
+.mode-switch { border-radius: 11px !important; background: rgba(255,255,255,.045) !important; }
+.mode-switch button.is-active { color: var(--ep-amber-bright) !important; background: rgba(232,168,106,.12) !important; box-shadow: inset 0 0 0 1px rgba(232,168,106,.22) !important; }
+.prompt-engine-tabs { border: 1px solid rgba(255,255,255,.075) !important; background: rgba(0,0,0,.17) !important; border-radius: 11px !important; }
+.prompt-engine-tabs button { min-height: 33px !important; border-radius: 8px !important; }
+.prompt-engine-tabs button:hover { color: var(--ep-amber-bright) !important; }
+.prompt-console-head { min-height: 62px !important; background: linear-gradient(180deg, rgba(255,255,255,.028), transparent) !important; }
+.prompt-code { font-size: 12.5px !important; line-height: 1.78 !important; }
+.generation-progress span { background: linear-gradient(90deg, transparent, var(--ep-amber), transparent) !important; }
+.studio-health-dot { background: var(--ep-amber) !important; box-shadow: 0 0 0 4px rgba(232,168,106,.12), 0 0 16px rgba(232,168,106,.55) !important; }
+@media (max-width: 1023px) { .pro-shell { padding-left: 0 !important; } .mobile-topbar { background: rgba(10,11,14,.86) !important; border-bottom-color: rgba(255,255,255,.09) !important; backdrop-filter: blur(18px); } }
+@media (prefers-reduced-motion: no-preference) {
+  .pro-brand-mark { animation: ep-breathe 4s ease-in-out infinite; }
+  .workspace-panel, .prompt-console { transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms var(--ease-out); }
+}
+@keyframes ep-breathe { 0%, 100% { box-shadow: 0 8px 22px rgba(232,168,106,.16), inset 0 1px 0 rgba(255,255,255,.55); } 50% { box-shadow: 0 10px 28px rgba(232,168,106,.30), inset 0 1px 0 rgba(255,255,255,.62); } }

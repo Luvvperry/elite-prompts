@@ -52,6 +52,10 @@ const Header: React.FC<HeaderProps> = ({
       {/* Desktop — professional instrument rail. No product branding. */}
       <aside className="pro-rail hidden lg:flex" aria-label={copy.nav}>
         <div className="pro-rail-top">
+          <div className="pro-brand" aria-label="Elite Prompts">
+            <span className="pro-brand-mark">EP</span>
+            <span className="pro-brand-name">ELITE<br />PROMPTS</span>
+          </div>
           <button type="button" onClick={onOpenCommand} className={`${actionClass} pro-nav-primary`} title={copy.command}>
             <Search size={18} strokeWidth={1.7} />
           </button>
@@ -86,6 +90,10 @@ const Header: React.FC<HeaderProps> = ({
       {/* Mobile — deliberately compact, app-like top bar. */}
       <header className="mobile-topbar lg:hidden">
         <div className="mobile-topbar-inner">
+          <div className="mobile-brand" aria-label="Elite Prompts">
+            <span className="pro-brand-mark">EP</span>
+            <span className="mobile-brand-name">ELITE PROMPTS</span>
+          </div>
           <button type="button" onClick={onOpenCommand} className="mobile-topbar-context" title={copy.command}>
             <SlidersHorizontal size={16} strokeWidth={1.7} />
             <span>{copy.create}</span>
