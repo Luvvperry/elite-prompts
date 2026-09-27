@@ -1541,3 +1541,30 @@ select, input[type="text"], input[type="number"] { min-height: 42px; }
   .ep-universe-nebula-a { width: 70vw; height: 40vw; right: -20%; }
   .studio-footer { height: 56px !important; padding-bottom: 15px !important; }
 }
+
+
+/* Procedural 3D canvas and more generous studio geometry. */
+.ep-cosmic-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .9; mix-blend-mode: screen; }
+.ep-universe-nebula, .ep-universe-star, .ep-universe-orbit, .ep-universe-core { z-index: 1; }
+.ep-universe-nebula { opacity: .13; }
+.ep-universe-orbit { opacity: .5; }
+.pro-studio-grid { gap: 24px !important; padding: 14px !important; }
+.pro-studio-grid > section { padding: 8px 10px 16px !important; min-width: 0; }
+.pane-heading { padding-left: 8px !important; padding-right: 8px !important; margin-bottom: 18px !important; }
+.studio-input-pane .workspace-panel, .studio-settings-pane .workspace-panel, .studio-settings-pane .advanced-panel-shell { margin: 0 5px; }
+.prompt-console { min-height: 610px; }
+.studio-output-pane .prompt-console { margin: 0 5px; }
+.ep-masthead { padding-left: 30px !important; padding-right: 30px !important; }
+@media (min-width: 1500px) {
+  .pro-studio-grid { grid-template-columns: minmax(330px, .88fr) minmax(400px, 1.05fr) minmax(500px, 1.36fr) !important; }
+}
+@media (min-width: 1180px) and (max-width: 1499px) {
+  .pro-studio-grid { grid-template-columns: minmax(280px, .84fr) minmax(330px, 1fr) minmax(410px, 1.28fr) !important; gap: 18px !important; }
+}
+@media (max-width: 1023px) {
+  .pro-studio-grid { gap: 18px !important; padding: 8px !important; }
+  .pro-studio-grid > section { padding: 6px 4px 14px !important; }
+  .pane-heading { margin-bottom: 12px !important; }
+  .prompt-console, .studio-output-pane .prompt-console { min-height: 520px; margin: 0; }
+  .ep-masthead { padding-left: 14px !important; padding-right: 14px !important; }
+}
