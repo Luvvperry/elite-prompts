@@ -643,9 +643,9 @@ const App: React.FC = () => {
   const canGenerate = (mode === 'image' && (references.length > 0 || ideaText.trim().length > 0)) || (mode === 'idea' && ideaText.trim().length > 0);
 
   const workspaceLabels = {
-    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', liveWorkspace: 'Workspace ativo' },
-    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', liveWorkspace: 'Workspace activo' },
-    en: { input: 'Input', controls: 'Controls', output: 'Output', liveWorkspace: 'Active workspace' }
+    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', liveWorkspace: 'Workspace ativo', kicker: 'Laboratório de imagem / 05 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
+    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', liveWorkspace: 'Workspace activo', kicker: 'Laboratorio de imagen / 05 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
+    en: { input: 'Input', controls: 'Controls', output: 'Output', liveWorkspace: 'Active workspace', kicker: 'Image laboratory / 05 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
   }[lang];
 
   return (
@@ -669,8 +669,8 @@ const App: React.FC = () => {
 
       <div className="pro-shell lg:pl-[64px]">
         <main className="studio-main flex-grow w-full relative z-10 pb-28 lg:pb-8">
-          <div className="studio-frame">
-            <StudioStatusRail
+            <div className="studio-frame">
+              <StudioStatusRail
               lang={lang}
               mode={mode}
               selectedTypeId={selectedTypeId}
@@ -678,10 +678,23 @@ const App: React.FC = () => {
               referencesCount={references.length}
               focusMode={focusMode}
               onToggleFocus={() => setFocusMode(v => !v)}
-              onOpenCommand={() => setIsCommandOpen(true)}
-            />
+                onOpenCommand={() => setIsCommandOpen(true)}
+              />
 
-            <div className="studio-grid pro-studio-grid items-start">
+              <section className="ep-masthead" aria-labelledby="ep-masthead-title">
+                <div className="ep-masthead-copy">
+                  <span className="ep-masthead-kicker"><i />{workspaceLabels.kicker}</span>
+                  <h1 id="ep-masthead-title">{workspaceLabels.headline}</h1>
+                  <p>{workspaceLabels.subline}</p>
+                </div>
+                <div className="ep-masthead-signal" aria-label={workspaceLabels.liveWorkspace}>
+                  <span className="ep-signal-pulse" />
+                  <span>{workspaceLabels.liveWorkspace}</span>
+                  <b>05</b>
+                </div>
+              </section>
+
+              <div className="studio-grid pro-studio-grid items-start">
               {/* Input pane */}
               <section id="studio-input" className="studio-input-pane min-w-0 scroll-mt-24">
                 <div className="pane-heading">
