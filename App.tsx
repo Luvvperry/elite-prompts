@@ -20,6 +20,8 @@ import {
 } from './services/geminiService';
 import { translations } from './translations';
 import { auditTranslations } from './services/i18nAudit';
+import { UsageGateModal } from './components/UsageGateModal';
+import { MAX_GENERATIONS, getUsageState, registerGeneration, UsageState } from './services/usageGate';
 import Header from './components/Header';
 import InputZone from './components/InputZone';
 import SimpleControls from './components/SimpleControls';
@@ -306,6 +308,7 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<FullSettings>(defaultSettings);
   const [generation, setGeneration] = useState<GenerationOutput | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [usage, setUsage] = useState<UsageState>(() => getUsageState());
   const [magicStatus, setMagicStatus] = useState<'idle' | 'enhancing' | 'success' | 'error' | 'timeout'>('idle');
   const isMagicEnhancing = magicStatus === 'enhancing';
   const [detectedParams, setDetectedParams] = useState<AutoDetectedParams | undefined>(undefined);
@@ -316,6 +319,7 @@ const App: React.FC = () => {
   const [isLanguageSheetOpen, setIsLanguageSheetOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [isUsageGateOpen, setIsUsageGateOpen] = useState(false);
   const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
   const [toast, setToast] = useState<ToastPayload>(null);
   const magicRequestIdRef = useRef(0);
@@ -516,6 +520,10 @@ const App: React.FC = () => {
     if (isLoading) return;
     if (mode === 'image' && references.length === 0 && !ideaText.trim()) return;
     if (mode === 'idea' && !ideaText.trim()) return;
+    if (!usage.unlocked && usage.count >= MAX_GENERATIONS) {
+      setIsUsageGateOpen(true);
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -552,6 +560,7 @@ const App: React.FC = () => {
 
       setGeneration(newOutput);
       setDetectedParams(result.autoDetected);
+      setUsage(registerGeneration());
 
       // Save to History
       const updatedHistory = [newOutput, ...history.slice(0, 24)];
@@ -892,6 +901,12 @@ const App: React.FC = () => {
         canGenerate={canGenerate}
         isLoading={isLoading}
         hasOutput={Boolean(generation)}
+      />
+
+      <UsageGateModal
+        open={isUsageGateOpen}
+        onClose={() => setIsUsageGateOpen(false)}
+        onUnlocked={() => setUsage(getUsageState())}
       />
 
       <ToastHost toast={toast} onClose={() => setToast(null)} />
