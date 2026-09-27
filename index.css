@@ -1216,3 +1216,20 @@ select, input[type="text"], input[type="number"] { min-height: 42px; }
 @media (prefers-reduced-motion: reduce) {
   .pro-rail, .pro-nav-button, .mobile-topbar-button, .mode-switch button { transition: none !important; }
 }
+
+
+/* Vercel-only Elite motion layer: fast, GPU-friendly, and reduced-motion safe. */
+:root { --ease-out: cubic-bezier(.23, 1, .32, 1); --ease-in-out: cubic-bezier(.77, 0, .175, 1); }
+@media (prefers-reduced-motion: no-preference) {
+  .workspace-panel { animation: ep-panel-in 240ms var(--ease-out) both; }
+  .studio-grid > * { animation: ep-rise-in 280ms var(--ease-out) both; }
+  .studio-grid > *:nth-child(2) { animation-delay: 45ms; }
+  .prompt-engine-tabs button, .header-action, button { transition: transform 150ms var(--ease-out), opacity 150ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease; }
+  button:active { transform: scale(.97); }
+  .prompt-console-body > * { animation: ep-content-in 220ms var(--ease-out) both; }
+  .prompt-compare-card { transition: transform 180ms var(--ease-out), border-color 180ms ease, box-shadow 180ms ease; }
+  .prompt-compare-card:hover { transform: translateY(-2px); border-color: var(--border-active); box-shadow: var(--shadow-soft); }
+}
+@keyframes ep-panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ep-rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ep-content-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }

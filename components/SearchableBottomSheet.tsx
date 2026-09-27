@@ -108,6 +108,10 @@ export const SearchableBottomSheet: React.FC<SearchableBottomSheetProps> = ({
     return groups;
   }, [filteredOptions, search, activeCategory]);
 
+  const groupedEntries = groupedOptions
+    ? (Object.entries(groupedOptions) as Array<[string, SelectOption[]]>)
+    : [];
+
   if (!isOpen) return null;
 
   return (
@@ -236,7 +240,7 @@ export const SearchableBottomSheet: React.FC<SearchableBottomSheetProps> = ({
             </div>
           ) : groupedOptions ? (
             // Grouped View by Category
-            Object.entries(groupedOptions).map(([catKey, items]) => {
+            groupedEntries.map(([catKey, items]) => {
               const catObj = categories.find(c => c.id === catKey);
               const catTitle = catObj ? catObj.label : catKey.toUpperCase();
               return (

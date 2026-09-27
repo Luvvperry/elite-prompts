@@ -21,7 +21,7 @@ interface PromptDisplayProps {
   lang: Language;
   generation: GenerationOutput | null;
   isLoading: boolean;
-  onRefinePrompt: (engine: 'v1' | 'v2' | 'v3', instruction: string) => Promise<void>;
+  onRefinePrompt: (engine: 'v1' | 'v2' | 'v3' | 'v4' | 'v5', instruction: string) => Promise<void>;
   onSaveToPresets: (name: string) => void;
 }
 
@@ -34,14 +34,15 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
 }) => {
   const t = translations[lang];
 
-  type TabType = 'v1' | 'v2' | 'v3' | 'compare';
+  type EngineType = 'v1' | 'v2' | 'v3' | 'v4' | 'v5';
+  type TabType = EngineType | 'compare';
   const [activeTab, setActiveTab] = useState<TabType>('v1');
   const [copiedAction, setCopiedAction] = useState<string | null>(null);
   const [showNegative, setShowNegative] = useState<boolean>(false);
 
   // Refine modal state
   const [isRefining, setIsRefining] = useState(false);
-  const [refineEngine, setRefineEngine] = useState<'v1' | 'v2' | 'v3'>('v1');
+  const [refineEngine, setRefineEngine] = useState<EngineType>('v1');
   const [refineInput, setRefineInput] = useState('');
   const [refineLoading, setRefineLoading] = useState(false);
 
@@ -68,25 +69,31 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
       case 'v1': return generation.v1;
       case 'v2': return generation.v2;
       case 'v3': return generation.v3;
+      case 'v4': return generation.v4 || '';
+      case 'v5': return generation.v5 || '';
       default: return '';
     }
   };
 
-  const getEngineTitle = (engine: 'v1' | 'v2' | 'v3') => {
-    switch (engine) {
-      case 'v1': return t.output.v1Title;
-      case 'v2': return t.output.v2Title;
-      case 'v3': return t.output.v3Title;
-    }
+  const engineLabels: Record<EngineType, { tab: string; title: string }> = {
+    v1: { tab: t.output.v1Tab, title: t.output.v1Title },
+    v2: { tab: t.output.v2Tab, title: t.output.v2Title },
+    v3: { tab: t.output.v3Tab, title: t.output.v3Title },
+    v4: { tab: lang === 'pt' ? 'V4 Consistência' : lang === 'es' ? 'V4 Consistencia' : 'V4 Scene-Lock', title: lang === 'pt' ? 'V4 — Consistência Física' : lang === 'es' ? 'V4 — Consistencia Física' : 'V4 — Scene-Lock Consistency' },
+    v5: { tab: lang === 'pt' ? 'V5 Master' : lang === 'es' ? 'V5 Maestro' : 'V5 Master', title: lang === 'pt' ? 'V5 — Prompt Master Adaptativo' : lang === 'es' ? 'V5 — Prompt Maestro Adaptativo' : 'V5 — Master Adaptive Prompt' }
   };
+
+  const getEngineTitle = (engine: EngineType) => engineLabels[engine].title;
 
   const handleCopyAll = () => {
     if (!generation) return;
-    const allText = `=== ${t.output.v1Title} ===\n\n${generation.v1}\n\n=== ${t.output.v2Title} ===\n\n${generation.v2}\n\n=== ${t.output.v3Title} ===\n\n${generation.v3}`;
+    const allText = (['v1', 'v2', 'v3', 'v4', 'v5'] as EngineType[])
+      .map(engine => `=== ${engineLabels[engine].title} ===\n\n${generation[engine] || ''}`)
+      .join('\n\n');
     copyWithFeedback(allText, 'copy-all');
   };
 
-  const openRefineModal = (engine: 'v1' | 'v2' | 'v3') => {
+  const openRefineModal = (engine: EngineType) => {
     setRefineEngine(engine);
     setRefineInput('');
     setIsRefining(true);
@@ -196,6 +203,21 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
           >
             {t.output.v3Tab}
           </button>
+
+          {(['v4', 'v5'] as EngineType[]).map((engine) => (
+            <button
+              key={engine}
+              type="button"
+              onClick={() => setActiveTab(engine)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all cursor-pointer ${
+                activeTab === engine
+                  ? 'bg-white dark:bg-[#242424] text-zinc-950 dark:text-white shadow-sm'
+                  : 'text-zinc-500 dark:text-[var(--text-secondary)] hover:text-zinc-950 dark:hover:text-white'
+              }`}
+            >
+              {engineLabels[engine].tab}
+            </button>
+          ))}
 
           <button
             type="button"
@@ -349,81 +371,24 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
 
         {/* VIEW 2: COMPARE ALL SIDE-BY-SIDE */}
         {activeTab === 'compare' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* V1 Column */}
-            <div className="flex flex-col gap-3 rounded-xl bg-zinc-50/90 dark:bg-[var(--bg-deep)] border border-zinc-200/90 dark:border-[var(--border-main)]/80 p-5">
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-200/70 dark:border-[var(--border-main)]">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-900 dark:text-[var(--text-primary)]">
-                    {t.output.v1Tab}
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-400 dark:text-[var(--text-muted)]">
-                    {generation.v1.length} {t.output.statsCharacters}
-                  </span>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {(['v1', 'v2', 'v3', 'v4', 'v5'] as EngineType[]).map((engine) => {
+              const text = generation[engine] || '';
+              return (
+                <div key={engine} className="prompt-compare-card flex flex-col gap-3 rounded-xl bg-zinc-50/90 dark:bg-[var(--bg-deep)] border border-zinc-200/90 dark:border-[var(--border-main)]/80 p-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-zinc-200/70 dark:border-[var(--border-main)]">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-900 dark:text-[var(--text-primary)] truncate">{engineLabels[engine].tab}</span>
+                      <span className="text-[10px] font-mono text-zinc-400 dark:text-[var(--text-muted)]">{text.length} {t.output.statsCharacters}</span>
+                    </div>
+                    <button type="button" onClick={() => copyWithFeedback(text, `${engine}-col`)} className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer" title={`${t.output.copy} ${engine.toUpperCase()}`}>
+                      {copiedAction === `${engine}-col` ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                    </button>
+                  </div>
+                  <pre className="text-xs text-zinc-700 dark:text-[var(--text-secondary)] font-mono leading-relaxed whitespace-pre-wrap select-text max-h-[520px] overflow-auto custom-scrollbar">{text}</pre>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => copyWithFeedback(generation.v1, 'v1-col')}
-                  className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
-                  title={`${t.output.copy} V1`}
-                >
-                  {copiedAction === 'v1-col' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                </button>
-              </div>
-              <pre className="text-xs text-zinc-700 dark:text-[var(--text-secondary)] font-mono leading-relaxed whitespace-pre-wrap select-text max-h-[520px] overflow-auto custom-scrollbar">
-                {generation.v1}
-              </pre>
-            </div>
-
-            {/* V2 Column */}
-            <div className="flex flex-col gap-3 rounded-xl bg-zinc-50/90 dark:bg-[var(--bg-deep)] border border-zinc-200/90 dark:border-[var(--border-main)]/80 p-5">
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-200/70 dark:border-[var(--border-main)]">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-900 dark:text-[var(--text-primary)]">
-                    {t.output.v2Tab}
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-400 dark:text-[var(--text-muted)]">
-                    {generation.v2.length} {t.output.statsCharacters}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => copyWithFeedback(generation.v2, 'v2-col')}
-                  className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
-                  title={`${t.output.copy} V2`}
-                >
-                  {copiedAction === 'v2-col' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                </button>
-              </div>
-              <pre className="text-xs text-zinc-700 dark:text-[var(--text-secondary)] font-mono leading-relaxed whitespace-pre-wrap select-text max-h-[520px] overflow-auto custom-scrollbar">
-                {generation.v2}
-              </pre>
-            </div>
-
-            {/* V3 Column */}
-            <div className="flex flex-col gap-3 rounded-xl bg-zinc-50/90 dark:bg-[var(--bg-deep)] border border-zinc-200/90 dark:border-[var(--border-main)]/80 p-5">
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-200/70 dark:border-[var(--border-main)]">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-900 dark:text-[var(--text-primary)]">
-                    {t.output.v3Tab}
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-400 dark:text-[var(--text-muted)]">
-                    {generation.v3.length} {t.output.statsCharacters}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => copyWithFeedback(generation.v3, 'v3-col')}
-                  className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
-                  title={`${t.output.copy} V3`}
-                >
-                  {copiedAction === 'v3-col' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                </button>
-              </div>
-              <pre className="text-xs text-zinc-700 dark:text-[var(--text-secondary)] font-mono leading-relaxed whitespace-pre-wrap select-text max-h-[520px] overflow-auto custom-scrollbar">
-                {generation.v3}
-              </pre>
-            </div>
+              );
+            })}
           </div>
         )}
 

@@ -105,6 +105,51 @@ V1 QUALITY BAR:
 - Low light uses digital/high-ISO/shadow/chroma noise, never analog film grain unless explicitly requested.
 `;
 
+// ============================================================================
+// V4 / V5 — ADDITIVE ENGINES (V1/V2/V3 remain unchanged)
+// ============================================================================
+const V4_SCENE_LOCK_INSTRUCTION = `
+ENGINE 4: V4 — SCENE-LOCK CONSISTENCY ENGINE
+V4 is a production-grade reconstruction that prioritizes internal consistency over decorative detail.
+It must be a direct, paste-ready image prompt, never a report or a meta-prompt.
+
+Build one coherent scene graph in natural language with adaptive {curly-brace} blocks:
+- subject and reference locks: preserve only visible or explicitly requested identity evidence, clothing, accessories, pose, object ownership and count;
+- spatial graph: viewer-left/right, foreground/mid-ground/background, distances, occlusions, contact points and relative scale;
+- action mechanics: who does what, which hand touches what, support, weight transfer, pressure, folds and believable body/object contact;
+- optical capture: device class, lens mode, camera height/distance/tilt, crop, perspective distortion, autofocus and depth behavior;
+- light transport: source, direction, hardness, falloff, bounce, contact shadows, reflections and near/far exposure;
+- material response: only visible materials, with texture, roughness, gloss, translucency, wear and compression where physically supported;
+- causal imperfections: select only flaws explained by motion, distance, exposure or phone processing.
+
+V4 QUALITY GATE:
+Every clause must agree with every other clause. Never place the camera inside an object, merge subjects, float objects, contradict the selected aspect ratio, or add a random cinematic look. Preserve explicit user instructions above all inference. Do not invent brands, logos, locations or accessories. Use dense but readable natural language and end with the requested format/crop intent.
+`;
+
+const V5_MASTER_ADAPTIVE_INSTRUCTION = `
+ENGINE 5: V5 — MASTER ADAPTIVE IMAGE PROMPT
+V5 is the highest-fidelity adaptive engine: a single final prompt engineered to survive different image generators while preserving the actual scene.
+It is not a longer V3, not a checklist, and not a technical report. Output only a beautiful, direct, executable image prompt.
+
+Synthesize the strongest evidence into a layered but fluid prompt:
+1. lock the subject/reference facts, object count, wardrobe and explicit user intent;
+2. establish the scene's spatial anchor and relational geometry before adding adjectives;
+3. describe the decisive action and contact mechanics with no ambiguous pronouns;
+4. encode camera position, lens behavior, perspective, framing and focus in physically compatible terms;
+5. encode real light behavior, material response, shadows and reflections as causes and consequences;
+6. add only the fewest high-value imperfections that make the capture believable;
+7. finish with aspect ratio, crop, output purpose and a concise anti-artifact constraint when relevant.
+
+V5 MUST FEEL SPECIFIC, NOT DECORATIVE:
+- Prefer measurable or relational language (viewer-left, half a step behind, compressed against the seat, light falling off before the background) over hype.
+- Preserve uncertainty honestly: if evidence is unclear, use a conservative description rather than hallucinating detail.
+- Never overwrite an explicit instruction with a visual guess.
+- Never merge limbs, clothing, objects or reflections between subjects.
+- Never add studio polish, fake bokeh, luxury clichés, generic landmarks, film language or invented text unless explicitly requested.
+- Use natural-language clauses and adaptive {curly-brace} blocks only where they improve control; no headings, numbered sections, JSON or analysis.
+- The final result must be ready to paste into an image generator without any instruction addressed to another AI.
+`;
+
 // Helper to format settings guidance for prompt generation
 const formatSettingsContext = (settings: any): string => {
   if (!settings) return '';
@@ -284,7 +329,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', serverTime: new Date().toISOString() });
 });
 
-// Generate All Prompts (V1, V2, V3 + Auto Detection)
+// Generate All Prompts (V1, V2, V3, V4, V5 + Auto Detection)
 app.post('/api/generate-prompts', async (req: Request, res: Response) => {
   try {
     const { mode, modality, selectedTypeId = modality, promptLanguage, ideaText, references, settings } = req.body;
@@ -305,12 +350,14 @@ app.post('/api/generate-prompts', async (req: Request, res: Response) => {
     const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
-Write V1, V2, V3, and every natural-language value in autoDetected in ${requestedLanguageName}.
-Do not mix languages. V1, V2, V3, and every natural-language value in autoDetected must use the requested output language.
-Your mission is to construct three (3) distinct, highly specialized prompt engines for an image or scene:
+Write V1, V2, V3, V4, V5, and every natural-language value in autoDetected in ${requestedLanguageName}.
+Do not mix languages. V1, V2, V3, V4, V5, and every natural-language value in autoDetected must use the requested output language.
+Your mission is to construct five (5) distinct, highly specialized prompt engines for an image or scene:
 - V1: SMART NATURAL SNAPSHOT (COMPACT, PHYSICALLY RESOLVED)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
 - V3: FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT, EXTREME PHYSICAL SPECIFICITY)
+- V4: SCENE-LOCK CONSISTENCY (RELATIONAL PHYSICS AND CROSS-CLAUSE VALIDATION)
+- V5: MASTER ADAPTIVE IMAGE PROMPT (MAXIMUM GENERATOR-ROBUST FIDELITY)
 
 ==================================================
 CENTRAL FOUNDATIONAL PRINCIPLE:
@@ -681,22 +728,30 @@ Before returning V3, silently verify:
 Return ONLY the final V3 prompt text.
 
 ==================================================
+${V4_SCENE_LOCK_INSTRUCTION}
+${V5_MASTER_ADAPTIVE_INSTRUCTION}
+==================================================
+
+==================================================
 LANGUAGE LOCALIZATION DIRECTIVE:
 ==================================================
 ${isSpanish 
   ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.
 - V2: Output 100% in Spanish using the structured adaptive curly-brace format.
-- V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.
+- V4 and V5: Output 100% in Spanish as direct, paste-ready prompts using the V4/V5 rules above.`
   : isPortuguese 
   ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.
 - V2: Output 100% in Brazilian Portuguese using the structured adaptive curly-brace format.
-- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.
+- V4 and V5: Output 100% in Brazilian Portuguese as direct, paste-ready prompts using the V4/V5 rules above.`
   : `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural English using the smart adaptive curly-brace format.
 - V2: Output 100% in English using the structured adaptive curly-brace format.
-- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.
+- V4 and V5: Output 100% in English as direct, paste-ready prompts using the V4/V5 rules above.`
 }
 
 ==================================================
@@ -734,7 +789,7 @@ ${settingsContext}
     }
 
     contentsParts.push({
-      text: `OUTPUT LANGUAGE LOCK: Generate V1, V2, V3, and every natural-language value in autoDetected entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.
+      text: `OUTPUT LANGUAGE LOCK: Generate V1, V2, V3, V4, V5, and every natural-language value in autoDetected entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.
 
 ${userTextDescription}`
     });
@@ -770,6 +825,8 @@ ${userTextDescription}`
                 v1: { type: Type.STRING },
                 v2: { type: Type.STRING },
                 v3: { type: Type.STRING },
+                v4: { type: Type.STRING },
+                v5: { type: Type.STRING },
                 autoDetected: {
                   type: Type.OBJECT,
                   properties: {
@@ -791,7 +848,7 @@ ${userTextDescription}`
                   }
                 }
               },
-              required: ["v1", "v2", "v3", "autoDetected"]
+              required: ["v1", "v2", "v3", "v4", "v5", "autoDetected"]
             }
           }
         });
@@ -806,6 +863,8 @@ ${userTextDescription}`
           v1: parsed.v1?.trim() || "",
           v2: parsed.v2?.trim() || "",
           v3: parsed.v3?.trim() || "",
+          v4: parsed.v4?.trim() || "",
+          v5: parsed.v5?.trim() || "",
           negativePrompt: defaultNegativePrompt,
           autoDetected: parsed.autoDetected || {}
         });
@@ -958,6 +1017,8 @@ CRITICAL RULES:
    - If V1: Preserve its compact smart-natural curly-brace style and scene facts; do not expand it into V2/V3.
    - If V2: Maintain the structured {} brackets format.
    - If V3: Maintain the direct natural-language curly-brace {} format and the same scene-specific block order; never convert it into a blueprint or meta-prompt.
+   - If V4: Preserve its scene-lock relational structure and repair only the requested delta.
+   - If V5: Preserve its adaptive master-prompt density and generator-ready direct style; repair only the requested delta.
 4. Return ONLY the updated prompt text. No preamble or conversational filler.
 `;
 
