@@ -1476,3 +1476,68 @@ select, input[type="text"], input[type="number"] { min-height: 42px; }
   .ep-masthead-signal { padding-left: 0; }
   .pro-studio-grid { border-radius: 0 0 16px 16px !important; }
 }
+
+
+/* Cosmic depth layer — a quiet animated universe behind the working surface. */
+.ep-universe {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  opacity: .78; transition: opacity 400ms ease;
+}
+.ep-universe::before {
+  content: ""; position: absolute; inset: 0; opacity: .58;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(210, 239, 255, .88) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 30% 72%, rgba(153, 201, 240, .62) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 67% 26%, rgba(184, 242, 102, .62) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 83% 78%, rgba(211, 234, 255, .7) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 54% 88%, rgba(121, 177, 221, .56) 0 1px, transparent 1.5px);
+  background-size: 163px 197px, 227px 241px, 191px 223px, 269px 257px, 311px 293px;
+  mask-image: linear-gradient(to bottom, transparent, black 12%, black 82%, transparent);
+}
+.ep-universe-nebula { position: absolute; border-radius: 50%; filter: blur(48px); mix-blend-mode: screen; opacity: .22; }
+.ep-universe-nebula-a { width: 38vw; height: 24vw; top: 8%; right: -7%; background: radial-gradient(ellipse, rgba(40, 112, 188, .55), transparent 68%); transform: rotate(-24deg); }
+.ep-universe-nebula-b { width: 34vw; height: 26vw; bottom: -7%; left: 7%; background: radial-gradient(ellipse, rgba(35, 86, 147, .48), transparent 68%); transform: rotate(18deg); }
+.ep-universe-star { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #d8efff; box-shadow: 0 0 10px 2px rgba(178, 221, 250, .58); }
+.ep-universe-star-a { top: 18%; left: 18%; }
+.ep-universe-star-b { top: 34%; right: 22%; width: 2px; height: 2px; }
+.ep-universe-star-c { bottom: 25%; left: 47%; width: 2px; height: 2px; }
+.ep-universe-star-d { bottom: 14%; right: 9%; }
+.ep-universe-orbit { position: absolute; left: 62%; top: 34%; border: 1px solid rgba(103, 160, 207, .14); border-radius: 50%; transform: translate(-50%, -50%) rotate(-22deg); }
+.ep-universe-orbit::after { content: ""; position: absolute; width: 5px; height: 5px; top: 50%; right: -2px; border-radius: 50%; background: var(--ep-amber); box-shadow: 0 0 15px 3px rgba(184, 242, 102, .54); transform: translateY(-50%); }
+.ep-universe-orbit-a { width: 280px; height: 116px; }
+.ep-universe-orbit-b { width: 450px; height: 185px; opacity: .54; transform: translate(-50%, -50%) rotate(26deg); }
+.ep-universe-orbit-b::after { top: 0; right: 32%; }
+.ep-universe-orbit-c { width: 650px; height: 265px; opacity: .28; transform: translate(-50%, -50%) rotate(-43deg); }
+.ep-universe-orbit-c::after { top: 100%; right: 29%; }
+.ep-universe-core { position: absolute; left: 62%; top: 34%; width: 76px; height: 76px; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(53, 119, 180, .20), transparent 64%); filter: blur(3px); }
+.dark .ep-universe { opacity: .92; }
+.dark .ep-universe::before { opacity: .7; }
+.studio-main, .studio-footer, .pro-shell { position: relative; z-index: 1; }
+.studio-footer { position: relative; z-index: 2; height: 62px !important; padding-bottom: 19px !important; gap: 13px; flex-direction: column; }
+.studio-footer-line { width: min(760px, 62vw) !important; background: linear-gradient(90deg, transparent, rgba(104, 162, 211, .32), transparent) !important; }
+.studio-footer-credit { color: rgba(180, 208, 230, .52); font: 600 9px/1 "JetBrains Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+.studio-footer-credit i { color: var(--ep-amber); font-style: normal; margin-right: 5px; text-shadow: 0 0 10px rgba(184,242,102,.68); }
+@media (prefers-reduced-motion: no-preference) {
+  .ep-universe-orbit-a { animation: ep-orbit-drift-a 22s linear infinite; }
+  .ep-universe-orbit-b { animation: ep-orbit-drift-b 31s linear infinite reverse; }
+  .ep-universe-orbit-c { animation: ep-orbit-drift-c 44s linear infinite; }
+  .ep-universe-star { animation: ep-star-twinkle 4s ease-in-out infinite; }
+  .ep-universe-star-b { animation-delay: -1.3s; }
+  .ep-universe-star-c { animation-delay: -2.7s; }
+  .ep-universe-star-d { animation-delay: -3.5s; }
+  .ep-universe-nebula-a { animation: ep-nebula-breathe 12s ease-in-out infinite; }
+  .ep-universe-nebula-b { animation: ep-nebula-breathe 17s ease-in-out -5s infinite reverse; }
+  .studio-footer-credit { animation: ep-credit-in 700ms var(--ease-out) 450ms both; }
+}
+@keyframes ep-orbit-drift-a { from { transform: translate(-50%, -50%) rotate(-22deg); } to { transform: translate(-50%, -50%) rotate(338deg); } }
+@keyframes ep-orbit-drift-b { from { transform: translate(-50%, -50%) rotate(26deg); } to { transform: translate(-50%, -50%) rotate(-334deg); } }
+@keyframes ep-orbit-drift-c { from { transform: translate(-50%, -50%) rotate(-43deg); } to { transform: translate(-50%, -50%) rotate(317deg); } }
+@keyframes ep-star-twinkle { 0%, 100% { opacity: .36; transform: scale(.72); } 50% { opacity: 1; transform: scale(1.3); } }
+@keyframes ep-nebula-breathe { 0%, 100% { opacity: .14; transform: scale(.94) rotate(-24deg); } 50% { opacity: .3; transform: scale(1.08) rotate(-18deg); } }
+@keyframes ep-credit-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 1023px) {
+  .ep-universe-orbit { left: 72%; top: 20%; transform: translate(-50%, -50%) scale(.7) rotate(-22deg); }
+  .ep-universe-orbit-b, .ep-universe-orbit-c { display: none; }
+  .ep-universe-nebula-a { width: 70vw; height: 40vw; right: -20%; }
+  .studio-footer { height: 56px !important; padding-bottom: 15px !important; }
+}

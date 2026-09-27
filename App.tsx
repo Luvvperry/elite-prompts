@@ -650,6 +650,18 @@ const App: React.FC = () => {
 
   return (
     <div className={`app-shell min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
+      <div className="ep-universe" aria-hidden="true">
+        <span className="ep-universe-nebula ep-universe-nebula-a" />
+        <span className="ep-universe-nebula ep-universe-nebula-b" />
+        <span className="ep-universe-star ep-universe-star-a" />
+        <span className="ep-universe-star ep-universe-star-b" />
+        <span className="ep-universe-star ep-universe-star-c" />
+        <span className="ep-universe-star ep-universe-star-d" />
+        <span className="ep-universe-orbit ep-universe-orbit-a" />
+        <span className="ep-universe-orbit ep-universe-orbit-b" />
+        <span className="ep-universe-orbit ep-universe-orbit-c" />
+        <span className="ep-universe-core" />
+      </div>
       
       {/* Application chrome */}
       <Header
@@ -803,6 +815,7 @@ const App: React.FC = () => {
 
       <footer className="studio-footer mt-auto lg:pl-[64px]">
         <span className="studio-footer-line" />
+        <span className="studio-footer-credit"><i aria-hidden="true">✦</i> Made by xavi</span>
       </footer>
 
       {/* 4. Presets Modal */}
