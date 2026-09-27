@@ -1723,3 +1723,33 @@ body, .app-shell {
   .prompt-engine-tabs { width: 100%; }
   .prompt-engine-tabs button { flex: 1 1 auto; min-width: 0; padding: 0 6px !important; font-size: 9px !important; }
 }
+
+
+/* Organized engine picker: one calm control instead of five competing tabs. */
+.prompt-engine-tabs { position: relative; flex-wrap: nowrap !important; overflow: visible !important; }
+.engine-picker { position: relative; min-width: 0; }
+.engine-picker-trigger {
+  min-height: 32px; max-width: min(300px, 42vw); padding: 0 10px 0 12px; display: inline-flex; align-items: center; gap: 10px;
+  border-radius: 6px; color: var(--pro-text); background: var(--pro-panel); border: 1px solid var(--pro-line-strong);
+  font: 600 10px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; white-space: nowrap;
+}
+.engine-picker-trigger:hover { background: var(--pro-panel-2); border-color: rgba(255,255,255,.22); }
+.engine-picker-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.engine-picker-menu {
+  position: absolute; top: calc(100% + 7px); left: 0; z-index: 60; min-width: 238px; padding: 5px;
+  border: 1px solid var(--pro-line-strong); border-radius: 10px; background: #111213;
+  box-shadow: 0 18px 46px rgba(0,0,0,.38);
+}
+.engine-picker-option {
+  width: 100%; min-height: 38px; padding: 0 9px; display: flex; align-items: center; gap: 9px; border-radius: 7px;
+  color: var(--pro-text-2); background: transparent; text-align: left; font: 500 11px/1.2 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.engine-picker-option:hover { color: var(--pro-text); background: var(--pro-panel-2); }
+.engine-picker-option.is-selected { color: var(--pro-text); background: rgba(255,255,255,.08); }
+.engine-picker-option svg { margin-left: auto; color: var(--pro-text); }
+.engine-picker-code { width: 25px; color: var(--pro-text-3); font: 700 9px/1 "SFMono-Regular", Consolas, monospace; letter-spacing: .04em; }
+.engine-compare-button { min-height: 32px !important; white-space: nowrap; }
+@media (max-width: 639px) {
+  .engine-picker-trigger { max-width: 52vw; }
+  .engine-picker-menu { min-width: min(238px, calc(100vw - 32px)); }
+}
