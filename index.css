@@ -1568,3 +1568,52 @@ select, input[type="text"], input[type="number"] { min-height: 42px; }
   .prompt-console, .studio-output-pane .prompt-console { min-height: 520px; margin: 0; }
   .ep-masthead { padding-left: 14px !important; padding-right: 14px !important; }
 }
+
+
+/* Final theme correction: light mode must be a real light workspace, not dark surfaces with a light toggle. */
+html:not(.dark) .app-shell {
+  background-color: #f4f7fb !important;
+  background-image:
+    linear-gradient(rgba(37, 87, 126, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 87, 126, .055) 1px, transparent 1px),
+    radial-gradient(760px 460px at 86% -8%, rgba(88, 151, 201, .16), transparent 70%),
+    radial-gradient(720px 480px at 4% 92%, rgba(143, 191, 224, .12), transparent 70%) !important;
+  background-size: 64px 64px, 64px 64px, auto, auto !important;
+  color: #16283b !important;
+}
+html:not(.dark) .ep-universe { opacity: .2; mix-blend-mode: multiply; }
+html:not(.dark) .ep-universe::before { opacity: .35; }
+html:not(.dark) .ep-universe-nebula { opacity: .07; mix-blend-mode: multiply; }
+html:not(.dark) .ep-cosmic-canvas { opacity: .1; mix-blend-mode: multiply; }
+html:not(.dark) .pro-rail {
+  background: linear-gradient(180deg, #f9fbfd, #edf3f8) !important;
+  border-right-color: rgba(26, 76, 113, .16) !important;
+  box-shadow: 12px 0 42px rgba(31, 67, 96, .08) !important;
+}
+html:not(.dark) .pro-rail .pro-nav-button { color: rgba(23, 58, 87, .62); }
+html:not(.dark) .pro-rail .pro-nav-button:hover { color: #153b5c; background: rgba(48, 113, 159, .09); border-color: rgba(48, 113, 159, .18); }
+html:not(.dark) .pro-brand-orbit { background: radial-gradient(circle at 38% 30%, #fff, #dcecf6 48%, #c7dce9); border-color: rgba(33, 91, 133, .32); box-shadow: 0 0 0 5px rgba(47, 112, 156, .06), 0 10px 24px rgba(40, 78, 107, .14), inset 0 1px 0 #fff; }
+html:not(.dark) .orbit-core { fill: #327eae; filter: drop-shadow(0 0 3px rgba(50,126,174,.3)); }
+html:not(.dark) .orbit-ring-inner { color: #246b99; }
+html:not(.dark) .orbit-cut { stroke: #6596b7; }
+html:not(.dark) .studio-rail-shell { background: rgba(244, 248, 251, .86) !important; border-bottom-color: rgba(25, 86, 126, .16) !important; }
+html:not(.dark) .pro-studio-grid { background: rgba(232, 241, 247, .7) !important; border-color: rgba(31, 95, 136, .18) !important; box-shadow: 0 28px 80px rgba(38, 74, 100, .11) !important; }
+html:not(.dark) .pro-studio-grid > section { background: rgba(247, 250, 252, .82) !important; }
+html:not(.dark) .workspace-panel, html:not(.dark) .prompt-console, html:not(.dark) .advanced-panel-shell > * { background: rgba(255, 255, 255, .84) !important; border-color: rgba(26, 80, 116, .14) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 16px 48px rgba(45, 85, 112, .08) !important; }
+html:not(.dark) .workspace-panel:hover, html:not(.dark) .prompt-console:hover { border-color: rgba(33, 116, 163, .3) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 22px 60px rgba(45, 85, 112, .12) !important; }
+html:not(.dark) .pane-heading { border-bottom-color: rgba(28, 88, 126, .12); }
+html:not(.dark) .pane-eyebrow { color: #1c5d86 !important; }
+html:not(.dark) .pane-description { color: rgba(30, 71, 100, .58) !important; }
+html:not(.dark) .prompt-console-body { background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(244,248,251,.96)) !important; }
+html:not(.dark) .prompt-console-head { background: rgba(248,251,253,.92) !important; border-bottom-color: rgba(28,88,126,.12) !important; }
+html:not(.dark) .prompt-code { color: #24415a !important; }
+html:not(.dark) .mode-switch, html:not(.dark) .prompt-engine-tabs { background: rgba(228, 238, 245, .64) !important; border-color: rgba(32, 91, 128, .16) !important; }
+html:not(.dark) .mode-switch button.is-active { color: #164d72 !important; background: rgba(75, 145, 197, .14) !important; box-shadow: inset 0 0 0 1px rgba(48, 113, 159, .22) !important; }
+html:not(.dark) .ep-masthead h1 { color: #122b42; }
+html:not(.dark) .ep-masthead p, html:not(.dark) .ep-masthead-signal { color: rgba(27, 67, 97, .64); }
+html:not(.dark) .mobile-topbar { background: rgba(248, 251, 253, .88) !important; border-bottom-color: rgba(26, 80, 116, .16) !important; }
+html:not(.dark) .mobile-topbar-button, html:not(.dark) .mobile-topbar-context { color: #244c68 !important; }
+html:not(.dark) .studio-footer-credit { color: rgba(26, 66, 96, .72); }
+.studio-footer-credit { font-size: 13px !important; font-weight: 650 !important; letter-spacing: .08em !important; text-transform: none !important; color: rgba(198, 222, 238, .78) !important; }
+.studio-footer-credit i { font-size: 14px; }
+html:not(.dark) .studio-footer-credit { color: rgba(24, 67, 98, .72) !important; }
