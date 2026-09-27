@@ -133,44 +133,47 @@ export const generatePrompts = async (
 // Magic Enhance for User Idea
 export const magicEnhanceIdea = async (
   rawIdea: string,
-  modality: ModalityType
+  modality: ModalityType,
+  signal?: AbortSignal
 ): Promise<string> => {
-  const trimmedIdea = rawIdea?.trim() || '';
-  if (!trimmedIdea) return rawIdea;
+  const input = typeof rawIdea === 'string' ? rawIdea.trim() : '';
+  if (!input) throw new Error('EMPTY_ENHANCE_INPUT');
 
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 30000);
+  const response = await fetch('/api/magic-enhance', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rawIdea: input, modality }),
+    signal,
+  });
 
+  let data: unknown = null;
   try {
-    const response = await fetch('/api/magic-enhance', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        rawIdea: trimmedIdea,
-        modality,
-      }),
-      signal: controller.signal,
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error || `Magic Enhance server error (${response.status})`);
-    }
-
-    const enhanced = typeof data.enhanced === 'string' ? data.enhanced.trim() : '';
-    if (!enhanced) throw new Error('Magic Enhance returned an empty result');
-    return enhanced;
-  } catch (e) {
-    const error = e instanceof DOMException && e.name === 'AbortError'
-      ? new Error('Magic Enhance timed out')
-      : e;
-    console.error('Magic Enhance failed:', error);
-    throw error;
-  } finally {
-    window.clearTimeout(timeoutId);
+    data = await response.json();
+  } catch {
+    throw new Error(response.ok ? 'INVALID_ENHANCE_RESPONSE' : 'SERVER_ERROR');
   }
+
+  if (!response.ok) {
+    const message = typeof data === 'object' && data !== null && 'error' in data
+      ? String((data as { error?: unknown }).error || 'SERVER_ERROR')
+      : 'SERVER_ERROR';
+    if (response.status === 429 || /429|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(message)) {
+      throw new Error('RATE_LIMIT');
+    }
+    if (response.status === 408 || response.status === 504 || /TIMEOUT/i.test(message)) {
+      throw new Error('TIMEOUT');
+    }
+    if (response.status >= 500) throw new Error('SERVER_ERROR');
+    throw new Error(message || 'UNKNOWN');
+  }
+
+  const enhanced = typeof data === 'object' && data !== null && 'enhanced' in data
+    ? (data as { enhanced?: unknown }).enhanced
+    : null;
+  if (typeof enhanced !== 'string' || !enhanced.trim()) {
+    throw new Error('EMPTY_ENHANCE_RESPONSE');
+  }
+  return enhanced.trim();
 };
 
 // Refine Prompt with Specific Delta

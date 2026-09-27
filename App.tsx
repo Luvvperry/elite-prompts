@@ -34,6 +34,20 @@ import CommandPalette from './components/CommandPalette';
 import MobileCommandDock from './components/MobileCommandDock';
 import ToastHost, { ToastPayload } from './components/ToastHost';
 
+
+const normalizeInterfaceLanguage = (value: string | null | undefined): Language => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'es' || normalized.startsWith('es-') || normalized.includes('span') || normalized.includes('españ')) return 'es';
+  if (normalized === 'pt' || normalized === 'pt-br' || normalized === 'pt_br' || normalized === 'ptbr' || normalized.includes('portugu')) return 'pt';
+  return 'en';
+};
+
+const normalizePromptLanguage = (value: string | null | undefined): PromptLanguage => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'auto') return 'auto';
+  return normalizeInterfaceLanguage(normalized);
+};
+
 const defaultSettings: FullSettings = {
   // Legacy Basic
   strictRealism: true,
@@ -262,11 +276,13 @@ const defaultPresets: PresetItem[] = [
 const App: React.FC = () => {
   // Theme & Language states
   const [lang, setLang] = useState<Language>(() => {
-    return (localStorage.getItem('ep_lang') as Language) || 'pt';
+    const stored = localStorage.getItem('ep_lang');
+    return stored ? normalizeInterfaceLanguage(stored) : 'pt';
   });
 
   const [promptLang, setPromptLang] = useState<PromptLanguage>(() => {
-    return (localStorage.getItem('ep_prompt_lang') as PromptLanguage) || 'auto';
+    const stored = localStorage.getItem('ep_prompt_lang');
+    return stored ? normalizePromptLanguage(stored) : 'auto';
   });
 
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -293,7 +309,8 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<FullSettings>(defaultSettings);
   const [generation, setGeneration] = useState<GenerationOutput | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isMagicEnhancing, setIsMagicEnhancing] = useState<boolean>(false);
+  const [magicStatus, setMagicStatus] = useState<'idle' | 'enhancing' | 'success' | 'error' | 'timeout'>('idle');
+  const isMagicEnhancing = magicStatus === 'enhancing';
   const [detectedParams, setDetectedParams] = useState<AutoDetectedParams | undefined>(undefined);
 
   // Modals & Drawers
@@ -305,6 +322,8 @@ const App: React.FC = () => {
   const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
   const [toast, setToast] = useState<ToastPayload>(null);
   const magicRequestIdRef = useRef(0);
+  const magicControllerRef = useRef<AbortController | null>(null);
+  const ideaRevisionRef = useRef(0);
 
   // Presets & History persistence
   const [presets, setPresets] = useState<PresetItem[]>(() => {
@@ -347,6 +366,7 @@ const App: React.FC = () => {
   // Persist Language selections
   useEffect(() => {
     localStorage.setItem('ep_lang', lang);
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
   }, [lang]);
 
   useEffect(() => {
@@ -369,10 +389,13 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Invalidate an in-flight Magic Enhance when the capture context changes.
-    magicRequestIdRef.current += 1;
-    setIsMagicEnhancing(false);
-  }, [mode, modality]);
+    // Unmount cleanup is intentionally separate from configuration changes.
+    return () => {
+      magicRequestIdRef.current += 1;
+      magicControllerRef.current?.abort();
+      magicControllerRef.current = null;
+    };
+  }, []);
 
   const showToast = useCallback((type: 'success' | 'error' | 'info', message: string) => {
     setToast({ id: Date.now(), type, message });
@@ -419,45 +442,82 @@ const App: React.FC = () => {
     setReferences(prev => prev.map(r => r.id === id ? { ...r, subjectAssignment } : r));
   }, []);
 
-  // Magic Enhance Idea — resilient client wrapper; prompt logic remains untouched.
+  const handleIdeaChange = useCallback((nextIdea: string) => {
+    ideaRevisionRef.current += 1;
+    setIdeaText(nextIdea);
+  }, []);
+
+  // Magic Enhance Idea — request lifecycle is fully owned here; prompt logic is untouched.
   const handleMagicEnhance = useCallback(async () => {
     const originalIdea = ideaText;
-    if (!originalIdea.trim() || isMagicEnhancing) return;
+    if (!originalIdea.trim() || isMagicEnhancing || magicControllerRef.current) return;
 
+    const requestContext = { idea: originalIdea, modality, inputRevision: ideaRevisionRef.current };
     const requestId = ++magicRequestIdRef.current;
-    setIsMagicEnhancing(true);
+    magicControllerRef.current?.abort();
+    const controller = new AbortController();
+    magicControllerRef.current = controller;
+    setMagicStatus('enhancing');
 
-    const uiMessage: Record<Language, string> = {
-      pt: 'Não foi possível melhorar a ideia. Tente novamente.',
-      es: 'No fue posible mejorar la idea. Inténtalo de nuevo.',
-      en: 'Couldn’t enhance the idea. Try again.'
+    const uiMessage: Record<Language, { failed: string; timeout: string; rateLimit: string }> = {
+      pt: {
+        failed: 'Magic Enhance não conseguiu concluir. Tente novamente.',
+        timeout: 'Magic Enhance demorou demais. Tente novamente.',
+        rateLimit: 'Magic Enhance está com muita demanda agora. Tente novamente em instantes.'
+      },
+      es: {
+        failed: 'Magic Enhance no pudo completarse. Inténtalo de nuevo.',
+        timeout: 'Magic Enhance tardó demasiado. Inténtalo de nuevo.',
+        rateLimit: 'Magic Enhance tiene demasiada demanda ahora. Inténtalo de nuevo en unos instantes.'
+      },
+      en: {
+        failed: 'Magic Enhance couldn’t finish. Try again.',
+        timeout: 'Magic Enhance took too long. Try again.',
+        rateLimit: 'Magic Enhance is under heavy demand right now. Try again in a moment.'
+      }
     };
 
-    let timeoutId: number | undefined;
+    let timedOut = false;
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 42000);
+    const logMagic = (message: string) => {
+      if (import.meta.env.DEV) console.debug(`[MAGIC] ${message}`, requestId);
+    };
     try {
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        timeoutId = window.setTimeout(() => reject(new Error('MAGIC_ENHANCE_TIMEOUT')), 25000);
-      });
-
-      const enhanced = await Promise.race([
-        magicEnhanceIdea(originalIdea, modality),
-        timeoutPromise
-      ]);
-
+      logMagic('request started');
+      const enhanced = await magicEnhanceIdea(requestContext.idea, requestContext.modality, controller.signal);
+      logMagic('API resolved');
       if (requestId !== magicRequestIdRef.current) return;
-      if (typeof enhanced !== 'string' || !enhanced.trim()) throw new Error('MAGIC_ENHANCE_EMPTY');
-      setIdeaText(current => current === originalIdea ? enhanced.trim() : current);
-    } catch (e) {
-      if (requestId === magicRequestIdRef.current) {
-        console.error(e);
-        setIdeaText(current => current.trim() ? current : originalIdea);
-        showToast('error', uiMessage[lang]);
+      if (ideaRevisionRef.current === requestContext.inputRevision) {
+        handleIdeaChange(enhanced);
+      }
+      setMagicStatus('success');
+      logMagic('success');
+    } catch (error: any) {
+      if (requestId !== magicRequestIdRef.current) return;
+      if (timedOut || error?.message === 'TIMEOUT') {
+        setMagicStatus('timeout');
+        showToast('error', uiMessage[lang].timeout);
+        logMagic('timeout');
+      } else if (error?.name === 'AbortError') {
+        setMagicStatus('error');
+        logMagic('aborted');
+      } else {
+        setMagicStatus('error');
+        showToast('error', error?.message === 'RATE_LIMIT' ? uiMessage[lang].rateLimit : uiMessage[lang].failed);
+        if (import.meta.env.DEV) console.debug('[MAGIC] error', requestId, error);
       }
     } finally {
-      if (timeoutId) window.clearTimeout(timeoutId);
-      if (requestId === magicRequestIdRef.current) setIsMagicEnhancing(false);
+      window.clearTimeout(timeoutId);
+      if (magicControllerRef.current === controller) magicControllerRef.current = null;
+      if (requestId === magicRequestIdRef.current) {
+        setMagicStatus(prev => prev === 'enhancing' ? 'error' : prev);
+      }
+      logMagic('cleanup');
     }
-  }, [ideaText, modality, isMagicEnhancing, lang, showToast]);
+  }, [ideaText, modality, isMagicEnhancing, lang, showToast, handleIdeaChange]);
 
   // Generate All Prompts
   const handleGenerate = async () => {
@@ -637,7 +697,7 @@ const App: React.FC = () => {
                   onModalityChange={handleModalityChange}
                   selectedTypeId={selectedTypeId}
                   ideaText={ideaText}
-                  onIdeaChange={setIdeaText}
+                  onIdeaChange={handleIdeaChange}
                   references={references}
                   onAddReferences={handleAddReferences}
                   onRemoveReference={handleRemoveReference}
@@ -759,8 +819,8 @@ const App: React.FC = () => {
         currentLang={lang}
         currentPromptLang={promptLang}
         onApply={(newLang, newPromptLang) => {
-          setLang(newLang);
-          setPromptLang(newPromptLang);
+          setLang(normalizeInterfaceLanguage(newLang));
+          setPromptLang(normalizePromptLanguage(newPromptLang));
         }}
       />
 

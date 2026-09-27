@@ -24,6 +24,11 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
 }) => {
   if (!isOpen) return null;
   const t = translations[lang];
+  const local = {
+    pt: { search: 'Buscar no histórico...', noMatch: 'Nenhum prompt correspondente encontrado.' },
+    es: { search: 'Buscar en el historial...', noMatch: 'No se encontraron prompts coincidentes.' },
+    en: { search: 'Search history...', noMatch: 'No matching prompts found.' }
+  }[lang];
 
   const [searchQuery, setSearchQuery] = React.useState('');
 
@@ -79,7 +84,7 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search history..."
+              placeholder={local.search}
               className="w-full bg-zinc-50 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none"
             />
           </div>
@@ -90,11 +95,11 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
           {filteredHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center text-zinc-400 dark:text-zinc-500">
               <Clock size={32} strokeWidth={1.25} className="mb-3 opacity-60" />
-              <p className="text-xs font-sans-alt">{history.length === 0 ? t.history.empty : 'No matching prompts found.'}</p>
+              <p className="text-xs font-sans-alt">{history.length === 0 ? t.history.empty : local.noMatch}</p>
             </div>
           ) : (
             filteredHistory.map((item) => {
-              const dateStr = new Date(item.timestamp).toLocaleString(undefined, {
+              const dateStr = new Date(item.timestamp).toLocaleString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es' : 'en', {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
@@ -112,7 +117,7 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
                         {item.mode === 'image' ? t.history.imageRef : t.history.idea}
                       </span>
                       <span className="text-[10px] font-mono uppercase text-zinc-400">
-                        {item.modality}
+                        {(t.modalities as Record<string, string>)[item.modality] || item.modality.replace(/_/g, ' ')}
                       </span>
                     </div>
 

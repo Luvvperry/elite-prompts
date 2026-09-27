@@ -52,6 +52,6 @@ export function auditTranslations(): { valid: boolean; differences: string[] } {
 }
 
 // Run immediately during development
-if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+if (typeof window !== 'undefined' && Boolean((import.meta as any).env?.DEV)) {
   auditTranslations();
 }

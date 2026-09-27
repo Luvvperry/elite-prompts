@@ -40,9 +40,9 @@ const Header: React.FC<HeaderProps> = ({
   const t = translations[lang];
   const langLabel: Record<Language, string> = { pt: 'PT', en: 'EN', es: 'ES' };
   const copy = {
-    pt: { create: 'Criar', command: 'Comandos', settings: 'Configurações', language: 'Idioma' },
-    es: { create: 'Crear', command: 'Comandos', settings: 'Configuración', language: 'Idioma' },
-    en: { create: 'Create', command: 'Command', settings: 'Settings', language: 'Language' }
+    pt: { create: 'Criar', command: 'Comandos', settings: 'Configurações', language: 'Idioma', nav: 'Navegação do workspace', actions: 'Ações do workspace' },
+    es: { create: 'Crear', command: 'Comandos', settings: 'Configuración', language: 'Idioma', nav: 'Navegación del workspace', actions: 'Acciones del workspace' },
+    en: { create: 'Create', command: 'Command', settings: 'Settings', language: 'Language', nav: 'Workspace navigation', actions: 'Workspace actions' }
   }[lang];
 
   const actionClass = 'pro-nav-button';
@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <>
       {/* Desktop — professional instrument rail. No product branding. */}
-      <aside className="pro-rail hidden lg:flex" aria-label="Workspace navigation">
+      <aside className="pro-rail hidden lg:flex" aria-label={copy.nav}>
         <div className="pro-rail-top">
           <button type="button" onClick={onOpenCommand} className={`${actionClass} pro-nav-primary`} title={copy.command}>
             <Search size={18} strokeWidth={1.7} />
@@ -91,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({
             <span>{copy.create}</span>
           </button>
 
-          <nav className="mobile-topbar-actions" aria-label="Workspace actions">
+          <nav className="mobile-topbar-actions" aria-label={copy.actions}>
             <button type="button" onClick={onOpenPresets} className="mobile-topbar-button" title={t.nav.presets}>
               <Bookmark size={17} strokeWidth={1.65} />
             </button>

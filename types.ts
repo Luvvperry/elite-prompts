@@ -545,7 +545,7 @@ export interface FullSettings {
 }
 
 export interface GenerationOutput {
-  v1: string; // V1 — Original / Optical (preserved exact legacy engine)
+  v1: string; // V1 — Smart Natural Snapshot
   v2: string; // V2 — Structured Realism (with {} blocks)
   v3: string; // V3 — Forensic Deep Prompt (adaptive curly-brace final prompt, not a meta-blueprint)
   negativePrompt?: string;

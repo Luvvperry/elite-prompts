@@ -358,14 +358,14 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
                     {t.output.v1Tab}
                   </span>
                   <span className="text-[10px] font-mono text-zinc-400 dark:text-[var(--text-muted)]">
-                    {generation.v1.length} chars
+                    {generation.v1.length} {t.output.statsCharacters}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => copyWithFeedback(generation.v1, 'v1-col')}
                   className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
-                  title="Copy V1"
+                  title={`${t.output.copy} V1`}
                 >
                   {copiedAction === 'v1-col' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                 </button>
@@ -383,14 +383,14 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
                     {t.output.v2Tab}
                   </span>
                   <span className="text-[10px] font-mono text-zinc-400 dark:text-[var(--text-muted)]">
-                    {generation.v2.length} chars
+                    {generation.v2.length} {t.output.statsCharacters}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => copyWithFeedback(generation.v2, 'v2-col')}
                   className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
-                  title="Copy V2"
+                  title={`${t.output.copy} V2`}
                 >
                   {copiedAction === 'v2-col' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                 </button>
@@ -408,14 +408,14 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
                     {t.output.v3Tab}
                   </span>
                   <span className="text-[10px] font-mono text-zinc-400 dark:text-[var(--text-muted)]">
-                    {generation.v3.length} chars
+                    {generation.v3.length} {t.output.statsCharacters}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => copyWithFeedback(generation.v3, 'v3-col')}
                   className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
-                  title="Copy V3"
+                  title={`${t.output.copy} V3`}
                 >
                   {copiedAction === 'v3-col' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                 </button>

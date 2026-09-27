@@ -158,7 +158,8 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
       objectRealism: 'Realismo do objeto', heldObject: 'Objeto principal / em foco',
       foodHelper: 'POV de comida ativo: descreva arranjo do prato, embalagem, migalhas, gordura e marcas reais somente quando fizer sentido.',
       mood: 'Ambiente / sensação', ordinary: 'Comum / cotidiano', raw: 'Cru / cotidiano real', premium: 'Premium casual', luxury: 'Luxo realista',
-      doorState: 'Estado da porta', closed: 'Fechada', openDoor: 'Porta aberta', seatPosition: 'Posição no carro', driverSeat: 'Banco do motorista', passengerSeat: 'Banco do passageiro'
+      doorState: 'Estado da porta', closed: 'Fechada', openDoor: 'Porta aberta', seatPosition: 'Posição no carro', driverSeat: 'Banco do motorista', passengerSeat: 'Banco do passageiro',
+      contextFocus: 'Foco de contexto', expandAll: 'Expandir tudo', collapseAll: 'Recolher tudo', surfaceMaterial: 'Material da superfície', customSurfaceDetails: 'Detalhes personalizados da superfície', surfacePlaceholder: 'ex.: madeira de teca desgastada, mármore branco polido, bancada de aço escovado', cameraModeIndependent: 'Modo da câmera (independente do aparelho)', cameraFeelDemeanor: 'Comportamento da câmera', environmentCondition: 'Condição do ambiente', exteriorColorFinish: 'Cor / acabamento exterior', interiorColorUpholstery: 'Cor / revestimento interior', exteriorPlaceholder: 'ex.: preto metálico, prata fosco, cinza nardo', interiorPlaceholder: 'ex.: couro caramelo, alcântara grafite'
     },
     es: {
       autoContext: 'Automático (contextual)',
@@ -170,7 +171,8 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
       objectRealism: 'Realismo del objeto', heldObject: 'Objeto principal / enfocado',
       foodHelper: 'POV de comida activo: describe disposición, empaque, migas, grasa y marcas reales solo cuando tengan sentido.',
       mood: 'Ambiente / sensación', ordinary: 'Común / cotidiano', raw: 'Crudo / cotidiano real', premium: 'Premium casual', luxury: 'Lujo realista',
-      doorState: 'Estado de la puerta', closed: 'Cerrada', openDoor: 'Puerta abierta', seatPosition: 'Posición en el auto', driverSeat: 'Asiento del conductor', passengerSeat: 'Asiento del pasajero'
+      doorState: 'Estado de la puerta', closed: 'Cerrada', openDoor: 'Puerta abierta', seatPosition: 'Posición en el auto', driverSeat: 'Asiento del conductor', passengerSeat: 'Asiento del pasajero',
+      contextFocus: 'Foco de contexto', expandAll: 'Expandir todo', collapseAll: 'Contraer todo', surfaceMaterial: 'Material de la superficie', customSurfaceDetails: 'Detalles personalizados de la superficie', surfacePlaceholder: 'ej.: madera de teca desgastada, mármol blanco pulido, encimera de acero cepillado', cameraModeIndependent: 'Modo de cámara (independiente del dispositivo)', cameraFeelDemeanor: 'Comportamiento de la cámara', environmentCondition: 'Condición del ambiente', exteriorColorFinish: 'Color / acabado exterior', interiorColorUpholstery: 'Color / tapicería interior', exteriorPlaceholder: 'ej.: negro metálico, plata mate, gris nardo', interiorPlaceholder: 'ej.: cuero coñac, alcántara grafito'
     },
     en: {
       autoContext: 'Auto (contextual)',
@@ -182,9 +184,19 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
       objectRealism: 'Object realism', heldObject: 'Held / focused object',
       foodHelper: 'Food POV active: describe plate arrangement, packaging, crumbs, grease and real table marks only when physically appropriate.',
       mood: 'Atmosphere / mood', ordinary: 'Ordinary / relatable', raw: 'Raw / everyday authentic', premium: 'Premium casual', luxury: 'Luxury realism',
-      doorState: 'Door state', closed: 'Closed', openDoor: 'Open door', seatPosition: 'Seat position', driverSeat: 'Driver seat', passengerSeat: 'Passenger seat'
+      doorState: 'Door state', closed: 'Closed', openDoor: 'Open door', seatPosition: 'Seat position', driverSeat: 'Driver seat', passengerSeat: 'Passenger seat',
+      contextFocus: 'Context focus', expandAll: 'Expand all', collapseAll: 'Collapse all', surfaceMaterial: 'Surface material', customSurfaceDetails: 'Custom surface details', surfacePlaceholder: 'e.g. weathered teak, polished white marble, brushed stainless counter', cameraModeIndependent: 'Camera mode (independent from device)', cameraFeelDemeanor: 'Camera feel / demeanor', environmentCondition: 'Environment condition', exteriorColorFinish: 'Exterior color / finish', interiorColorUpholstery: 'Interior color / upholstery', exteriorPlaceholder: 'e.g. metallic black, matte silver, nardo grey', interiorPlaceholder: 'e.g. cognac leather, charcoal alcantara'
     }
   }[lang];
+
+  const detectedLabels: Record<string, string> = ({
+    pt: { subjectCount: 'Pessoas', pose: 'Pose', behavior: 'Comportamento', gaze: 'Olhar', expression: 'Expressão', camera: 'Câmera', lens: 'Lente', distance: 'Distância', framing: 'Enquadramento', flash: 'Flash', time: 'Horário', environment: 'Ambiente', vehicle: 'Veículo', activity: 'Ação', lighting: 'Iluminação' },
+    es: { subjectCount: 'Personas', pose: 'Pose', behavior: 'Comportamiento', gaze: 'Mirada', expression: 'Expresión', camera: 'Cámara', lens: 'Lente', distance: 'Distancia', framing: 'Encuadre', flash: 'Flash', time: 'Hora', environment: 'Ambiente', vehicle: 'Vehículo', activity: 'Acción', lighting: 'Iluminación' },
+    en: { subjectCount: 'Subjects', pose: 'Pose', behavior: 'Behavior', gaze: 'Gaze', expression: 'Expression', camera: 'Camera', lens: 'Lens', distance: 'Distance', framing: 'Framing', flash: 'Flash', time: 'Time', environment: 'Environment', vehicle: 'Vehicle', activity: 'Activity', lighting: 'Lighting' }
+  } as const)[lang];
+
+  const activeModalityLabel = (t.modalities as Record<string, string>)[modality] || modality.replace(/_/g, ' ');
+  const activeTypeLabel = selectedTypeId ? ((t.options.typesList as Record<string, string>)[selectedTypeId] || selectedTypeId.replace(/_/g, ' ')) : '';
 
   // Accordion state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -416,7 +428,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
                     key={k}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-50 dark:bg-[#161616] border border-zinc-200/70 dark:border-zinc-800 text-[11px] font-mono text-zinc-700 dark:text-zinc-300"
                   >
-                    <span className="text-zinc-400 dark:text-zinc-500 capitalize">{k}:</span>
+                    <span className="text-zinc-400 dark:text-zinc-500">{detectedLabels[k] || k}:</span>
                     <span className="font-semibold text-zinc-900 dark:text-zinc-100">{v}</span>
                   </div>
                 ))}
@@ -430,8 +442,8 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
           <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 truncate">
-            Context Focus: <strong className="text-zinc-900 dark:text-zinc-100 font-sans uppercase">{modality.replace('_', ' ')}</strong>
-            {selectedTypeId ? ` · ${selectedTypeId.replace(/_/g, ' ')}` : ''}
+            {local.contextFocus}: <strong className="text-zinc-900 dark:text-zinc-100 font-sans uppercase">{activeModalityLabel}</strong>
+            {activeTypeLabel ? ` · ${activeTypeLabel}` : ''}
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -440,14 +452,14 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
             onClick={handleExpandAll}
             className="text-[10px] font-mono font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
           >
-            Expand All
+            {local.expandAll}
           </button>
           <button
             type="button"
             onClick={handleCollapseAll}
             className="text-[10px] font-mono font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
           >
-            Collapse All
+            {local.collapseAll}
           </button>
         </div>
       </div>
@@ -812,7 +824,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
             {/* Row 4: Surface Selection */}
             <div>
               <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider font-sans">
-                Surface Material
+                {local.surfaceMaterial}
               </label>
               <select
                 value={settings.pov?.surface || 'auto'}
@@ -837,7 +849,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
             {settings.pov?.surface === 'custom' && (
               <div>
                 <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider font-sans">
-                  Custom Surface Details
+                  {local.customSurfaceDetails}
                 </label>
                 <input
                   type="text"
@@ -849,7 +861,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
                       customSurface: e.target.value
                     }
                   })}
-                  placeholder="e.g. weathered teak deck, polished white calacatta marble, brushed stainless steel counter"
+                  placeholder={local.surfacePlaceholder}
                   className="w-full h-11 bg-zinc-50 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 rounded-xl px-3.5 text-xs text-zinc-900 dark:text-zinc-100 outline-none font-mono placeholder-zinc-400 shadow-xs"
                 />
               </div>
@@ -951,7 +963,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider font-sans">
-                  Camera Mode (Independent from Device)
+                  {local.cameraModeIndependent}
                 </label>
                 <select
                   value={settings.cameraMode || 'auto'}
@@ -968,7 +980,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider font-sans">
-                  Camera Feel / Demeanor
+                  {local.cameraFeelDemeanor}
                 </label>
                 <select
                   value={settings.cameraFeel || 'auto'}
@@ -1249,7 +1261,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider font-sans">
-                  Environment Condition
+                  {local.environmentCondition}
                 </label>
                 <select
                   value={settings.environment.condition || 'auto'}
@@ -1409,26 +1421,26 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider font-sans">
-                  Exterior Color / Finish
+                  {local.exteriorColorFinish}
                 </label>
                 <input
                   type="text"
                   value={settings.vehicle.exteriorColor || ''}
                   onChange={(e) => updateNested('vehicle', 'exteriorColor', e.target.value)}
-                  placeholder="e.g. metallic obsidian black, matte silver, nardo grey"
+                  placeholder={local.exteriorPlaceholder}
                   className="w-full h-11 bg-zinc-50 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 rounded-xl px-3.5 text-xs text-zinc-900 dark:text-zinc-100 outline-none font-mono placeholder-zinc-400 shadow-xs"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wider font-sans">
-                  Interior Color / Upholstery
+                  {local.interiorColorUpholstery}
                 </label>
                 <input
                   type="text"
                   value={settings.vehicle.interiorColor || ''}
                   onChange={(e) => updateNested('vehicle', 'interiorColor', e.target.value)}
-                  placeholder="e.g. cognac tan leather, charcoal alcantara"
+                  placeholder={local.interiorPlaceholder}
                   className="w-full h-11 bg-zinc-50 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 rounded-xl px-3.5 text-xs text-zinc-900 dark:text-zinc-100 outline-none font-mono placeholder-zinc-400 shadow-xs"
                 />
               </div>

@@ -34,36 +34,75 @@ const getAiClient = () => {
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const withDeadline = async <T>(promise: Promise<T>, ms: number, code = 'REQUEST_TIMEOUT'): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(code)), ms);
+      })
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+};
+
 // ============================================================================
-// V1 LEGACY SYSTEM PROMPT DEFINITION (LOCKED & PRESERVED 100% 1:1)
+// V1 SMART NATURAL PROMPT DEFINITION
 // ============================================================================
-const V1_LEGACY_INSTRUCTION = `
-YOU ARE AN ELITE IMAGE-TO-PROMPT GENERATOR (iPhone RAW snapshot realism).
+const V1_SMART_INSTRUCTION = `
+V1 IS THE SMART NATURAL SNAPSHOT ENGINE.
+It is NOT a basic prompt, NOT a legacy boilerplate, and NOT a shorter copy of V2.
+It should feel like a highly competent human wrote a compact, paste-ready smartphone-photo prompt from the actual scene evidence.
 
-GOAL
-User uploads an image or gives an idea. You output ONE (1) prompt that recreates the photo as a real iPhone snapshot. It must copy EVERYTHING that is visible/specified EXCEPT the person’s appearance/identity. Tattoos must be ignored completely.
+V1 GOAL:
+- Preserve every explicit fact from the user and assigned references.
+- Resolve the few physical details that matter most: subject placement, clothing behavior, action, camera position, light source, and causal imperfections.
+- Keep it concise enough to scan quickly, but specific enough that the image generator cannot fall back to a generic scene.
+- Default to casual smartphone realism when the user does not specify a different capture style.
 
-OUTPUT FORMAT (EXACT)
-Subject A: [blank] Subject B: [blank]
-An ultra-detailed, HD, authentic portrait captured as if taken by an iPhone camera, [ONE single paragraph describing the photo using highly evocative, precise photographic terminology for textures, lighting, and structure]. Avoid AI artifacts: no plastic skin, no CGI surfaces, no warped anatomy, no extra fingers, no distorted hands. Do not change Subject's facial features. Subjects must look 1000% identical to uploaded images.
-is fully sharp and in focus, with no bokeh, no depth-of-field effect, and no portrait mode. No color grading, no stylization, no cinematic look; the tone is neutral, not too cool, not too warm. Shot in portrait orientation with a 3:4 aspect ratio, roughly 24–26mm equivalent, realistic exposure (around f/1.9, 1/125s, ISO 160). It must not look AI-generated, but like a real iPhone snapshot taken in the moment. [DO NOT CHANGE SUBJECT/S' FACIAL FEATURES]
+V1 OUTPUT STYLE:
+- Return ONLY the final V1 prompt. Never expose reasoning, analysis, checklists, role instructions, or system language.
+- Write in the requested prompt-output language.
+- Use natural clauses with a small number of adaptive {curly-brace} blocks.
+- Use only blocks that matter to the scene. Do not mechanically print empty categories.
+- State each important fact once, in the best block.
 
-SUBJECT LINE RULES
-- Always output: "Subject A: [blank]"
-- If a second person is clearly visible or specified, include: "Subject B: [blank]" on the SAME line.
-- If there is no second person, output only: "Subject A: [blank]" (no Subject B).
-- Do NOT add any extra words on the subject line.
+V1 PERSON TEMPLATE — adapt, localize, and omit irrelevant blocks:
+PHOTO / SOLO PHOTO: create an image of the main person from the provided reference or user specification.
+subject: {identity/reference fidelity only when applicable; body scale in frame and relevant physical build only when established}.
+wearing: {piece-by-piece clothing, color, material, fit, visible accessories, and a few pose-caused folds/compressions}.
+environment: {specific place, foreground/background anchors, everyday spatial context, no invented luxury/postcard scenery}.
+action and posture: {the photographed instant, torso/head orientation, weight-bearing leg, arms/hands, gaze, and any contact with furniture/vehicle/object}.
+the photo is taken: {smartphone/device, rear/front camera, 0.5x/1x/2x/3x if known, photographer position, approximate distance and camera height, framing/orientation}.
+light and shadows: {actual source, direction, flash behavior if present, near/far exposure relationship, relevant reflections}.
+photo imperfections: {only 1–4 causal flaws that fit the capture: minor shake, slight focus miss, digital shadow noise, flash clipping, WB mismatch, compression, crooked framing}.
+skin / focus / format: {natural skin appropriate to distance, natural smartphone depth, no fake bokeh, selected aspect ratio/platform when relevant}.
 
-CRITICAL PRIORITIES:
-- OBSESSIVE POSE REPLICATION (1:1 CLONE): Biomechanical and geometric precision mapping joints, angles, and weight distribution.
-- VEHICLE & OBJECT FORENSICS (100% ACCURACY): Exact Make, Model, approximate Year, color finish, visible mods, wheel spoke pattern.
-- EXACT SCENE & SPATIAL RECREATION: Exact spatial relationship between subject and environment.
-- OUTFIT, ACCESSORIES & TEXTURES: Brand, fit, fabric drape, tactile reality.
-- IDENTITY + TATTOO RULES: Do NOT describe facial features, age, skin tone, or tattoos.
-- ANTI-AI & IDENTITY STRINGS:
-  "Avoid AI artifacts: no plastic skin, no CGI surfaces, no warped anatomy, no extra fingers, no distorted hands. Do not change Subject's facial features. Subjects must look 1000% identical to uploaded images."
-- FINAL CAMERA SETTINGS (PASTED VERBATIM AT THE END):
-  "is fully sharp and in focus, with no bokeh, no depth-of-field effect, and no portrait mode. No color grading, no stylization, no cinematic look; the tone is neutral, not too cool, not too warm. Shot in portrait orientation with a 3:4 aspect ratio, roughly 24–26mm equivalent, realistic exposure (around f/1.9, 1/125s, ISO 160). It must not look AI-generated, but like a real iPhone snapshot taken in the moment. [DO NOT CHANGE SUBJECT/S' FACIAL FEATURES]"
+V1 DUO / GROUP:
+- Keep each important person separate enough that wardrobe, hands, action, gaze, and ownership of objects cannot merge.
+- Give one shared environment/camera/light description after the subject-specific facts.
+
+V1 OBJECT / POV:
+Use a specialized compact structure instead of portrait language:
+POV / OBJECT PHOTO.
+main object: {material, finish, condition, orientation and scale}.
+surface and contact: {what supports it, curvature/pressure/contact shadow, spills/grease/fingerprints/wear only when justified}.
+environment: {real surrounding context and a few useful everyday anchors}.
+interaction: {hands only if visible/requested; exact grip/contact rather than generic “holding naturally”}.
+the photo is taken: {rear smartphone camera in POV, realistic height/distance/tilt and lens mode}.
+light and imperfections: {actual source plus causal smartphone flaws}.
+format: {requested ratio/platform}.
+
+V1 QUALITY BAR:
+- Replace vague “natural pose” with one or two concrete biomechanical facts.
+- Replace vague “realistic lighting” with the actual source and its visible consequence.
+- Replace vague “shot on iPhone” with camera side/mode + distance/height when the scene needs it.
+- Do not invent brands, logos, tattoos, jewelry, landmarks, vehicles, or luxury décor.
+- No automatic cinematic language, film grain, 35/50/85mm professional-lens language, studio lighting, or artificial portrait bokeh.
+- Daylight defaults to flash off unless requested/physically justified. Direct phone flash at night has strong near-field exposure, rapid falloff, localized reflections, short nearby shadows, and a darker distant background.
+- Low light uses digital/high-ISO/shadow/chroma noise, never analog film grain unless explicitly requested.
 `;
 
 // Helper to format settings guidance for prompt generation
@@ -252,14 +291,24 @@ app.post('/api/generate-prompts', async (req: Request, res: Response) => {
     const ai = getAiClient();
     const settingsContext = formatSettingsContext(settings);
 
-    const isSpanish = promptLanguage === 'es';
-    const isPortuguese = promptLanguage === 'pt';
-    const isEnglish = promptLanguage === 'en';
+    // Normalize UI codes and locale names so language selection never silently falls back.
+    const rawPromptLanguage = String(promptLanguage ?? '').trim().toLowerCase();
+    const normalizedPromptLanguage =
+      rawPromptLanguage === 'pt' || rawPromptLanguage === 'pt-br' || rawPromptLanguage.includes('portugu') ? 'pt' :
+      rawPromptLanguage === 'es' || rawPromptLanguage.includes('span') || rawPromptLanguage.includes('españ') ? 'es' :
+      'en';
+    const isSpanish = normalizedPromptLanguage === 'es';
+    const isPortuguese = normalizedPromptLanguage === 'pt';
+    const isEnglish = normalizedPromptLanguage === 'en';
+    const requestedLanguageName = isPortuguese ? 'Brazilian Portuguese' : isSpanish ? 'Spanish' : 'English';
 
     const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
+HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
+Write V1, V2, V3, and every natural-language value in autoDetected in ${requestedLanguageName}.
+Do not mix languages. V1, V2, V3, and every natural-language value in autoDetected must use the requested output language.
 Your mission is to construct three (3) distinct, highly specialized prompt engines for an image or scene:
-- V1: ORIGINAL / OPTICAL (LOCKED 1:1 LEGACY ENGINE)
+- V1: SMART NATURAL SNAPSHOT (COMPACT, PHYSICALLY RESOLVED)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
 - V3: FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT, EXTREME PHYSICAL SPECIFICITY)
 
@@ -305,141 +354,129 @@ PROHIBITED: "Actúa como...", "Eres experto...", "Tu misión...", "Chain-of-thou
 Deliver pure, executable image generation prompts!
 
 ==================================================
-ENGINE 1: V1 — ORIGINAL / OPTICAL (LOCKED 1:1 LEGACY ENGINE)
+ENGINE 1: V1 — SMART NATURAL SNAPSHOT
 ==================================================
-Must adhere 100% strictly to the following legacy format:
-${V1_LEGACY_INSTRUCTION}
+${V1_SMART_INSTRUCTION}
+
+V1 MUST BE DISTINCT FROM V2:
+- V1 is compact and high-signal: resolve only the details that materially change the picture.
+- V2 is more exhaustive and spatially explicit.
+- V1 must never collapse to a generic one-sentence description.
+- V1 must never reuse old fixed boilerplate that overrides the user's aspect ratio, flash state, camera choice, or output language.
 
 ==================================================
-ENGINE 2: V2 — STRUCTURED REALISM (BLOCK SYNTAX WITH {})
+ENGINE 2: V2 — STRUCTURED PHOTOGRAPHIC RECONSTRUCTION
 ==================================================
-V2 MUST KEEP THE CLASSIC STRUCTURE WITH CURLY BRACES {}.
-DO NOT replace with technical headings. DO NOT convert into a meta-prompt or bullet list.
-Every bracket {} must contain deep, forensic, physical observation.
+V2 is the precision middle engine: substantially more resolved than V1, but cleaner and easier to read than V3.
+It must use direct natural-language clauses with adaptive {curly-brace} blocks and must be immediately paste-ready.
 
-FOR A SOLO PERSON (FOTO SOLO):
-Structure for Spanish (${isSpanish ? 'ACTIVE' : 'DEFAULT'}):
-FOTO SOLO: crea una imagen de la persona principal enviada en la foto de arriba.
+V2 CORE DIFFERENCE:
+- V1 = compact smart reconstruction.
+- V2 = structured photographic reconstruction with explicit geometry, biomechanics, object contact, optics, lighting, material response, and causal imperfections.
+- V3 = deepest scene-forensics engine.
 
-viste: { [describir cada prenda visible: color exacto, material mate o brillante, grosor, corte holgado o ajustado, tipo de cuello, botones, bolsillos, acumulación de tela en cintura o tobillos, calzado detallado indicando si lleva o no calcetines, accesorios exactos como gafas, collares dobles, reloj de eslabones y pulseras en la muñeca visible] }.
+V2 BEFORE WRITING — silently resolve, never show the analysis:
+1. SUBJECT MAP: count, reference assignment, frame side, scale in frame, body orientation, gaze, expression, action state.
+2. BODY MAP: head/chin, shoulder asymmetry, torso, pelvis, weight-bearing leg, relaxed/advancing leg, feet, arms, hands, and contact points.
+3. WARDROBE MAP: each visible layer, color, material, cut, closure, drape, tension, bunching, compression, footwear, accessories.
+4. SCENE MAP: foreground, subject plane, mid-ground, background, viewer-left/right anchors, floor/wall/architecture, useful clutter, vehicles/objects.
+5. OBJECT MAP: ownership, support surface, contact, orientation, scale, occlusion, grip, reflections, wear/grease/dust only when justified.
+6. CAMERA MAP: holder, rear/front camera, lens mode, distance, height, direction, tilt, orientation, crop, subject scale, perspective.
+7. LIGHT MAP: source(s), direction, hardness, falloff, cast shadows, reflected highlights, near/far exposure, flash reach.
+8. IMPERFECTION MAP: only flaws causally supported by movement, light, distance, focus, handheld behavior, or phone processing.
 
-ambiente: { [organización espacial real: qué hay en el lado izquierdo del encuadre, qué hay en el lado derecho, profundidad de calle o habitación, texturas de suelo, paredes, macetas o vegetación, postes, vehículos distantes con color y modelo plausible, fondo y cielo] }.
+V2 OUTPUT RULES:
+- Use the requested output language for EVERY block label and description.
+- Do not expose the maps above, numbered phases, JSON, checklists, or meta-instructions.
+- Do not use a rigid template when the scene type does not need it.
+- Every {} block must contain observable, image-changing information, not filler adjectives.
+- State each important fact once. Do not repeat camera/flash/realism in multiple blocks.
 
-acción de la persona: { [biomecánica exacta del frame: en qué momento del paso o apoyo está capturado, pierna que soporta peso vs pierna retrasada, posición exacta de cada brazo y mano (ej: mano hundida en bolsillo, brazo opuesto doblado cubriendo boca/nariz), inclinación de cabeza, dirección de la mirada a través de gafas] }.
+V2 — SOLO PERSON / PORTRAIT / LIFESTYLE, adapt and localize:
+PHOTO / SOLO PHOTO: create an image of the main person from the provided reference or specification.
+main person: {identity/reference fidelity when applicable, body scale in frame, physical build only when established}.
+wearing: {all relevant garments and accessories, exact color/material/fit/closure, natural folds, tension and compression caused by pose}.
+environment: {specific place and spatial organization, viewer-left/right anchors, foreground/background depth, floor/wall/architecture and restrained everyday details}.
+position in space: {where the person stands/sits relative to furniture, vehicle, wall, table, doorway, etc.; distance and occlusion where relevant}.
+action: {exact photographed instant, not merely a verb}.
+posture and body: {torso/head orientation, shoulders, hips, weight distribution, legs and feet, asymmetry}.
+hands and interaction: {which hand, which object/surface, grip/contact/orientation; omit when irrelevant}.
+gaze and expression: {where the eyes/head are directed and the expression actually requested/visible}.
+camera: {device, rear/front camera and selected lens/mode; smartphone-first if unspecified}.
+camera position and framing: {who holds it, approximate distance, height, lateral offset, front/side/3-quarter/rear relation, crop and subject scale}.
+light: {real source, direction, intensity relationship, flash behavior if present, background falloff}.
+shadows and reflections: {cast/contact shadows and only physically plausible glass/metal/paint highlights}.
+materials: {only scene-relevant material response visible at this distance}.
+photo imperfections: {only causal smartphone imperfections; no random defect dumping}.
+skin and focus: {skin detail proportional to distance, autofocus behavior, natural small-sensor depth, no plastic smoothing or fake portrait bokeh}.
+photo format: {requested aspect ratio/platform and crop intent}.
 
-la foto es tomada de él: { [dispositivo, quién toma la foto, orientación vertical/horizontal, distancia para encuadre completo o medio, altura de cámara respecto al pecho/cintura del fotógrafo, perspectiva amplia sin compresión de teleobjetivo] }.
+V2 — TWO PEOPLE / GROUPS:
+- Give each important subject a separate identity/position, wardrobe, action, hands, gaze, and object ownership description.
+- Explicitly map viewer-left/center/viewer-right or other useful spatial relation.
+- Never merge clothing, accessories, limbs, laptops, drinks, phones, tools, or actions between subjects.
+- Then describe shared environment, camera, light, imperfections, materials and format once.
 
-imperfecciones: { [defectos puramente causais de la captura cotidiana: grano sutil en sombras, ligera falta de micro-enfoque en bordes periféricos o micro-trepidación manual sin efectos artificiales] }.
+V2 — OBJECT / POV / FOOD / DESK / TABLE:
+Do NOT use portrait language.
+POV / OBJECT PHOTO.
+main object: {exact object, make/model only if established, material, finish, condition, orientation, scale and position}.
+support surface: {surface material, curvature/level, exact contact patches, pressure/compression/contact shadow, spills/grease/sauce/water only when justified}.
+secondary objects: {limited scene-specific items, count, ownership, orientation and occlusion; no random décor}.
+environment: {garage/kitchen/car/desk/bedroom/etc., foreground/mid-ground/background and ordinary contextual anchors}.
+interaction: {hands only when visible/requested; which hand, finger placement, grip/use/contact and sleeve/watch only when established}.
+camera and POV: {rear smartphone camera, realistic chest/eye/waist/table height, distance, downward/upward tilt, 0.5x/1x/2x/3x behavior}.
+light: {real source(s), direction, falloff, highlight/contact-shadow behavior}.
+materials and reflections: {paint curvature, glass reflection/transmission, metal highlights, cardboard folds, food moisture/oil, wood/stone/plastic response only where present}.
+photo imperfections: {causal handheld/digital flaws only}.
+focus and format: {natural smartphone depth and requested ratio/platform}.
 
-efecto: { [fotografía móvil espontánea, profundidad de campo naturalmente amplia, procesado discreto de smartphone y contraste suficiente para conservar textura de ropa y entorno sin filtro de cine ni render] }.
+V2 — VEHICLE / PERSON + VEHICLE:
+- Preserve the exact named vehicle when established; never downgrade it to “luxury car”.
+- Resolve visible side/front/rear, door/window state, wheel/tire ground contact, roofline, interior visibility, and body-panel reflections when they matter.
+- If a person leans/sits/enters/exits, state the exact contact point and body mechanics.
+- In car interiors, the camera position must physically fit inside/outside the cabin; never place the camera through a seat, dashboard, door, or glass.
 
-piel: { [textura natural coherente con la distancia focal: sin microporos hiper-renderizados artificiales si está a distancia, sin alisado plástico de IA] }.
+V2 — SCENE / INTERIOR / ARCHITECTURE / PRODUCT:
+Use blocks such as:
+main scene/object: {exact physical content}.
+environment and geometry: {architecture, lines, distances, foreground/mid-ground/background, viewer-left/right anchors}.
+object relations: {support/contact/scale/orientation/occlusion}.
+camera and framing: {smartphone/device, position, distance, height, lens mode, crop}.
+light and shadows: {source, direction, falloff, reflections}.
+materials: {only visible material response}.
+photo imperfections: {causal only}.
+format: {requested ratio/platform}.
 
-sombras: { [fuente de luz, dirección, suavidad de bordes, sombras proyectadas por la ropa y el cuerpo en el suelo o paredes adyacentes] }.
+V2 PHYSICAL RULES:
+- “Leaning” requires a real body-to-surface contact point and believable weight transfer.
+- “Sitting” requires seat compression, hip/knee/foot logic and clothing folds at waist/knees when visible.
+- “Walking” requires a real gait phase, arm counter-swing and possible slight motion blur only if justified.
+- “Holding/using” requires which hand, grip/contact and object orientation.
+- Food should look irregular and physically used, not automatically styled like advertising.
+- Objects on a car hood must follow hood curvature and stable contact; they cannot behave as if on a perfectly level table.
+- Reflections must follow glass/metal/paint geometry; do not invent impossible mirrored content.
 
-ángulo de la foto: { [ángulo frontal/tres cuartos, altura de cámara a nivel de pecho, centrado o descentrado del sujeto, línea del horizonte a media altura y recorte justo debajo de los pies] }.
+V2 SMARTPHONE RULES:
+- If camera is unspecified, default to rear iPhone/smartphone main camera at 1x, handheld.
+- Preserve any explicit 0.5x/1x/2x/3x/front-camera choice exactly.
+- No automatic 35mm/50mm/85mm professional-lens language, full-frame look, anamorphic language, studio lighting, or artificial portrait bokeh.
+- Day/bright exterior defaults to flash off unless explicitly requested or physically justified.
+- Direct phone flash at night: stronger near-field exposure, rapid falloff, possible clipping on white fabric, localized glass/metal highlights, short harder nearby shadows, darker distant background.
+- Low light uses digital/high-ISO/shadow/chroma noise, not analog film grain.
 
-Structure for Portuguese (${isPortuguese ? 'ACTIVE' : 'OPTION'}):
-FOTO SOLO: crie uma imagem da pessoa principal enviada na foto acima.
-
-a pessoa está vestindo: { [descrever peça por peça: tecido, gramatura, caimento, gola, botões, acumulação de tecido, calçados com ou sem meias, acessórios e relógio] }.
-
-ambiente: { [organização espacial detalhada: lado esquerdo, lado direito, textura do piso, arquitetura, elementos de profundidade e céu] }.
-
-ação da pessoa: { [biomecânica exata: perna de apoio, perna de arrasto, posição individual de braços e mãos, inclinação da cabeça e vetor do olhar] }.
-
-a foto é tirada dela: { [dispositivo, distância de enquadramento, altura em relação ao fotógrafo, perspectiva ótica natural] }.
-
-imperfeições: { [imperfeições causais estritas da captura do momento] }.
-
-efeito: { [captura móvel autêntica sem filtros de cinema ou render plástico] }.
-
-pele: { [textura real e calibrada pela distância da câmera] }.
-
-sombras: { [direção, suavidade e oclusão real da luz] }.
-
-ângulo da foto: { [alinhamento, nível do peito, horizonte e enquadramento exato] }.
-
-Structure for English (${isEnglish ? 'ACTIVE' : 'OPTION'}):
-SOLO PHOTO: create an image of the main person sent in the photo above.
-
-the subject is wearing: { [detailed wardrobe piece-by-piece, fabric drape, seams, bunching, footwear with/without socks, jewelry, watch, eyewear] }.
-
-environment: { [spatial layout: viewer-left, viewer-right, ground pavement, architectural structures, depth objects, distant background] }.
-
-subject action: { [exact biomechanical frame: weight-bearing leg, trailing leg, individual arm and hand positions, head tilt, gaze vector] }.
-
-the photo is taken of the subject: { [device, orientation, distance, camera height relative to photographer chest, natural wide perspective] }.
-
-imperfections: { [causal capture imperfections only, subtle shadow noise, authentic handheld snapshot flaws] }.
-
-effect: { [unposed smartphone photograph, natural depth of field, tactile textures, no artificial cinematic grading] }.
-
-skin: { [natural skin texture congruent with distance, no plastic smoothing, no CGI pore exaggerations] }.
-
-shadows: { [light direction, softness, ambient fill balance, ground contact occlusion] }.
-
-photo angle: { [camera height at chest level, horizontal alignment, centered composition, crop boundary] }.
-
-FOR TWO PEOPLE (DUPLA):
-Header line: FOTO EN DUPLA (or localized equivalent).
-Include separate blocks:
-primera persona viste: { ... }.
-segunda persona viste: { ... }.
-ambiente: { ... }.
-acción de la primera persona: { ... }.
-acción de la segunda persona: { ... }.
-la foto es tomada de ellos: { ... }.
-imperfecciones: { ... }.
-efecto: { ... }.
-piel: { ... }.
-sombras: { ... }.
-ángulo de la foto: { ... }.
-
-FOR VEHICLES / SCENES / OBJECTS WITHOUT PERSONS:
-SUJETO PRINCIPAL: { ... }.
-ambiente: { ... }.
-óptica y toma: { ... }.
-materiales y física: { ... }.
-imperfecciones: { ... }.
-iluminación y sombras: { ... }.
-
-FOR FIRST-PERSON POV / OBJECTS (object_pov modality or POV style):
-In Spanish:
-FOTO POV / OBJETO EN PRIMERA PERSONA: crea una imagen capturada desde la perspectiva en primera persona (POV) del fotógrafo.
-objeto e interacción con las manos: { [descripción física exacta del objeto sostenido: materiales, acabados, y anatomía exacta de las manos que lo sujetan: colocación de cada dedo, presión de agarre natural, pliegues cutáneos en nudillos, uñas limpias, mangas visibles y reloj/joyería] }.
-ambiente y superficie: { [superficie de contacto en primer plano: madera, volante con costuras, mármol, y entorno de fondo contextual sin desenfoque artificial excesivo] }.
-acción y perspectiva POV: { [ángulo en primera persona, manos ingresando desde el borde inferior izquierdo/derecho del marco, distancia corta de celular] }.
-la foto es tomada desde: { cámara trasera de smartphone en primera persona, encuadre natural a la altura del pecho o mesa] }.
-imperfecciones: { [sutil ruido de sensor en sombras, micro-sombras de contacto debajo de los dedos y objeto] }.
-efecto: { [captura espontánea de iPhone, texturas hiper-tangibles, nitidez uniforme de sensor móvil] }.
-piel y manos: { [textura real de la piel de las manos, sin alisado ni deformaciones de IA] }.
-sombras: { [luz direccional o ambiental, sombras de oclusión entre los dedos y el objeto] }.
-ángulo de la toma: { [mirada en primera persona dirigida hacia el objeto con ángulo ligeramente inclinado hacia abajo] }.
-
-In Portuguese:
-FOTO POV / OBJETO EM PRIMEIRA PESSOA: crie uma imagem capturada a partir da perspectiva em primeira pessoa (POV) do usuário.
-objeto e interação com as mãos: { [descrição física exata do objeto: dimensões, materiais, e anatomia de mãos segurando com firmeza natural, nós dos dedos dobrados, unhas realistas, punhos da blusa e relógio no pulso] }.
-ambiente e superfície: { [superfície em primeiro plano e profundidade contextual ao redor] }.
-ação e perspectiva POV: { [ângulo em primeira pessoa, mãos entrando pelas bordas inferiores, distância de celular] }.
-a foto é tirada de: { câmera traseira de smartphone em primeira pessoa, altura do peito ou mesa] }.
-imperfeições: { [ruído sutil de sensor móvel, micro-sombras reais de contato] }.
-efeito: { [fotografia casual de smartphone, texturas palpáveis sem blur plástico] }.
-pele e mãos: { [pele das mãos com textura real, sem filtros ou dedos duplicados] }.
-sombras: { [sombras de contato e direção natural da luz] }.
-ângulo da foto: { [olhar em primeira pessoa direcionado ao objeto] }.
-
-In English:
-FIRST-PERSON POV / OBJECT PHOTO: create an image captured from the first-person perspective (POV) of the photographer.
-object and hand interaction: { [tangible description of the held object: materials, texture, and realistic hand anatomy: exact finger placement, natural grip tension, knuckle creases, fingernails, visible cuffs/watch] }.
-environment and surface: { [foreground surface: wood grain, steering wheel stitching, cafe counter, and contextual spatial background] }.
-action and POV perspective: { [first-person glance, hands entering from lower left/right frame edges, natural phone working distance] }.
-the photo is taken from: { handheld smartphone rear camera in POV, eye or chest level looking down] }.
-imperfections: { [subtle digital sensor noise in shadows, authentic contact shadows under fingertips] }.
-effect: { [tactile smartphone realism, authentic dynamic range, zero fake bokeh] }.
-skin and hands: { [authentic skin texture on hands, anatomically correct 5 fingers per hand, natural nail beds] }.
-shadows: { [directional or ambient light casting realistic contact shadows] }.
-photo angle: { [downward first-person glance angled toward the subject] }.
+V2 QUALITY GATE — silently revise before returning:
+- Have all explicit user facts survived unchanged?
+- Is every subject/object assigned correctly?
+- Are hands, support, contact, occlusion and action physically possible?
+- Can the camera really occupy the described position?
+- Does flash respect distance and falloff?
+- Does clothing respond to the pose?
+- Do materials respond to the actual light?
+- Is the environment spatial rather than generic?
+- Did any buzzword replace concrete evidence?
+- Did I invent luxury, landmarks, brands, logos, jewelry, props or cinematic styling?
+If any answer exposes a problem, fix it silently before output.
 
 ==================================================
 ENGINE 3: V3 — FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT)
@@ -590,6 +627,44 @@ IPHONE / SMARTPHONE CAPTURE RULES
 - For low light smartphone photos, use digital sensor noise / computational sharpening behavior, not analog film grain.
 
 ==================================================
+V3 RECONSTRUCTION SPECIFICATION — APPLY ONLY TO V3
+==================================================
+V3 is not a longer version of V2. It is a direct natural-language reconstruction of the photographed scene, using only the evidence and instructions available.
+
+TRUTH PRIORITY:
+1. explicit user text and requested facts;
+2. visible or reliably assigned reference-image evidence;
+3. explicit locks and manual settings;
+4. auto-detected context;
+5. conservative physical completion.
+Never overwrite a higher-priority fact with a guess. Never invent unreadable logos, brands, jewelry, tattoos, car details, locations, or background objects.
+
+ADAPTIVE BLOCKS:
+- Use natural-language blocks with curly braces {}, not headings, checklists, JSON, phases, reports, or meta-instructions.
+- Include only blocks that matter to the selected type and actual scene. Do not add hands, skin, vehicle, flash, food, or other categories when they are absent or irrelevant.
+- For people, resolve identity evidence, hairline, facial proportions, skin tone/texture, clothing, body orientation, weight distribution, legs, feet, hands, gaze, expression, and contacts with objects or surfaces.
+- For two or more people, keep each identity, wardrobe, action, gaze, hands, and accessories separate; describe their spacing and interaction explicitly.
+- For objects/POV, prioritize support, weight, contact patches, orientation, scale, surface curvature, occlusion, wear, fingerprints, packaging, grease/crumbs, reflections, and surrounding context. Never make an object float or turn the result into a clean product advertisement.
+- For vehicles, resolve the visible side, doors, windows, roofline, steering wheel/seat when relevant, tire contact, body curvature, reflections, and the exact physical contact with a person or object.
+
+PHYSICAL AND SPATIAL RESOLUTION:
+- Silently resolve camera position, subject distance, foreground/midground/background, viewer-left/viewer-right, occlusion, scale, contact, orientation, perspective, and the photographed moment before writing.
+- Describe actions with who, which hand, what object, where, contact, and orientation. Replace vague phrases such as “natural pose”, “relaxed pose”, or “hands naturally positioned” with concrete biomechanics.
+- Make clothing respond to posture: material, cut, drape, folds, tension, bunching, compression, and overlap. Make materials respond to light: matte cotton, linen, leather, glass, metal, paint, wood, stone, food, and plastic only where present and visible.
+
+SMARTPHONE-FIRST CAPTURE:
+- If unspecified, use a rear smartphone main camera at 1x with handheld framing and natural wide perspective. Preserve selected 0.5x, 1x, 2x, or 3x behavior exactly; never convert it into a professional-camera look.
+- Resolve camera height, distance, direction, tilt, orientation, framing, crop, and subject scale. A distant subject must not become a close-up.
+- Do not add artificial portrait bokeh, professional shallow depth of field, 35mm/50mm/85mm language, cinema language, or film grain unless explicitly requested. Low light uses digital/high-ISO/chroma/shadow noise, not analog grain.
+- Daylight without requested flash means flash off. When direct phone flash is present, show near-field exposure, localized highlights, short nearby shadows, rapid falloff, and a darker distant background; never light an entire distant space uniformly.
+- Add only causal imperfections: motion blur, camera shake, focus miss, digital noise, uneven exposure, white-balance mismatch, compression, crooked framing, lens smudge, or flash clipping only when justified by movement, light, distance, or camera behavior. Do not dump them all into the prompt.
+
+STYLE AND COMPLETENESS:
+- The output must be one paste-ready direct image prompt, with natural clauses and adaptive {} blocks. It must not look like a technical document and must not expose reasoning.
+- Avoid buzzwords such as cinematic, masterpiece, award-winning, luxury atmosphere, editorial photography, 8K, hyperrealistic, photorealistic masterpiece, film still, anamorphic, or beautiful composition unless the user explicitly asks for them.
+- Each sentence must add geometry, physics, action, material, composition, lighting, or evidence. State each important fact once in its best block; do not repeat camera, flash, realism, or iPhone details.
+- V3 must be substantially more physically informative than V2 without padding. End with the selected aspect ratio/format when relevant.
+==================================================
 V3 FINAL QUALITY GATE
 ==================================================
 Before returning V3, silently verify:
@@ -610,18 +685,18 @@ LANGUAGE LOCALIZATION DIRECTIVE:
 ==================================================
 ${isSpanish 
   ? `CRITICAL LANGUAGE REQUIREMENT:
-- V1: Keep in its exact standard English snapshot formula as established.
-- V2: Output in Spanish (Español) using the exact curly braces {} structure.
-- V3: Output in Spanish (Español), as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.
+- V2: Output 100% in Spanish using the structured adaptive curly-brace format.
+- V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
   : isPortuguese 
   ? `CRITICAL LANGUAGE REQUIREMENT:
-- V1: Keep in its exact standard English snapshot formula as established.
-- V2: Output in Portuguese (Português Brasil) using the exact curly braces {} structure.
-- V3: Output in Portuguese (Português Brasil), as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.
+- V2: Output 100% in Brazilian Portuguese using the structured adaptive curly-brace format.
+- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
   : `CRITICAL LANGUAGE REQUIREMENT:
-- V1 remains in its exact legacy English formula.
-- V2 must be generated in English using curly braces {}.
-- V3 must be generated in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+- V1: Output 100% in natural English using the smart adaptive curly-brace format.
+- V2: Output 100% in English using the structured adaptive curly-brace format.
+- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
 }
 
 ==================================================
@@ -658,7 +733,11 @@ ${settingsContext}
 `;
     }
 
-    contentsParts.push({ text: userTextDescription });
+    contentsParts.push({
+      text: `OUTPUT LANGUAGE LOCK: Generate V1, V2, V3, and every natural-language value in autoDetected entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.
+
+${userTextDescription}`
+    });
 
     if (references && references.length > 0) {
       for (const ref of references) {
@@ -675,7 +754,7 @@ ${settingsContext}
     const MODELS_CASCADE = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
     let lastError: any = null;
 
-    for (let attempt = 0; attempt < MODELS_CASCADE.length + 1; attempt++) {
+    for (let attempt = 0; attempt < MODELS_CASCADE.length; attempt++) {
       const currentModel = MODELS_CASCADE[Math.min(attempt, MODELS_CASCADE.length - 1)];
       try {
         const response = await ai.models.generateContent({
@@ -733,8 +812,8 @@ ${settingsContext}
       } catch (err: any) {
         lastError = err;
         console.warn(`Attempt ${attempt + 1} with model ${currentModel} failed: ${err.message}`);
-        if (attempt < MODELS_CASCADE.length) {
-          await wait(1000 * (attempt + 1));
+        if (attempt < MODELS_CASCADE.length - 1) {
+          await wait(750 * (attempt + 1));
           continue;
         }
         break;
@@ -750,74 +829,109 @@ ${settingsContext}
 
 // Magic Enhance Idea
 app.post('/api/magic-enhance', async (req: Request, res: Response) => {
-  const rawIdea = typeof req.body?.rawIdea === 'string' ? req.body.rawIdea.trim() : '';
-  const modality = req.body?.modality || 'person';
-  if (!rawIdea) return res.json({ enhanced: '' });
+  const startedAt = Date.now();
+  let clientClosed = false;
+  req.on('aborted', () => {
+    clientClosed = true;
+  });
+  res.on('close', () => {
+    if (!res.writableEnded) clientClosed = true;
+  });
 
   try {
+    const rawIdea = typeof req.body?.rawIdea === 'string' ? req.body.rawIdea.trim() : '';
+    const modality = String(req.body?.modality || 'person');
+
+    if (!rawIdea) {
+      return res.status(400).json({ error: 'EMPTY_ENHANCE_INPUT' });
+    }
+
     const ai = getAiClient();
-const prompt = `
-YOU ARE AN EXPERT IN CASUAL IPHONE REALISM AND SPATIAL PHOTOGRAPHIC EXPANSION.
-A user has written this raw photo idea:
+    const prompt = `
+You are the hidden reconstruction engine behind Magic Enhance.
+The user's original idea is the highest authority and must remain intact.
+
+ORIGINAL IDEA:
 """${rawIdea}"""
 
 MODALITY: ${modality}
 
-YOUR MISSION:
-Enhance and flesh out this idea into a complete, physically plausible scene description GROUNDED IN AUTHENTIC IPHONE CASUAL PHOTOGRAPHY.
-Enrich the tangible physical evidence (body posture, weight distribution, hand position, clothing drape, spatial arrangement, phone camera height/distance, realistic phone flash/ambient light) WITHOUT CHANGING ANY OF THE USER'S EXPLICIT FACTS OR TURNING IT INTO CINEMATIC / PROFESSIONAL PHOTOGRAPHY.
+TASK:
+Transform the idea into a substantially more photographable, physically coherent scene description for authentic casual smartphone photography. Do not merely paraphrase or add adjectives.
 
-==================================================
-CORE DIRECTIVES:
-==================================================
+SILENT INTERNAL PROCESS — DO NOT OUTPUT IT:
+1. Extract locked facts: subjects, wardrobe, objects, vehicles, place, time, action, camera/flash/framing, negatives.
+2. Reconstruct the scene: foreground / subject plane / background, left/right relations, support/contact, occlusion, distance and scale.
+3. Resolve body/action physics when people are present: torso/head direction, shoulders, weight distribution, legs/feet, exact hand/object contact, gaze and action moment.
+4. Resolve camera physics: default rear iPhone/smartphone main camera 1x only when unspecified; realistic photographer position, distance, height, tilt, crop and subject scale.
+5. Resolve lighting/material physics: real source, flash falloff, shadows, reflections, fabric folds, glass/metal/car-paint response, object support and surface contact.
+6. Add only causal imperfections: handheld shake, slight focus miss, digital/high-ISO shadow noise, WB mismatch, compression, flash clipping, crooked frame — only when justified.
+7. Audit the candidate and silently rewrite it if it is generic, contradictory, physically impossible, too cinematic, or changes a locked fact.
 
-1. IPHONE SNAPSHOT FIRST:
-- By default, describe the shot as taken with a casual smartphone: iPhone rear main camera 1x.
-- Natural smartphone depth of field.
-- Handheld framing at chest/eye level.
-- Automated exposure and natural smartphone processing.
+STRICT PRIORITY:
+explicit user facts > reference/context already stated in the idea > conservative physical completion > stylistic enrichment.
 
-2. STRICT BAN ON PROFESSIONAL / CINEMATIC JARGON:
-- ABSOLUTELY FORBIDDEN: cinematic, film look, editorial, anamorphic, prime lens, creamy bokeh, shallow depth of field, film grain, rim light, studio lighting.
+SMARTPHONE RULES:
+- Never convert an unspecified casual phone image into DSLR/full-frame/cinema photography.
+- No automatic 35mm/50mm/85mm prime-lens language, anamorphic look, film grain, studio lighting, creamy bokeh, fake portrait mode, teal/orange grade, or luxury/editorial clichés.
+- Day/bright exterior: flash off unless explicitly requested or physically justified.
+- Night/direct phone flash when requested: near subject receives stronger frontal exposure; white fabric can clip; glass/metal produces localized highlights; nearby short shadows are harder; illumination falls off quickly; distant background stays darker.
+- Low-light imperfection is digital sensor/high-ISO/shadow/chroma noise, not analog film grain.
 
-3. PHYSICAL & SPATIAL EVIDENCE TO ENRICH:
-- Biomechanics, wardrobe drape, environment depth, realistic smartphone lighting.
+OBJECT / POV SPECIAL MODE:
+If the modality or idea is object/POV/food/desk/table/car-hood oriented, prioritize object orientation, support surface, contact patches, curvature, packaging folds, wear/fingerprints/grease/crumbs only when justified, surrounding context, camera height/tilt and material reflections. Do not turn it into a catalog/product-ad photo. Do not invent hands unless visible/requested by the idea.
 
-4. INVIOLABLE FACTS (DO NOT ALTER):
-- DO NOT change user's subjects, clothes, vehicles, setting, brand, beverage, or core action.
-
-5. OUTPUT FORMAT:
-- Return ONLY the enhanced idea text.
-- Match the exact language of the user's input (Portuguese, Spanish, or English).
+OUTPUT:
+- Return ONLY the enhanced idea itself.
+- Match the language of the user's original idea exactly: Portuguese stays Portuguese, Spanish stays Spanish, English stays English.
+- Keep the user's facts and tone; enrich physical/spatial/camera evidence.
+- Do not show analysis, headings like PASS 1/PASS 2, checklists, JSON, explanations, or commentary.
 `;
-    const models = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
-    let lastError: any;
 
-    for (let attempt = 0; attempt < models.length; attempt++) {
+    // Prefer one stable fast model; keep a single fallback so a bad model response cannot create a long retry chain.
+    const magicModels = ['gemini-flash-latest', 'gemini-3.1-flash-lite'];
+    let lastError: any = null;
+
+    for (let index = 0; index < magicModels.length; index++) {
+      if (clientClosed || res.destroyed) return;
+      const model = magicModels[index];
       try {
-        const result = await ai.models.generateContent({
-          model: models[attempt],
-          contents: prompt,
-          config: { temperature: 0.2 }
-        });
+        const result = await withDeadline(
+          ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: { temperature: 0.18 }
+          }),
+          16000,
+          'MAGIC_MODEL_TIMEOUT'
+        );
+
         const enhanced = result.text?.trim();
-        if (enhanced) return res.json({ enhanced });
-        throw new Error('Empty response from model');
+        if (!enhanced) throw new Error('EMPTY_ENHANCE_RESPONSE');
+
+        if (!clientClosed && !res.destroyed && !res.headersSent) {
+          return res.json({ enhanced, elapsedMs: Date.now() - startedAt });
+        }
+        return;
       } catch (error: any) {
         lastError = error;
-        console.warn(`Magic Enhance attempt ${attempt + 1} (${models[attempt]}) failed: ${error?.message || error}`);
-        if (attempt < models.length - 1) await wait(500 * (attempt + 1));
+        console.warn(`[MAGIC] model=${model} failed: ${error?.message || error}`);
+        if (clientClosed || res.destroyed) return;
       }
     }
 
-    throw lastError || new Error('All Magic Enhance models failed');
+    const message = String(lastError?.message || 'MAGIC_ENHANCE_FAILED');
+    const isTimeout = /TIMEOUT/i.test(message);
+    const isRateLimit = /429|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(message);
+    const status = isTimeout ? 504 : isRateLimit ? 429 : 500;
+    if (!clientClosed && !res.destroyed && !res.headersSent) {
+      return res.status(status).json({ error: isTimeout ? 'MAGIC_TIMEOUT' : isRateLimit ? 'RATE_LIMIT' : 'MAGIC_ENHANCE_FAILED' });
+    }
   } catch (error: any) {
-    console.error('Magic enhance error:', error);
-    return res.status(502).json({
-      error: error.message || 'Failed to enhance idea',
-      enhanced: rawIdea,
-      retryable: true
-    });
+    console.error('[MAGIC] fatal error:', error);
+    if (!clientClosed && !res.destroyed && !res.headersSent) {
+      return res.status(500).json({ error: error?.message || 'MAGIC_ENHANCE_FAILED' });
+    }
   }
 });
 
@@ -841,7 +955,7 @@ CRITICAL RULES:
 1. ONLY apply the exact modification specified by the user; preserve all poses, camera settings, lighting, vehicle, environment, and background.
 2. DO NOT randomly rewrite the rest of the prompt or re-roll the entire scene.
 3. Maintain the exact formatting style of the target engine:
-   - If V1: Maintain the Subject line, single paragraph, and closing camera formula verbatim.
+   - If V1: Preserve its compact smart-natural curly-brace style and scene facts; do not expand it into V2/V3.
    - If V2: Maintain the structured {} brackets format.
    - If V3: Maintain the direct natural-language curly-brace {} format and the same scene-specific block order; never convert it into a blueprint or meta-prompt.
 4. Return ONLY the updated prompt text. No preamble or conversational filler.

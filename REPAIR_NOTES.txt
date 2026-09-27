@@ -1,0 +1,16 @@
+ELITE PROMPTS — FULL REPAIR — 2026-09-26
+
+Source-level repairs applied to the current project:
+- V1 rebuilt as Smart Natural Snapshot: concise, direct, physically resolved smartphone prompts.
+- V2 rebuilt as Structured Photographic Reconstruction: richer spatial/body/object/camera/light logic.
+- V3 preserved from the current project.
+- Magic Enhance hardened against indefinite loading: request IDs, abort/timeout cleanup, defensive errors, bounded server model attempts, input preservation.
+- Magic Enhance scene reasoning strengthened without adding fake delays.
+- Interface language state normalized and made reactive; PT-BR/ES/EN selector applies immediately.
+- Language sheet now rerenders in the selected language while open.
+- More hardcoded Advanced/History/Output/Header UI strings moved to localized labels.
+- Translation key parity verified across EN/ES/PT (695 keys each).
+- API JavaScript deployment entrypoints regenerated from the repaired server source.
+- TypeScript/TSX syntax pass completed successfully.
+
+Note: the existing dist/ directory is retained as a historical build artifact. A normal Vite/AI Studio build will regenerate it from the repaired source.
