@@ -22,6 +22,17 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
   onDelete,
   onClearAll
 }) => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
   const t = translations[lang];
   const local = {
@@ -29,8 +40,6 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
     es: { search: 'Buscar en el historial...', noMatch: 'No se encontraron prompts coincidentes.' },
     en: { search: 'Search history...', noMatch: 'No matching prompts found.' }
   }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
-
-  const [searchQuery, setSearchQuery] = React.useState('');
 
   const filteredHistory = history.filter(item => {
     if (!searchQuery.trim()) return true;
@@ -45,8 +54,8 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-end">
-      <div className="bg-white dark:bg-[#121212] border-l border-zinc-200 dark:border-zinc-800 w-full max-w-md h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-end" onMouseDown={onClose}>
+      <div className="bg-white dark:bg-[#121212] border-l border-zinc-200 dark:border-zinc-800 w-full max-w-md h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300" onMouseDown={(event) => event.stopPropagation()}>
         {/* Header */}
         <div className="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -70,9 +79,11 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+              aria-label={lang === 'pt' ? 'Fechar histórico' : lang === 'es' ? 'Cerrar historial' : 'Close history'}
+              title={lang === 'pt' ? 'Fechar histórico' : lang === 'es' ? 'Cerrar historial' : 'Close history'}
+              className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500 transition-colors hover:border-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-white cursor-pointer"
             >
-              <X size={18} />
+              <X size={19} strokeWidth={2} />
             </button>
           </div>
         </div>
