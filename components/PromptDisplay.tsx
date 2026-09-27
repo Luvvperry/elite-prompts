@@ -46,6 +46,7 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
   const [refineEngine, setRefineEngine] = useState<EngineType>('v1');
   const [refineInput, setRefineInput] = useState('');
   const [refineLoading, setRefineLoading] = useState(false);
+  const [refineError, setRefineError] = useState('');
 
   // Loading text rotation
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
@@ -97,17 +98,20 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
   const openRefineModal = (engine: EngineType) => {
     setRefineEngine(engine);
     setRefineInput('');
+    setRefineError('');
     setIsRefining(true);
   };
 
   const handleApplyRefine = async () => {
     if (!refineInput.trim() || refineLoading) return;
     setRefineLoading(true);
+    setRefineError('');
     try {
       await onRefinePrompt(refineEngine, refineInput.trim());
       setIsRefining(false);
     } catch (err) {
       console.error(err);
+      setRefineError(err instanceof Error ? err.message : 'Não foi possível aplicar o ajuste. Tente novamente.');
     } finally {
       setRefineLoading(false);
     }
@@ -397,13 +401,18 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
               </button>
             </div>
 
-            <textarea
+              <textarea
               rows={3}
               value={refineInput}
-              onChange={(e) => setRefineInput(e.target.value)}
+                onChange={(e) => { setRefineInput(e.target.value); setRefineError(''); }}
               placeholder={t.output.refineInputPlaceholder}
               className="w-full bg-zinc-50 dark:bg-[#1a1a1a] border border-zinc-200 dark:border-[var(--border-main)] rounded-xl p-3 text-xs text-zinc-900 dark:text-[var(--text-primary)] outline-none font-mono resize-none focus:border-zinc-400 dark:focus:border-zinc-600"
-            />
+              />
+              {refineError && (
+                <p className="text-xs leading-relaxed text-red-400" role="alert">
+                  {refineError}
+                </p>
+              )}
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button

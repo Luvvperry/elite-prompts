@@ -1058,13 +1058,23 @@ CRITICAL RULES:
 4. Return ONLY the updated prompt text. No preamble or conversational filler.
 `;
 
-    const result = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: { temperature: 0.1 }
-    });
-
-    res.json({ refined: result.text?.trim() || originalPrompt });
+    const refineModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+    let lastError: any = null;
+    for (const model of refineModels) {
+      try {
+        const result = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: { temperature: 0.1 }
+        });
+        const refined = result.text?.trim();
+        if (refined) return res.json({ refined });
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`[REFINE] model ${model} failed; trying fallback`, error?.message || error);
+      }
+    }
+    throw lastError || new Error('REFINE_EMPTY_RESPONSE');
   } catch (error: any) {
     console.error("Refine prompt error:", error);
     res.status(500).json({ error: error.message || "Failed to refine prompt" });
