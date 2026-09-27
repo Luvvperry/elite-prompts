@@ -878,7 +878,7 @@ ${userTextDescription}`
                             if (longParsed.v4?.trim()) dedicatedV4 = longParsed.v4.trim();
                             if (longParsed.v5?.trim()) dedicatedV5 = longParsed.v5.trim();
                           }
-                        } catch (longErr: any) {
+                        } catch (longErr) {
                           console.warn(`Dedicated V4/V5 pass failed; keeping primary result: ${longErr.message}`);
                         }
 return res.json({
