@@ -846,12 +846,47 @@ ${userTextDescription}`
                     throw new Error("Empty response from model.");
                 const parsed = JSON.parse(responseText);
                 const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, cartoon, anime, illustration, oversaturated, artificial studio lighting, shallow cinematic bokeh, exaggerated fake blur, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, watermark, signature, text artifacts, weird eyes, unnatural specular highlights";
-                return res.json({
+                                        // Dedicated long-form pass: V4/V5 get their own output budget so the five-engine
+                        // response does not compress the human/phone realism requested by the user.
+                        let dedicatedV4 = parsed.v4?.trim() || "";
+                        let dedicatedV5 = parsed.v5?.trim() || "";
+                        try {
+                          const longResponse = await ai.models.generateContent({
+                            model: currentModel,
+                            contents: contentsParts,
+                            config: {
+                              systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. Do not summarize and do not explain. V4 must follow the long reference-faithful HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally exceed 500 words with at least 12 dense sentences. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold and normally exceed 700 words with at least 16 dense sentences. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
+
+                ${V4_SCENE_LOCK_INSTRUCTION}
+
+                ${V5_MASTER_ADAPTIVE_INSTRUCTION}`,
+                              temperature: 0.2,
+                              maxOutputTokens: 12000,
+                              responseMimeType: "application/json",
+                              responseSchema: {
+                                type: Type.OBJECT,
+                                properties: {
+                                  v4: { type: Type.STRING },
+                                  v5: { type: Type.STRING }
+                                },
+                                required: ["v4", "v5"]
+                              }
+                            }
+                          });
+                          if (longResponse.text) {
+                            const longParsed = JSON.parse(longResponse.text);
+                            if (longParsed.v4?.trim()) dedicatedV4 = longParsed.v4.trim();
+                            if (longParsed.v5?.trim()) dedicatedV5 = longParsed.v5.trim();
+                          }
+                        } catch (longErr: any) {
+                          console.warn(`Dedicated V4/V5 pass failed; keeping primary result: ${longErr.message}`);
+                        }
+return res.json({
                     v1: parsed.v1?.trim() || "",
                     v2: parsed.v2?.trim() || "",
                     v3: parsed.v3?.trim() || "",
-                    v4: parsed.v4?.trim() || "",
-                    v5: parsed.v5?.trim() || "",
+                    v4: dedicatedV4,
+                    v5: dedicatedV5,
                     negativePrompt: defaultNegativePrompt,
                     autoDetected: parsed.autoDetected || {}
                 });
