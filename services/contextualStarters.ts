@@ -28,7 +28,7 @@ export interface SuggestionComplement {
 const STARTERS_BY_CATEGORY: Record<
   string,
   Record<
-    'en' | 'es' | 'pt',
+    Language,
     Array<{ title: string; text: string; subcategories?: string[] }>
   >
 > = {
@@ -737,7 +737,7 @@ const STARTERS_BY_CATEGORY: Record<
 };
 
 // Additive suggestions for when user already typed text in the textarea
-const COMPLEMENT_SUGGESTIONS: Record<'en' | 'es' | 'pt', SuggestionComplement[]> = {
+const COMPLEMENT_SUGGESTIONS: Record<Language, SuggestionComplement[]> = {
   pt: [
     { label: "Flash direto", appendText: ", flash direto de smartphone ligado" },
     { label: "Luz de entardecer", appendText: ", luz suave e quente de fim de tarde" },
@@ -841,7 +841,7 @@ export function getContextualStarters(context: ContextualStarterContext): Starte
 
   // Context suffixes only apply when the user has explicitly selected a
   // non-auto capture behavior. They never override the scene itself.
-  const profileSuffix: Partial<Record<CaptureProfile, Record<'en' | 'es' | 'pt', string>>> = {
+  const profileSuffix: Partial<Record<CaptureProfile, Record<Language, string>>> = {
     night_flash: {
       pt: ', fotografado com flash direto de celular e fundo naturalmente mais escuro',
       es: ', fotografiado con flash directo de celular y fondo naturalmente más oscuro',
@@ -869,7 +869,7 @@ export function getContextualStarters(context: ContextualStarterContext): Starte
     }
   };
 
-  const modeSuffix: Partial<Record<CameraMode, Record<'en' | 'es' | 'pt', string>>> = {
+  const modeSuffix: Partial<Record<CameraMode, Record<Language, string>>> = {
     rear_ultrawide: {
       pt: ', usando câmera traseira 0.5x com distorção periférica natural',
       es: ', usando cámara trasera 0.5x con distorsión periférica natural',

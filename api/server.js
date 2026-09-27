@@ -335,12 +335,11 @@ app.post('/api/generate-prompts', async (req, res) => {
         const rawPromptLanguage = String(promptLanguage ?? '').trim().toLowerCase();
         const normalizedPromptLanguage = rawPromptLanguage === 'pt' || rawPromptLanguage === 'pt-br' || rawPromptLanguage.includes('portugu') ? 'pt' :
             rawPromptLanguage === 'es' || rawPromptLanguage.includes('span') || rawPromptLanguage.includes('españ') ? 'es' :
-                (['en','fr','de','it','ja','ko','zh','ar','hi','ru','id','tr'].includes(rawPromptLanguage.split('-')[0].split('_')[0]) ? rawPromptLanguage.split('-')[0].split('_')[0] : 'en');
+                'en';
         const isSpanish = normalizedPromptLanguage === 'es';
         const isPortuguese = normalizedPromptLanguage === 'pt';
         const isEnglish = normalizedPromptLanguage === 'en';
-        const requestedLanguageNames = { en: 'English', pt: 'Brazilian Portuguese', es: 'Spanish', fr: 'French', de: 'German', it: 'Italian', ja: 'Japanese', ko: 'Korean', zh: 'Simplified Chinese', ar: 'Arabic', hi: 'Hindi', ru: 'Russian', id: 'Indonesian', tr: 'Turkish' };
-        const requestedLanguageName = requestedLanguageNames[normalizedPromptLanguage] || 'English';
+        const requestedLanguageName = isPortuguese ? 'Brazilian Portuguese' : isSpanish ? 'Spanish' : 'English';
         const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Language, PromptLanguage } from '../types';
-import { localeMeta } from '../translations';
 import { Check, Globe2, X } from 'lucide-react';
 
 interface LanguageBottomSheetProps {
@@ -35,7 +34,7 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
 }) => {
   const [selectedLang, setSelectedLang] = useState<Language>(currentLang);
   const [selectedPromptLang, setSelectedPromptLang] = useState<PromptLanguage>(currentPromptLang);
-  const ui = copy[selectedLang as keyof typeof copy] ?? copy.en;
+  const ui = copy[selectedLang];
 
   useEffect(() => {
     if (isOpen) {
@@ -52,15 +51,17 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
 
   if (!isOpen) return null;
 
-  const interfaceOptions: { id: Language; label: string; sub: string }[] = (Object.keys(localeMeta) as Language[]).map((id) => ({
-    id, label: localeMeta[id].nativeName, sub: localeMeta[id].region
-  }));
+  const interfaceOptions: { id: Language; label: string; sub: string }[] = [
+    { id: 'pt', label: 'Português Brasileiro', sub: 'Português (Brasil)' },
+    { id: 'en', label: 'English', sub: 'English (US)' },
+    { id: 'es', label: 'Español', sub: 'Español' }
+  ];
 
   const promptOptions: { id: PromptLanguage; label: string; sub: string }[] = [
     { id: 'auto', label: ui.auto, sub: ui.autoDesc },
-    ...(Object.keys(localeMeta) as Language[]).map((id) => ({
-      id: id as PromptLanguage, label: localeMeta[id].nativeName, sub: `Output · ${localeMeta[id].region}`
-    }))
+    { id: 'pt', label: 'Português Brasileiro', sub: ui.promptPt },
+    { id: 'en', label: 'English', sub: ui.promptEn },
+    { id: 'es', label: 'Español', sub: ui.promptEs }
   ];
 
   const row = (selected: boolean) =>
