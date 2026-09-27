@@ -7,6 +7,7 @@ import {
   Language,
   CameraMode,
   CaptureProfile
+  ,FullSettings
 } from '../types';
 import { translations } from '../translations';
 import { TYPE_LIBRARY, TYPE_CATEGORIES, getRecentTypes, saveRecentType, getFavoriteTypes, toggleFavoriteType } from '../services/typeLibrary';
@@ -44,6 +45,8 @@ interface InputZoneProps {
   camera?: string;
   cameraMode?: CameraMode;
   captureProfile?: CaptureProfile;
+  settings: FullSettings;
+  onSettingsChange: (settings: FullSettings) => void;
 }
 
 const InputZone: React.FC<InputZoneProps> = ({
@@ -64,7 +67,9 @@ const InputZone: React.FC<InputZoneProps> = ({
   isMagicEnhancing,
   camera,
   cameraMode,
-  captureProfile
+  captureProfile,
+  settings,
+  onSettingsChange
 }) => {
   const t = translations[lang];
   const ui = {
@@ -96,7 +101,7 @@ const InputZone: React.FC<InputZoneProps> = ({
       recent: 'Recientes',
       favorites: 'Favoritos', options: 'opciones', empty: 'No se encontraron opciones', clear: 'Limpiar filtro', done: 'Listo', selectHint: 'Toca para seleccionar · Esc para cerrar'
     },
-    en: {
+      en: {
       source: 'Source',
       type: 'Type',
       change: 'Change',
@@ -109,7 +114,12 @@ const InputZone: React.FC<InputZoneProps> = ({
       typeSearch: 'Search type...',
       recent: 'Recent',
       favorites: 'Favorites', options: 'options', empty: 'No matching options found', clear: 'Clear filter', done: 'Done', selectHint: 'Tap to select · Esc to close'
-    }
+      }
+    }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
+  const additionalInstructionsLabels = {
+    pt: { title: 'Instruções adicionais (detalhes específicos)', placeholder: 'Detalhes que você quer adicionar, como roupa específica, acessórios, luzes ou marcas...' },
+    es: { title: 'Instrucciones adicionales (detalles específicos)', placeholder: 'Detalles que quieras añadir, como ropa específica, accesorios, luces o marcas...' },
+    en: { title: 'Additional instructions (specific details)', placeholder: 'Details you want to add, such as specific clothing, accessories, lighting or brands...' }
   }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -400,6 +410,23 @@ const InputZone: React.FC<InputZoneProps> = ({
               </div>
             </div>
           )}
+
+          <div className="image-instructions-card">
+            <label className="image-instructions-label" htmlFor="image-additional-instructions">
+              {additionalInstructionsLabels.title}
+            </label>
+            <textarea
+              id="image-additional-instructions"
+              rows={4}
+              value={settings.fineControl.additionalInstructions}
+              onChange={(event) => onSettingsChange({
+                ...settings,
+                fineControl: { ...settings.fineControl, additionalInstructions: event.target.value }
+              })}
+              placeholder={additionalInstructionsLabels.placeholder}
+              className="image-instructions-textarea"
+            />
+          </div>
         </div>
       )}
 

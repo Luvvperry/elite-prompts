@@ -1753,3 +1753,38 @@ body, .app-shell {
   .engine-picker-trigger { max-width: 52vw; }
   .engine-picker-menu { min-width: min(238px, calc(100vw - 32px)); }
 }
+
+/* Image-only additional instructions block. */
+.image-instructions-card {
+  padding: 22px 20px 20px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  background: #0a0b0c;
+}
+.image-instructions-label {
+  display: block;
+  margin-bottom: 18px;
+  color: var(--pro-text-2);
+  font: 600 12px/1.3 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.image-instructions-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 18px 20px;
+  resize: vertical;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  outline: none;
+  background: #08090a;
+  color: var(--pro-text);
+  font: 400 15px/1.6 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.image-instructions-textarea::placeholder { color: rgba(255,255,255,.25); }
+.image-instructions-textarea:focus { border-color: rgba(255,255,255,.28); box-shadow: 0 0 0 3px rgba(255,255,255,.04); }
+@media (max-width: 639px) {
+  .image-instructions-card { padding: 18px 14px 14px; border-radius: 14px; }
+  .image-instructions-label { margin-bottom: 14px; font-size: 10px; }
+  .image-instructions-textarea { min-height: 126px; padding: 15px; font-size: 14px; border-radius: 14px; }
+}

@@ -735,6 +735,8 @@ const App: React.FC = () => {
                   camera={settings.device}
                   cameraMode={settings.cameraMode}
                   captureProfile={settings.captureProfile}
+                  settings={settings}
+                  onSettingsChange={setSettings}
                 />
               </section>
 
