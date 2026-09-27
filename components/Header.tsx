@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Language } from '../types';
-import { translations } from '../translations';
+import { translations, localeMeta } from '../translations';
 import {
   History,
   Bookmark,
@@ -32,12 +32,12 @@ const Header: React.FC<HeaderProps> = ({
   presetsCount
 }) => {
   const t = translations[lang];
-  const langLabel: Record<Language, string> = { pt: 'PT', en: 'EN', es: 'ES' };
+  const langLabel: Record<Language, string> = Object.fromEntries((Object.keys(localeMeta) as Language[]).map((id) => [id, id.toUpperCase()])) as Record<Language, string>;
   const copy = {
     pt: { create: 'Criar', command: 'Comandos', settings: 'Configurações', language: 'Idioma', nav: 'Navegação do workspace', actions: 'Ações do workspace' },
     es: { create: 'Crear', command: 'Comandos', settings: 'Configuración', language: 'Idioma', nav: 'Navegación del workspace', actions: 'Acciones del workspace' },
     en: { create: 'Create', command: 'Command', settings: 'Settings', language: 'Language', nav: 'Workspace navigation', actions: 'Workspace actions' }
-  }[lang];
+  }[lang as 'pt' | 'es' | 'en'] ?? { create: 'Create', command: 'Command', settings: 'Settings', language: 'Language', nav: 'Workspace navigation', actions: 'Workspace actions' };
 
   const actionClass = 'pro-nav-button';
 

@@ -1,5 +1,5 @@
-export type Language = 'en' | 'es' | 'pt';
-export type PromptLanguage = 'auto' | 'en' | 'es' | 'pt';
+export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de' | 'it' | 'ja' | 'ko' | 'zh' | 'ar' | 'hi' | 'ru' | 'id' | 'tr';
+export type PromptLanguage = 'auto' | Language;
 
 export type InputMode = 'image' | 'idea';
 

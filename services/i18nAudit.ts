@@ -5,7 +5,7 @@ import { Language } from '../types';
  * Audit helper to verify 100% parity across translation keys for en, es, pt.
  */
 export function auditTranslations(): { valid: boolean; differences: string[] } {
-  const languages: Language[] = ['en', 'es', 'pt'];
+  const languages: Language[] = ['en', 'es', 'pt', 'fr', 'de', 'it', 'ja', 'ko', 'zh', 'ar', 'hi', 'ru', 'id', 'tr'];
   const differences: string[] = [];
 
   function getKeys(obj: any, prefix = ''): string[] {
@@ -21,24 +21,11 @@ export function auditTranslations(): { valid: boolean; differences: string[] } {
     return keys;
   }
 
-  const enKeys = new Set(getKeys(translations.en));
-  const esKeys = new Set(getKeys(translations.es));
-  const ptKeys = new Set(getKeys(translations.pt));
-
-  // Check en vs es
-  for (const k of enKeys) {
-    if (!esKeys.has(k)) differences.push(`Missing key in 'es': ${k}`);
-  }
-  for (const k of esKeys) {
-    if (!enKeys.has(k)) differences.push(`Extra key in 'es' not in 'en': ${k}`);
-  }
-
-  // Check en vs pt
-  for (const k of enKeys) {
-    if (!ptKeys.has(k)) differences.push(`Missing key in 'pt': ${k}`);
-  }
-  for (const k of ptKeys) {
-    if (!enKeys.has(k)) differences.push(`Extra key in 'pt' not in 'en': ${k}`);
+  const referenceKeys = new Set(getKeys(translations.en));
+  for (const language of languages.filter((lang) => lang !== 'en')) {
+    const keys = new Set(getKeys(translations[language]));
+    for (const key of referenceKeys) if (!keys.has(key)) differences.push(`Missing key in '${language}': ${key}`);
+    for (const key of keys) if (!referenceKeys.has(key)) differences.push(`Extra key in '${language}' not in 'en': ${key}`);
   }
 
   if (differences.length > 0) {

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { FullSettings, Language } from '../types';
+import { localeMeta } from '../translations';
 import { Bookmark, ChevronRight, Focus, Globe2, History, Settings as SettingsIcon, X, Zap } from 'lucide-react';
 
 interface SettingsSheetProps {
@@ -43,7 +44,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
   focusMode,
   onToggleFocus
 }) => {
-  const ui = copy[lang];
+  const ui = copy[lang as keyof typeof copy] ?? copy.en;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && isOpen && onClose();
@@ -53,7 +54,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
 
   if (!isOpen) return null;
 
-  const langNames: Record<Language, string> = { pt: 'Português (BR)', en: 'English', es: 'Español' };
+  const langNames: Record<Language, string> = Object.fromEntries((Object.keys(localeMeta) as Language[]).map((id) => [id, localeMeta[id].nativeName])) as Record<Language, string>;
   const row = 'w-full px-4 py-3 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-main)] hover:border-[var(--border-active)] flex items-center justify-between transition-all text-left';
 
   return (

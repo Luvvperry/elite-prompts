@@ -18,7 +18,7 @@ import {
   refinePrompt, 
   detectContextualParams 
 } from './services/geminiService';
-import { translations } from './translations';
+import { translations, localeMeta } from './translations';
 import { auditTranslations } from './services/i18nAudit';
 import Header from './components/Header';
 import InputZone from './components/InputZone';
@@ -40,7 +40,9 @@ const normalizeInterfaceLanguage = (value: string | null | undefined): Language 
   const normalized = String(value || '').trim().toLowerCase();
   if (normalized === 'es' || normalized.startsWith('es-') || normalized.includes('span') || normalized.includes('españ')) return 'es';
   if (normalized === 'pt' || normalized === 'pt-br' || normalized === 'pt_br' || normalized === 'ptbr' || normalized.includes('portugu')) return 'pt';
-  return 'en';
+  const code = normalized.split('-')[0].split('_')[0];
+  const supported: Language[] = ['en','fr','de','it','ja','ko','zh','ar','hi','ru','id','tr'];
+  return supported.includes(code as Language) ? code as Language : 'en';
 };
 
 const normalizePromptLanguage = (value: string | null | undefined): PromptLanguage => {
@@ -359,6 +361,7 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('ep_lang', lang);
     document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+    document.documentElement.dir = localeMeta[lang].dir;
   }, [lang]);
 
   useEffect(() => {
@@ -451,7 +454,7 @@ const App: React.FC = () => {
     magicControllerRef.current = controller;
     setMagicStatus('enhancing');
 
-    const uiMessage: Record<Language, { failed: string; timeout: string; rateLimit: string }> = {
+    const uiMessage: Record<'en' | 'es' | 'pt', { failed: string; timeout: string; rateLimit: string }> = {
       pt: {
         failed: 'Magic Enhance não conseguiu concluir. Tente novamente.',
         timeout: 'Magic Enhance demorou demais. Tente novamente.',
@@ -491,14 +494,14 @@ const App: React.FC = () => {
       if (requestId !== magicRequestIdRef.current) return;
       if (timedOut || error?.message === 'TIMEOUT') {
         setMagicStatus('timeout');
-        showToast('error', uiMessage[lang].timeout);
+        showToast('error', (uiMessage[lang as 'en' | 'es' | 'pt'] ?? uiMessage.en).timeout);
         logMagic('timeout');
       } else if (error?.name === 'AbortError') {
         setMagicStatus('error');
         logMagic('aborted');
       } else {
         setMagicStatus('error');
-        showToast('error', error?.message === 'RATE_LIMIT' ? uiMessage[lang].rateLimit : uiMessage[lang].failed);
+        showToast('error', error?.message === 'RATE_LIMIT' ? (uiMessage[lang as 'en' | 'es' | 'pt'] ?? uiMessage.en).rateLimit : (uiMessage[lang as 'en' | 'es' | 'pt'] ?? uiMessage.en).failed);
         if (import.meta.env.DEV) console.debug('[MAGIC] error', requestId, error);
       }
     } finally {
