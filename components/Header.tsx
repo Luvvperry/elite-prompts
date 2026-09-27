@@ -49,12 +49,18 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      {/* Desktop — professional instrument rail. No product branding. */}
+      {/* Desktop — professional instrument rail. The mark is intentionally symbol-only. */}
       <aside className="pro-rail hidden lg:flex" aria-label={copy.nav}>
         <div className="pro-rail-top">
           <div className="pro-brand" aria-label="Elite Prompts">
-            <span className="pro-brand-mark">EP</span>
-            <span className="pro-brand-name">ELITE<br />PROMPTS</span>
+            <span className="pro-brand-orbit" aria-hidden="true">
+              <svg viewBox="0 0 36 36" role="presentation">
+                <circle className="orbit-ring orbit-ring-outer" cx="18" cy="18" r="13" />
+                <path className="orbit-ring orbit-ring-inner" d="M8.5 21.5c3.2-7.5 10.5-11.4 19-7.9" />
+                <path className="orbit-cut" d="M12 25c4.5 2.1 10.2 1.5 14.2-1.8" />
+                <circle className="orbit-core" cx="18" cy="18" r="4" />
+              </svg>
+            </span>
           </div>
           <button type="button" onClick={onOpenCommand} className={`${actionClass} pro-nav-primary`} title={copy.command}>
             <Search size={18} strokeWidth={1.7} />
@@ -91,8 +97,14 @@ const Header: React.FC<HeaderProps> = ({
       <header className="mobile-topbar lg:hidden">
         <div className="mobile-topbar-inner">
           <div className="mobile-brand" aria-label="Elite Prompts">
-            <span className="pro-brand-mark">EP</span>
-            <span className="mobile-brand-name">ELITE PROMPTS</span>
+            <span className="pro-brand-orbit" aria-hidden="true">
+              <svg viewBox="0 0 36 36" role="presentation">
+                <circle className="orbit-ring orbit-ring-outer" cx="18" cy="18" r="13" />
+                <path className="orbit-ring orbit-ring-inner" d="M8.5 21.5c3.2-7.5 10.5-11.4 19-7.9" />
+                <path className="orbit-cut" d="M12 25c4.5 2.1 10.2 1.5 14.2-1.8" />
+                <circle className="orbit-core" cx="18" cy="18" r="4" />
+              </svg>
+            </span>
           </div>
           <button type="button" onClick={onOpenCommand} className="mobile-topbar-context" title={copy.command}>
             <SlidersHorizontal size={16} strokeWidth={1.7} />
