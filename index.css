@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 :root {
   --bg-main: #f4f4f2;
   --bg-deep: #ececea;
@@ -42,7 +44,7 @@ body,
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", sans-serif;
   background: var(--bg-main);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -56,16 +58,16 @@ body {
 }
 
 .font-display {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 }
 
 .font-sans,
 .font-sans-alt {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", sans-serif;
 }
 
 .font-mono {
-  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: "DM Mono", "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
 }
 
 .workspace-header {
@@ -1617,3 +1619,40 @@ html:not(.dark) .studio-footer-credit { color: rgba(26, 66, 96, .72); }
 .studio-footer-credit { font-size: 13px !important; font-weight: 650 !important; letter-spacing: .08em !important; text-transform: none !important; color: rgba(198, 222, 238, .78) !important; }
 .studio-footer-credit i { font-size: 14px; }
 html:not(.dark) .studio-footer-credit { color: rgba(24, 67, 98, .72) !important; }
+
+/* Art-direction pass: editorial type, controlled asymmetry and tactile motion. */
+:root {
+  --ep-ease-snap: cubic-bezier(.23, 1, .32, 1);
+  --ep-ease-flow: cubic-bezier(.77, 0, .175, 1);
+}
+.app-shell { font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif; }
+.ep-masthead h1 { font-family: "Space Grotesk", sans-serif !important; font-weight: 500 !important; letter-spacing: -.075em !important; }
+.ep-masthead-kicker, .ep-masthead-signal, .pane-eyebrow, .studio-footer-credit { font-family: "DM Mono", "JetBrains Mono", monospace !important; }
+.pane-eyebrow { letter-spacing: .08em !important; text-transform: uppercase; font-size: 10px !important; }
+.pane-description { font-family: "DM Sans", sans-serif !important; font-size: 10px !important; }
+.pro-studio-grid { border-radius: 2px !important; position: relative; }
+.pro-studio-grid::before { content: ""; position: absolute; inset: -1px; pointer-events: none; border: 1px solid rgba(141, 190, 224, .12); clip-path: polygon(0 0, 18% 0, 18% 1px, 82% 1px, 82% 0, 100% 0, 100% 100%, 0 100%); }
+.pro-studio-grid > section { position: relative; }
+.workspace-panel, .prompt-console, .advanced-panel-shell > * { border-radius: 3px !important; }
+.control-row, .reference-card, .quick-start-card, .idea-editor, .upload-zone { border-radius: 3px !important; }
+select, input[type="text"], input[type="number"], textarea { border-radius: 3px !important; font-family: "DM Sans", sans-serif !important; }
+.mode-switch, .prompt-engine-tabs { border-radius: 3px !important; }
+.mode-switch button, .prompt-engine-tabs button { border-radius: 2px !important; font-family: "DM Mono", monospace !important; letter-spacing: .04em !important; }
+.workspace-panel, .prompt-console, .upload-zone, .idea-editor, .control-row, .quick-start-card, .reference-card, select, input, textarea, button { transition: transform 180ms var(--ep-ease-snap), border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease; }
+.workspace-panel, .prompt-console { overflow: hidden; }
+.workspace-panel::before, .prompt-console::before { content: ""; position: absolute; top: 0; left: -40%; width: 32%; height: 1px; background: linear-gradient(90deg, transparent, var(--ep-amber), transparent); opacity: 0; transition: left 420ms var(--ep-ease-flow), opacity 180ms ease; pointer-events: none; }
+.workspace-panel:hover::before, .prompt-console:hover::before { left: 108%; opacity: .8; }
+button:active { transform: scale(.97); }
+.pro-nav-button:hover { transform: translateX(3px) !important; }
+.ep-masthead { border-bottom-color: rgba(113, 165, 204, .26) !important; }
+.ep-masthead::before { content: "01 / 05"; position: absolute; right: 30px; top: 26px; color: rgba(178, 207, 229, .32); font: 500 10px/1 "DM Mono", monospace; letter-spacing: .12em; }
+.studio-footer-credit { font-size: 13px !important; letter-spacing: .12em !important; }
+@media (prefers-reduced-motion: no-preference) {
+  .pro-studio-grid > section:nth-child(1) { animation: art-panel-in 520ms var(--ep-ease-snap) 80ms both; }
+  .pro-studio-grid > section:nth-child(2) { animation: art-panel-in 520ms var(--ep-ease-snap) 130ms both; }
+  .pro-studio-grid > section:nth-child(3) { animation: art-panel-in 520ms var(--ep-ease-snap) 180ms both; }
+  .ep-masthead::before { animation: art-label-in 650ms var(--ep-ease-snap) 260ms both; }
+}
+@keyframes art-panel-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes art-label-in { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+@media (max-width: 1023px) { .ep-masthead::before { right: 14px; top: 24px; } }
