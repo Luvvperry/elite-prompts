@@ -2054,3 +2054,42 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
   .prompt-console-state { min-height: 270px !important; }
   #studio-input, #studio-settings, #studio-output { scroll-margin-top: 72px !important; }
 }
+
+/* BREATHING ROOM PASS — never crop controls or force three cramped columns. */
+.workspace-panel, .prompt-console, .advanced-panel-shell > *,
+.workspace-panel > *, .prompt-console > *, .advanced-panel-shell > * > * {
+  overflow: visible !important;
+}
+.pro-studio-grid {
+  grid-template-columns: minmax(320px, .9fr) minmax(430px, 1fr) minmax(500px, 1.15fr) !important;
+  gap: 28px !important;
+}
+.pro-studio-grid .control-row,
+.pro-studio-grid .segmented-control,
+.pro-studio-grid .upload-zone,
+.pro-studio-grid .image-instructions-card,
+.pro-studio-grid .reference-card,
+.pro-studio-grid .prompt-console-body,
+.pro-studio-grid .prompt-code {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+.pro-studio-grid input, .pro-studio-grid textarea, .pro-studio-grid select,
+.pro-studio-grid button { max-width: 100% !important; }
+.pro-studio-grid label, .pro-studio-grid p, .pro-studio-grid span { overflow-wrap: anywhere; }
+
+@media (max-width: 1440px) and (min-width: 701px) {
+  .pro-studio-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 24px !important;
+  }
+  .pro-studio-grid > section:nth-child(3) { grid-column: 1 / -1 !important; }
+  .pro-studio-grid > section:nth-child(3) .prompt-console { min-height: 420px !important; }
+}
+@media (max-width: 700px) {
+  .pro-studio-grid { gap: 26px !important; }
+  .pro-studio-grid > section { padding-bottom: 24px !important; }
+  .workspace-panel, .prompt-console, .advanced-panel-shell > * { overflow: visible !important; }
+  .upload-zone { min-height: 190px !important; }
+  .prompt-console-body { min-height: 300px !important; }
+}
