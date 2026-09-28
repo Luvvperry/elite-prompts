@@ -162,7 +162,7 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
   const charCount = promptText.length;
   const wordCount = promptText.trim() ? promptText.trim().split(/\s+/).length : 0;
   const tokenEst = Math.round(charCount / 4);
-  const ratioLabel = generation.settingsSnapshot?.aspectRatio || '3:4';
+  const ratioLabel = generation.settingsSnapshot?.aspectRatio || '9:16';
   const deviceLabel = generation.settingsSnapshot?.device || 'iPhone 16 Pro';
 
   return (

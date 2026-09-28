@@ -68,7 +68,7 @@ export const generatePrompts = async (
     sharpness: settings.sharpness ?? 'Natural',
     hdr: settings.hdr ?? 'Natural',
     outputModel: 'gemini-3.1-pro-preview',
-    aspectRatio: '3:4',
+    aspectRatio: '9:16',
     photographicStyle: 'casual_smartphone',
     captureProfile: 'auto',
     realismLevel: 95,
