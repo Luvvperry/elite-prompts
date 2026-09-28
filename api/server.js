@@ -366,6 +366,9 @@ HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageN
 Write V1, V2, V3, V4, V5, and every natural-language value in autoDetected in ${requestedLanguageName}.
 Do not mix languages. V1, V2, V3, V4, V5, and every natural-language value in autoDetected must use the requested output language.
 
+FINAL PROMPT CLEANLINESS — ALL ENGINES:
+Never output internal instructions, rule explanations, reference handoff notes, labels such as "the man", "appearance reference", "face/reference", or blocks that say not to describe appearance. The final answer must contain only the requested image prompt: opening sentence, wardrobe, environment, action, effects, shadows, angle, imperfections, camera, light and relevant physical details.
+
 ABSOLUTE APPEARANCE EXCLUSION — ALL ENGINES:
 No version may analyze or describe the person's appearance in the text prompt. The opening handoff may refer to 100% of the separate face reference, but must not expand into appearance details. Do not describe face, facial features, hair, skin tone, ethnicity, age, beard, body shape, physique or identity markers. The reference may guide scene placement, pose, clothing, accessories, action and composition only. Treat the person's appearance as supplied separately to the image generator, but do not encode it in the text prompt. This rule overrides any appearance or identity wording elsewhere in these instructions.
 Your mission is to construct five (5) distinct, highly specialized prompt engines for an image or scene:
@@ -567,7 +570,6 @@ Base Modality: ${modality}
 V3 — PERSON / SOLO PERSON / PORTRAIT / LIFESTYLE
 ==================================================
 For a single person, start the final prompt with the exact language-matched handoff sentence: Portuguese "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."; Spanish "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."; English "Create an image of the man from the uploaded photo, following 100% of his characteristics." Then continue with only wardrobe, environment, action, camera, light, angle and imperfections. Never output the instruction itself.
-the man: { use the separate face photo for his appearance; do not describe facial or physical traits in this text }.
 body position: { standing/sitting/turning, scale in frame and body mechanics needed for geometry }.
 the person is wearing: { every visible garment, exact color, material, thickness, cut, collar, sleeves, closure, hem, footwear, socks/no socks, accessories, eyewear, watch/jewelry, natural folds/compression caused by the pose }.
 environment: { exact room/street/driveway/garage/etc., foreground, subject plane, background, viewer-left and viewer-right anchors, real everyday details, architecture, floor/wall texture, vehicles/objects with spatial positions }.
@@ -579,7 +581,6 @@ angle: { exact front/side/3-quarter/rear relation, camera height, tilt, horizon/
 photo format: { selected aspect ratio / output format and how the crop should preserve the subject and environment }.
 light: { source, direction, hardness/softness, falloff, near/far exposure relationship, cast shadows, reflections }.
 materials and reflections: { only materials actually present; fabric response, glass, metal, leather, car paint, wood, stone, water, etc. }.
-appearance reference: { use the supplied face/reference image externally; do not describe skin, face or physical appearance in the text }.
 
 ==================================================
 V3 — TWO PEOPLE / DUO
