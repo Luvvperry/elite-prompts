@@ -88,7 +88,7 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
             <div className="flex flex-col gap-1.5">
               {interfaceOptions.map(opt => {
                 const selected = selectedLang === opt.id;
-                return <button key={opt.id} type="button" onClick={() => { setSelectedLang(opt.id); onApply(opt.id, selectedPromptLang); }} className={row(selected)}>
+                return <button key={opt.id} type="button" onClick={() => setSelectedLang(opt.id)} className={row(selected)}>
                   <div className="flex flex-col"><span className="text-xs font-medium">{opt.label}</span><span className="text-[10px] opacity-65">{opt.sub}</span></div>
                   {selected && <div className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center"><Check size={12} strokeWidth={2.5} /></div>}
                 </button>;
@@ -101,7 +101,7 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
             <div className="flex flex-col gap-1.5">
               {promptOptions.map(opt => {
                 const selected = selectedPromptLang === opt.id;
-                return <button key={opt.id} type="button" onClick={() => { setSelectedPromptLang(opt.id); onApply(selectedLang, opt.id); }} className={row(selected)}>
+                return <button key={opt.id} type="button" onClick={() => setSelectedPromptLang(opt.id)} className={row(selected)}>
                   <div className="flex flex-col"><span className="text-xs font-medium">{opt.label}</span><span className="text-[10px] opacity-65">{opt.sub}</span></div>
                   {selected && <div className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center"><Check size={12} strokeWidth={2.5} /></div>}
                 </button>;
