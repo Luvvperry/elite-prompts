@@ -2093,3 +2093,24 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
   .upload-zone { min-height: 190px !important; }
   .prompt-console-body { min-height: 300px !important; }
 }
+
+/* GRID STRUCTURE FIX — keep each pane in its own track at every breakpoint. */
+.pro-studio-grid { overflow: visible !important; }
+@media (max-width: 1440px) and (min-width: 701px) {
+  .pro-studio-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-areas: "input settings" "output output" !important;
+    gap: 28px !important;
+  }
+  .studio-output-pane { position: static !important; }
+  .studio-output-pane .prompt-console { min-height: 420px !important; }
+}
+@media (max-width: 700px) {
+  .pro-studio-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: "input" "settings" "output" !important;
+    gap: 26px !important;
+  }
+  .studio-output-pane { position: static !important; }
+}
