@@ -279,11 +279,15 @@ const defaultPresets: PresetItem[] = [
 const App: React.FC = () => {
   // Theme & Language states
   const [lang, setLang] = useState<Language>(() => {
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    if (urlLang) return normalizeInterfaceLanguage(urlLang);
     const stored = localStorage.getItem('ep_lang');
-    return stored ? normalizeInterfaceLanguage(stored) : 'pt';
+    return stored ? normalizeInterfaceLanguage(stored) : 'es';
   });
 
   const [promptLang, setPromptLang] = useState<PromptLanguage>(() => {
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    if (urlLang) return normalizePromptLanguage(urlLang);
     const stored = localStorage.getItem('ep_prompt_lang');
     return stored ? normalizePromptLanguage(stored) : 'auto';
   });
