@@ -292,10 +292,10 @@ const formatSettingsContext = (settings) => {
 // ============================================================================
 const V4_OPENING_LANGUAGE_RULE = `
 MANDATORY V4/V5 OPENING — The first sentence of both V4 and V5 must be the exact equivalent in the requested output language, with no heading or preamble:
-- Brazilian Portuguese: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
-- Spanish: "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."
-- English: "Create an image of the man from the uploaded photo, following 100% of his characteristics."
-Continue directly after that sentence and never replace man/homem with a generic subject.
+- Brazilian Portuguese: "Faça uma imagem do homem da foto enviada."
+- Spanish: "Haz una imagen del hombre de la foto enviada."
+- English: "Create an image of the man from the uploaded photo."
+Continue directly after that sentence. Do not describe, copy, preserve or analyze the man's facial or physical appearance.
 `;
 
 const V4_SCENE_LOCK_INSTRUCTION = `
@@ -322,8 +322,9 @@ const V5_MASTER_ADAPTIVE_INSTRUCTION = `
 ENGINE 5: V5 — LIVED-IN SMARTPHONE REALITY MASTER
 V5 is the grounded reality engine, not a synonym-heavy mega-prompt. Produce one direct, paste-ready prompt, normally 650–900 words for a complex reference and shorter when the evidence is simple. Every sentence must add a concrete image-changing fact or a necessary physical relationship. Never repeat the same realism idea with different adjectives. Never output a checklist, report, negative-prompt dump or meta-prompt.
 
-REFERENCE IDENTITY LOCK — WHEN AN UPLOADED PHOTO IS PRESENT:
-Treat the supplied reference photo as the absolute authority for the person's visible identity and appearance. Preserve the same face and facial geometry (face shape, forehead, hairline, eyebrows, eye shape and spacing, nose, lips, jaw, ears and natural asymmetries), skin tone and texture, hair color, haircut, facial hair, age cues, body proportions, shoulder width and other visible physical traits. Do not beautify, idealize, age, de-age, masculinize, feminize, slim, enlarge, reshape, replace, merge or reinterpret the person. Do not create a look-alike or a generic version of the subject. Keep the person's recognizable appearance at maximum fidelity even when the location, clothing, pose, camera angle or lighting changes; adapt only what the user explicitly asks to change. If a facial or physical detail is not visible, leave it unspecified rather than inventing it. Apply this identity lock separately to every referenced person and never transfer one person's traits to another.
+REFERENCE APPEARANCE EXCLUSION — WHEN AN UPLOADED PHOTO IS PRESENT:
+Use the supplied image only for scene placement, pose, clothing, accessories, action and composition. Do not describe, copy, preserve, lock or analyze the person's face, hair, skin, age, ethnicity, beard, physique or identity traits. Never invent or encode appearance details in the text prompt.
+
 
 Construct one continuous paste-ready prompt with this hidden order, but do not expose headings or numbered sections in the output: begin with the exact subject and identity/reference fidelity; build the real environment as a lived-in place rather than a set; map every important relationship between people, objects, surfaces and empty space; describe the micro-moment of action and human behavior; describe clothing, hair, skin, hands, feet and posture as physical responses to that moment; place the photographer and phone in a believable position; then resolve optics, focus, exposure, light transport, materials, reflections, motion, compression and amateur framing.
 
@@ -364,6 +365,9 @@ YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
 Write V1, V2, V3, V4, V5, and every natural-language value in autoDetected in ${requestedLanguageName}.
 Do not mix languages. V1, V2, V3, V4, V5, and every natural-language value in autoDetected must use the requested output language.
+
+ABSOLUTE APPEARANCE EXCLUSION — ALL ENGINES:
+No version may copy, preserve, replicate, lock, analyze or describe the person's appearance from a reference image. Do not describe face, facial features, hair, skin tone, ethnicity, age, beard, body shape, physique or identity markers. The reference may guide scene placement, pose, clothing, accessories, action and composition only. Treat the person's appearance as supplied separately to the image generator, but do not encode it in the text prompt. This rule overrides any appearance or identity wording elsewhere in these instructions.
 Your mission is to construct five (5) distinct, highly specialized prompt engines for an image or scene:
 - V1: SMART NATURAL SNAPSHOT (COMPACT, PHYSICALLY RESOLVED)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
@@ -542,8 +546,7 @@ ENGINE 3: V3 — FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT)
 ==================================================
 V3 IS THE DEEPEST ENGINE, BUT IT MUST STILL READ LIKE A DIRECT IMAGE PROMPT — NEVER LIKE A TECHNICAL REPORT.
 
-V3 REFERENCE APPEARANCE HANDOFF — CRITICAL:
-The uploaded face/reference image is supplied separately to the image generator as the authority for the person's appearance. Do NOT describe the person's face, facial features, hair, skin tone, ethnicity, age, beard, body shape, physique, identity markers or other appearance traits in the generated V3 prompt. Do NOT invent or analyze those traits. Refer to the subject only as "the man from the uploaded photo" or the exact equivalent in the requested language, and instruct the image generator to preserve 100% of his visible appearance from the supplied reference image. Describe only what surrounds that appearance: scene, environment, wardrobe, accessories, pose, hands, action, object contact, camera, framing, light, shadows and imperfections. This applies to every referenced person and overrides generic identity-description templates below.
+V3 APPEARANCE EXCLUSION — Do not describe, copy, preserve or analyze any person's appearance. Use references only for scene placement, pose, clothing, action and composition; leave face, hair, skin, age, physique and identity traits out of the text prompt.
 DO NOT USE [DEFINE], [REFERENCE BLUEPRINT], numbered forensic sections, role instructions, checklists, or meta-analysis.
 V3 MUST USE NATURAL-LANGUAGE CLAUSES WITH CURLY-BRACE BLOCKS {} AND MUST BE READY TO PASTE DIRECTLY INTO AN IMAGE GENERATOR.
 
@@ -566,7 +569,7 @@ V3 — PERSON / SOLO PERSON / PORTRAIT / LIFESTYLE
 For a single person, use this direct structure in the requested output language:
 
 create an image of the main person from the uploaded reference / user specification.
-the person from the uploaded photo: { preserve 100% of the supplied appearance through the external image reference; do not describe facial features or physical appearance in text }.
+the man from the uploaded photo: { use only as a scene/pose reference; do not describe, copy or preserve facial or physical appearance in the text }.
 physical build: { describe only pose, scale in frame and body mechanics needed for geometry; never describe appearance, physique or identity traits }.
 the person is wearing: { every visible garment, exact color, material, thickness, cut, collar, sleeves, closure, hem, footwear, socks/no socks, accessories, eyewear, watch/jewelry, natural folds/compression caused by the pose }.
 environment: { exact room/street/driveway/garage/etc., foreground, subject plane, background, viewer-left and viewer-right anchors, real everyday details, architecture, floor/wall texture, vehicles/objects with spatial positions }.
@@ -586,7 +589,7 @@ V3 — TWO PEOPLE / DUO
 For exactly two people, use this exact DUO template and KEEP SUBJECTS, CLOTHING, HANDS AND OBJECT OWNERSHIP SEPARATE. Do not convert it into a report, checklist or paragraph without braces. Keep the same order and preserve every {} block; translate the natural-language labels and values completely into the requested output language.
 
 PROMPT EM DUPLA:
-crie uma imagem dos dois homens principais enviados na foto acima, mantendo 100% da aparência de cada um pela referência visual fornecida, sem descrever a aparência deles no texto.
+crie uma imagem dos dois homens principais enviados na foto acima, sem descrever, copiar ou preservar a aparência deles no texto.
 o da primeira foto veste: { complete wardrobe and accessories of the first man, exact colors, materials, logos and reference fidelity }.
 ação do primeiro homem: { exact body position, hand use, object contact, gaze, posture and weight distribution }.
 vestimenta do segundo homem: { complete wardrobe and accessories of the second man, preserving his separate reference }.
@@ -704,7 +707,7 @@ Never overwrite a higher-priority fact with a guess. Never invent unreadable log
 ADAPTIVE BLOCKS:
 - Use natural-language blocks with curly braces {}, not headings, checklists, JSON, phases, reports, or meta-instructions.
 - Include only blocks that matter to the selected type and actual scene. Do not add hands, skin, vehicle, flash, food, or other categories when they are absent or irrelevant.
-- For people, resolve identity evidence, hairline, facial proportions, skin tone/texture, clothing, body orientation, weight distribution, legs, feet, hands, gaze, expression, and contacts with objects or surfaces.
+- For people, resolve scene placement, clothing, body orientation, weight distribution, legs, feet, hands, gaze, expression, and contacts with objects or surfaces; never resolve or describe appearance or identity traits.
 - For two or more people, keep each identity, wardrobe, action, gaze, hands, and accessories separate; describe their spacing and interaction explicitly.
 - For objects/POV, prioritize support, weight, contact patches, orientation, scale, surface curvature, occlusion, wear, fingerprints, packaging, grease/crumbs, reflections, and surrounding context. Never make an object float or turn the result into a clean product advertisement.
 - For vehicles, resolve the visible side, doors, windows, roofline, steering wheel/seat when relevant, tire contact, body curvature, reflections, and the exact physical contact with a person or object.
@@ -877,7 +880,7 @@ ${userTextDescription}`
                             model: currentModel,
                             contents: contentsParts,
                             config: {
-                              systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. The first sentence of both fields must be the exact language-matched opening defined by V4_OPENING_LANGUAGE_RULE, with no heading or preamble. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, enforce the REFERENCE IDENTITY LOCK whenever a photo is supplied, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
+                              systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. The first sentence of both fields must be the exact language-matched neutral opening defined by V4_OPENING_LANGUAGE_RULE, with no heading or preamble. Neither field may describe or copy appearance. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, enforce the absolute appearance exclusion whenever a photo is supplied, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
 
                 ${V4_OPENING_LANGUAGE_RULE}
                 ${V4_SCENE_LOCK_INSTRUCTION}
