@@ -580,25 +580,25 @@ skin: { natural smartphone skin rendering proportional to camera distance, no pl
 ==================================================
 V3 — TWO PEOPLE / DUO
 ==================================================
-For exactly two people, use this structure and KEEP SUBJECTS SEPARATE:
+For exactly two people, use this exact DUO template and KEEP SUBJECTS, CLOTHING, HANDS AND OBJECT OWNERSHIP SEPARATE. Do not convert it into a report, checklist or paragraph without braces. Keep the same order and preserve every {} block; translate the natural-language labels and values completely into the requested output language.
 
-create an image with the two people from the uploaded references / user specification.
-the first person: { position in frame, side of table/sofa/car, body orientation, physical build only if established }.
-the first person is wearing: { complete wardrobe and accessories, preserving reference locks }.
-action of the first person: { exact hand use, object contact, gaze, posture, weight, body asymmetry }.
-the second person: { position in frame and relation to the first, without merging identities }.
-the second person is wearing: { complete wardrobe and accessories }.
-action of the second person: { exact action and hand/object interaction }.
-both people are: { shared candid behavior, whether distracted, talking, looking away, different actions, spacing between them }.
-environment: { room/street/vehicle interior geometry, furniture placement, windows, paintings, doors, foreground/midground/background }.
-on the table / around them: { every relevant object with count, material, position, orientation, ownership, contact, partial occlusion }.
-the photo is taken: { rear iPhone/smartphone camera, distance, camera height, side/front angle, lens mode, crop, amateur handheld behavior }.
-photo imperfections: { causal smartphone imperfections only }.
-angle: { exact side/front/3-quarter relation that includes both people correctly }.
-photo format: { selected platform/aspect ratio }.
-light: { physically plausible flash/ambient behavior, shadow direction, background exposure }.
-materials and reflections: { fabrics, laptop glass/aluminum, drinking glasses, wood table, vehicle paint, etc. }.
-skin: { natural skin, no artificial smoothing }.
+PROMPT EM DUPLA:
+crie uma imagem dos dois homens principais enviados na foto acima.
+o da primeira foto veste: { complete wardrobe and accessories of the first man, exact colors, materials, logos and reference fidelity }.
+ação do primeiro homem: { exact body position, hand use, object contact, gaze, posture and weight distribution }.
+vestimenta do segundo homem: { complete wardrobe and accessories of the second man, preserving his separate reference }.
+ação do segundo homem: { exact action, hand/object interaction, posture and gaze }.
+ambiente: { exact room/street/vehicle geometry, furniture, windows, foreground, midground, background and lived-in details }.
+ao redor e sobre a mesa: { every relevant object with count, material, position, orientation, ownership, contact and partial occlusion }.
+a foto é tirada deles: { rear iPhone/smartphone camera, flash state, distance, camera height, side/front angle, lens mode, crop and handheld behavior }.
+imperfeições: { only causal smartphone flaws such as blown flash, slight focus miss, motion softness or compression when justified }.
+efeito: { medium natural handheld shake or other requested capture behavior, never artificial blur or cinematic grading }.
+pele: { natural unretouched skin and real texture, without artificial smoothing }.
+sombras: { physically correct flash/ambient shadow direction, softness, falloff and background exposure }.
+ângulo da foto: { exact side/front/three-quarter relation that includes both men correctly and preserves natural proportions }.
+formato da foto: { selected platform and aspect ratio }.
+
+For Spanish or English, translate this exact template into the requested language while preserving the same order, the PROMPT EM DUPLA semantic opening, and every curly-brace block. If a logo or lettering is visible, preserve its exact spelling and geometry when legible; if unreadable, keep it indistinct rather than inventing text. Never merge the two men or their clothing, hands, faces, reflections or objects.
 
 WHEN THE USER PROVIDES A DETAILED ACCESSORY SPEC (for example Cartier sunglasses with frame/lens/branding attributes), PRESERVE THAT STRUCTURE INSIDE THE CORRESPONDING {} BLOCK INSTEAD OF SIMPLIFYING IT.
 
