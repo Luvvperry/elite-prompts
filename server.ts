@@ -537,6 +537,9 @@ If any answer exposes a problem, fix it silently before output.
 ENGINE 3: V3 — FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT)
 ==================================================
 V3 IS THE DEEPEST ENGINE, BUT IT MUST STILL READ LIKE A DIRECT IMAGE PROMPT — NEVER LIKE A TECHNICAL REPORT.
+
+V3 REFERENCE APPEARANCE HANDOFF — CRITICAL:
+The uploaded face/reference image is supplied separately to the image generator as the authority for the person's appearance. Do NOT describe the person's face, facial features, hair, skin tone, ethnicity, age, beard, body shape, physique, identity markers or other appearance traits in the generated V3 prompt. Do NOT invent or analyze those traits. Refer to the subject only as "the man from the uploaded photo" or the exact equivalent in the requested language, and instruct the image generator to preserve 100% of his visible appearance from the supplied reference image. Describe only what surrounds that appearance: scene, environment, wardrobe, accessories, pose, hands, action, object contact, camera, framing, light, shadows and imperfections. This applies to every referenced person and overrides generic identity-description templates below.
 DO NOT USE [DEFINE], [REFERENCE BLUEPRINT], numbered forensic sections, role instructions, checklists, or meta-analysis.
 V3 MUST USE NATURAL-LANGUAGE CLAUSES WITH CURLY-BRACE BLOCKS {} AND MUST BE READY TO PASTE DIRECTLY INTO AN IMAGE GENERATOR.
 
@@ -559,8 +562,8 @@ V3 — PERSON / SOLO PERSON / PORTRAIT / LIFESTYLE
 For a single person, use this direct structure in the requested output language:
 
 create an image of the main person from the uploaded reference / user specification.
-the person: { identity preservation instructions appropriate to the reference without inventing facial details }.
-physical build: { only if explicitly visible/provided; height and build only when established }.
+the person from the uploaded photo: { preserve 100% of the supplied appearance through the external image reference; do not describe facial features or physical appearance in text }.
+physical build: { describe only pose, scale in frame and body mechanics needed for geometry; never describe appearance, physique or identity traits }.
 the person is wearing: { every visible garment, exact color, material, thickness, cut, collar, sleeves, closure, hem, footwear, socks/no socks, accessories, eyewear, watch/jewelry, natural folds/compression caused by the pose }.
 environment: { exact room/street/driveway/garage/etc., foreground, subject plane, background, viewer-left and viewer-right anchors, real everyday details, architecture, floor/wall texture, vehicles/objects with spatial positions }.
 person action: { exact photographed instant, torso orientation, head/chin/gaze, shoulders, viewer-left arm/hand, viewer-right arm/hand, pelvis, legs, feet, weight distribution, contact with furniture/vehicle/object, asymmetry, whether distracted or looking away }.
@@ -571,7 +574,7 @@ angle: { exact front/side/3-quarter/rear relation, camera height, tilt, horizon/
 photo format: { selected aspect ratio / output format and how the crop should preserve the subject and environment }.
 light: { source, direction, hardness/softness, falloff, near/far exposure relationship, cast shadows, reflections }.
 materials and reflections: { only materials actually present; fabric response, glass, metal, leather, car paint, wood, stone, water, etc. }.
-skin: { natural smartphone skin rendering proportional to camera distance, no plastic smoothing, no fake hyper-detailed pores }.
+appearance reference: { use the supplied face/reference image externally; do not describe skin, face or physical appearance in the text }.
 
 ==================================================
 V3 — TWO PEOPLE / DUO
@@ -579,7 +582,7 @@ V3 — TWO PEOPLE / DUO
 For exactly two people, use this exact DUO template and KEEP SUBJECTS, CLOTHING, HANDS AND OBJECT OWNERSHIP SEPARATE. Do not convert it into a report, checklist or paragraph without braces. Keep the same order and preserve every {} block; translate the natural-language labels and values completely into the requested output language.
 
 PROMPT EM DUPLA:
-crie uma imagem dos dois homens principais enviados na foto acima.
+crie uma imagem dos dois homens principais enviados na foto acima, mantendo 100% da aparência de cada um pela referência visual fornecida, sem descrever a aparência deles no texto.
 o da primeira foto veste: { complete wardrobe and accessories of the first man, exact colors, materials, logos and reference fidelity }.
 ação do primeiro homem: { exact body position, hand use, object contact, gaze, posture and weight distribution }.
 vestimenta do segundo homem: { complete wardrobe and accessories of the second man, preserving his separate reference }.
