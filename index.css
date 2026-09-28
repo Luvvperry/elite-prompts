@@ -1975,3 +1975,82 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
   .dark .pro-studio-grid { gap: 14px !important; }
   .dark .pro-studio-grid > section { padding-bottom: 18px !important; }
 }
+
+/* RESTORED LAYOUT ORGANIZATION — spacing and proportions only. */
+*, *::before, *::after { box-sizing: border-box; }
+.studio-frame, .pro-shell, .studio-main, .studio-grid, .pro-studio-grid,
+.pro-studio-grid > section, .workspace-panel, .prompt-console, .advanced-panel-shell {
+  min-width: 0 !important;
+}
+.studio-frame { width: 100% !important; }
+.pro-studio-grid {
+  display: grid !important;
+  grid-template-columns: minmax(280px, .86fr) minmax(360px, 1fr) minmax(420px, 1.18fr) !important;
+  gap: 20px !important;
+  align-items: start !important;
+  margin: 0 !important;
+  padding-top: 22px !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+.pro-studio-grid > section,
+.pro-studio-grid > section:nth-child(1),
+.pro-studio-grid > section:nth-child(2),
+.pro-studio-grid > section:nth-child(3) {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+.pane-heading {
+  min-width: 0 !important;
+  min-height: 52px !important;
+  margin-bottom: 12px !important;
+  padding: 0 2px 11px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+.pane-heading > div:first-child { min-width: 0 !important; flex: 1 1 auto !important; }
+.pane-description { overflow-wrap: anywhere !important; }
+.pane-heading-controls { flex-wrap: wrap !important; }
+.mode-switch { flex: 0 1 auto !important; max-width: 100% !important; }
+.workspace-panel, .prompt-console, .advanced-panel-shell > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+.workspace-panel > *, .prompt-console > *, .advanced-panel-shell > * > * { min-width: 0 !important; max-width: 100% !important; }
+.controls-panel { padding: 16px !important; }
+.controls-panel input, .controls-panel select, .controls-panel textarea,
+.workspace-panel input, .workspace-panel select, .workspace-panel textarea { min-width: 0 !important; max-width: 100% !important; }
+
+@media (max-width: 1240px) and (min-width: 701px) {
+  .pro-studio-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 18px !important; }
+  .pro-studio-grid > section:nth-child(3) { grid-column: 1 / -1 !important; }
+}
+@media (max-width: 700px) {
+  .pro-shell { padding-left: 0 !important; }
+  .studio-frame { padding-inline: 14px !important; padding-bottom: 124px !important; }
+  .pro-studio-grid {
+    display: flex !important; flex-direction: column !important; gap: 20px !important; padding-top: 16px !important;
+  }
+  .pro-studio-grid > section,
+  .pro-studio-grid > section:nth-child(1),
+  .pro-studio-grid > section:nth-child(2),
+  .pro-studio-grid > section:nth-child(3) {
+    width: 100% !important; padding: 0 0 18px !important; margin: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,.1) !important;
+  }
+  .pro-studio-grid > section:last-child { border-bottom: 0 !important; padding-bottom: 0 !important; }
+  .pane-heading { min-height: 0 !important; margin-bottom: 10px !important; }
+  .pane-heading-controls { flex-direction: column !important; align-items: stretch !important; gap: 9px !important; }
+  .mode-switch { align-self: flex-start !important; }
+  .workspace-panel, .prompt-console, .advanced-panel-shell > * { border-radius: 14px !important; }
+  .prompt-console-state { min-height: 270px !important; }
+  #studio-input, #studio-settings, #studio-output { scroll-margin-top: 72px !important; }
+}
