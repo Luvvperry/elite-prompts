@@ -108,8 +108,17 @@ V1 QUALITY BAR:
 // ============================================================================
 // V4 / V5 — ADDITIVE ENGINES (V1/V2/V3 remain unchanged)
 // ============================================================================
+const V4_OPENING_LANGUAGE_RULE = `
+MANDATORY V4/V5 OPENING — The very first words of both V4 and V5 must be the exact equivalent of this sentence in the requested output language, with no heading, quotation mark or preamble before it:
+- Brazilian Portuguese: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
+- Spanish: "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."
+- English: "Create an image of the man from the uploaded photo, following 100% of his characteristics."
+After that exact opening sentence, continue directly with the detailed prompt. Do not translate the opening into another language, replace "homem/man" with a generic subject, or begin with a title.
+`;
+
 const V4_SCENE_LOCK_INSTRUCTION = `
 ENGINE 4: V4 — HUMAN IPHONE MOMENT RECONSTRUCTION
+${V4_OPENING_LANGUAGE_RULE}
 V4 is the grounded long-form engine. Produce one direct, paste-ready prompt, normally 500–750 words only when the scene needs that detail. Expand facts that change the image, but never pad with synonyms, generic realism adjectives or repeated camera clauses. Use at least 12 natural sentences. Do not summarize or explain the method.
 
 Use this exact semantic mold, translated completely into the requested output language and adapted to the actual reference/idea:
@@ -130,6 +139,7 @@ The result must feel like a real imperfect iPhone snapshot, not an advertisement
 
 const V5_MASTER_ADAPTIVE_INSTRUCTION = `
 ENGINE 5: V5 — LIVED-IN SMARTPHONE REALITY MASTER
+${V4_OPENING_LANGUAGE_RULE}
 V5 is the grounded reality engine, not a synonym-heavy mega-prompt. Produce one direct, paste-ready prompt, normally 650–900 words for a complex reference and shorter when the evidence is simple. Every sentence must add a concrete image-changing fact or a necessary physical relationship. Never repeat the same realism idea with different adjectives. Never output a checklist, report, negative-prompt dump or meta-prompt.
 
 REFERENCE IDENTITY LOCK — WHEN AN UPLOADED PHOTO IS PRESENT:
@@ -867,8 +877,9 @@ ${userTextDescription}`
                     model: currentModel,
                     contents: contentsParts,
                     config: {
-                      systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, enforce the REFERENCE IDENTITY LOCK whenever a photo is supplied, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
+                      systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. The first sentence of both fields must be the exact language-matched opening defined by V4_OPENING_LANGUAGE_RULE, with no heading or preamble. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, enforce the REFERENCE IDENTITY LOCK whenever a photo is supplied, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
 
+        ${V4_OPENING_LANGUAGE_RULE}
         ${V4_SCENE_LOCK_INSTRUCTION}
 
         ${V5_MASTER_ADAPTIVE_INSTRUCTION}`,

@@ -290,6 +290,14 @@ const formatSettingsContext = (settings) => {
 // ============================================================================
 // V4 / V5 — ADDITIVE ENGINES (V1/V2/V3 remain unchanged)
 // ============================================================================
+const V4_OPENING_LANGUAGE_RULE = `
+MANDATORY V4/V5 OPENING — The first sentence of both V4 and V5 must be the exact equivalent in the requested output language, with no heading or preamble:
+- Brazilian Portuguese: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
+- Spanish: "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."
+- English: "Create an image of the man from the uploaded photo, following 100% of his characteristics."
+Continue directly after that sentence and never replace man/homem with a generic subject.
+`;
+
 const V4_SCENE_LOCK_INSTRUCTION = `
 ENGINE 4: V4 — HUMAN IPHONE MOMENT RECONSTRUCTION
 V4 is the grounded long-form engine. Produce one direct, paste-ready prompt, normally 500–750 words only when the scene needs that detail. Expand facts that change the image, but never pad with synonyms, generic realism adjectives or repeated camera clauses. Use at least 12 natural sentences. Do not summarize or explain the method.
@@ -866,8 +874,9 @@ ${userTextDescription}`
                             model: currentModel,
                             contents: contentsParts,
                             config: {
-                              systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, enforce the REFERENCE IDENTITY LOCK whenever a photo is supplied, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
+                              systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. The first sentence of both fields must be the exact language-matched opening defined by V4_OPENING_LANGUAGE_RULE, with no heading or preamble. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, enforce the REFERENCE IDENTITY LOCK whenever a photo is supplied, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
 
+                ${V4_OPENING_LANGUAGE_RULE}
                 ${V4_SCENE_LOCK_INSTRUCTION}
 
                 ${V5_MASTER_ADAPTIVE_INSTRUCTION}`,
