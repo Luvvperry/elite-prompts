@@ -2031,7 +2031,6 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
 
 @media (max-width: 1240px) and (min-width: 701px) {
   .pro-studio-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 18px !important; }
-  .pro-studio-grid > section:nth-child(3) { grid-column: 1 / -1 !important; }
 }
 @media (max-width: 700px) {
   .pro-shell { padding-left: 0 !important; }
@@ -2083,7 +2082,6 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
     gap: 24px !important;
   }
-  .pro-studio-grid > section:nth-child(3) { grid-column: 1 / -1 !important; }
   .pro-studio-grid > section:nth-child(3) .prompt-console { min-height: 420px !important; }
 }
 @media (max-width: 700px) {
@@ -2127,7 +2125,6 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
   display: flex; flex-direction: column; justify-content: space-between;
 }
 .language-gate-brand { display: flex; align-items: center; gap: 12px; color: #f5f5f2; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
-.language-gate-mark { width: 19px; height: 19px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.62); border-radius: 50%; font-size: 10px; }
 .language-gate-hero { margin: auto 0 clamp(42px, 8vh, 84px); }
 .language-gate-kicker { margin: 0 0 26px; color: #777773; font: 600 10px/1.2 "SFMono-Regular", Consolas, monospace; letter-spacing: .14em; text-transform: uppercase; }
 .language-gate-hero h1 { max-width: 720px; margin: 0; color: #f4f4f1; font-size: clamp(3.7rem, 9.4vw, 8rem); line-height: .87; letter-spacing: -.085em; font-weight: 500; }
@@ -2309,11 +2306,7 @@ input[type="range"] { accent-color: #FF6A3D !important; }
 }
 html, body, #root, .app-shell, .pro-shell, .studio-main, .studio-frame { background: #090A0B !important; }
 .pro-rail { background: #090A0B !important; border-color: #30353A !important; }
-.elite-rail-brand { width: 100%; margin: 0 0 18px; display: flex; flex-direction: column; align-items: center; gap: 7px; color: #F3F3EF; }
-.elite-rail-mark { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid #CDD2D8; border-radius: 7px; color: #F3F3EF; font: 700 9px/1 "DM Mono", monospace; letter-spacing: -.08em; }
 .elite-rail-wordmark { color: #ADB3BA; font: 700 7px/1.15 Inter, sans-serif; letter-spacing: .12em; text-align: center; }
-.elite-mobile-brand { display: inline-flex; align-items: center; gap: 8px; color: #F3F3EF; white-space: nowrap; }
-.elite-mobile-brand .elite-rail-mark { width: 24px; height: 24px; border-radius: 6px; font-size: 8px; }
 .elite-mobile-wordmark { font: 700 9px/1 Inter, sans-serif; letter-spacing: .12em; }
 .ep-masthead-kicker { color: #CDD2D8 !important; }
 .ep-masthead-kicker i { background: #CDD2D8 !important; }
@@ -2325,7 +2318,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .prompt-engine-tab.is-active { color: #090A0B !important; background: #F3F3EF !important; border-color: #F3F3EF !important; }
 .prompt-console-state svg { color: #CDD2D8 !important; }
 .generation-progress span { background: #CDD2D8 !important; }
-.language-gate-mark { border-color: #CDD2D8 !important; border-radius: 6px !important; font: 700 8px/1 "DM Mono", monospace !important; letter-spacing: -.08em; }
 .language-gate-option-number { color: #090A0B !important; background: #F3F3EF !important; }
 .language-gate-option:hover, .language-gate-option:focus-visible { color: #090A0B !important; background: #F3F3EF !important; }
 .language-gate-option-native { color: #ADB3BA !important; }
@@ -2345,4 +2337,35 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .mobile-topbar-inner { padding-inline: 14px !important; }
   .elite-mobile-wordmark { display: none; }
   .mobile-topbar-inner > .mobile-topbar-context { flex-basis: 0; }
+}
+
+/* FINAL STRUCTURAL LAYOUT — one unambiguous grid placement per breakpoint. */
+.pro-studio-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  grid-template-areas: "input settings" "output output" !important;
+  align-items: start !important;
+  gap: 24px !important;
+}
+.pro-studio-grid > section,
+.studio-input-pane, .studio-settings-pane, .studio-output-pane {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  position: static !important;
+  min-width: 0 !important;
+}
+.studio-output-pane .prompt-console,
+.prompt-console-state { min-height: 0 !important; height: auto !important; }
+.studio-output-pane .prompt-console-state { min-height: 230px !important; }
+.studio-settings-pane .controls-panel, .studio-settings-pane .advanced-panel-shell { max-height: none !important; overflow: visible !important; }
+.elite-rail-wordmark-only { margin-bottom: 22px; color: #ADB3BA; font: 700 8px/1.3 Inter, sans-serif; letter-spacing: .14em; text-align: center; writing-mode: vertical-rl; transform: rotate(180deg); }
+.elite-mobile-wordmark { color: #F3F3EF; font: 700 9px/1 Inter, sans-serif; letter-spacing: .12em; }
+.language-gate-brand-text { color: #F3F3EF; font: 700 10px/1 Inter, sans-serif; letter-spacing: .16em; }
+@media (min-width: 1500px) {
+  .pro-studio-grid { grid-template-columns: minmax(300px, .86fr) minmax(360px, 1fr) minmax(500px, 1.24fr) !important; grid-template-areas: "input settings output" !important; gap: 24px !important; }
+  .studio-output-pane .prompt-console, .prompt-console-state { min-height: 480px !important; }
+}
+@media (max-width: 700px) {
+  .pro-studio-grid { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "input" "settings" "output" !important; gap: 22px !important; }
+  .studio-output-pane .prompt-console-state { min-height: 220px !important; }
+  .elite-rail-wordmark-only { display: none; }
 }

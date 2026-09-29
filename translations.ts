@@ -520,7 +520,7 @@ export const translations: Record<Language, TranslationSchema> = {
       subtitle: "Optical Forensics Engine",
       edition: "PRO EDITION",
       status: "System Online",
-      footer: "PERFECTLY, IMPERFECT. — OPTICAL FORENSICS ENGINE V1 / V2 / V3"
+      footer: "PERFECTLY, IMPERFECT. — OPTICAL FORENSICS ENGINE V1 / V2 / V3 / V4 / V5"
     },
     nav: {
       fromImage: "From Image",
@@ -1299,9 +1299,9 @@ export const translations: Record<Language, TranslationSchema> = {
       refineCancel: "Cancel",
       refining: "Refining...",
       emptyTitle: "No prompts generated yet",
-      emptySub: "Upload an image or describe your scene idea to generate V1, V2, and V3 prompts.",
+      emptySub: "Upload an image or describe your scene idea to generate V1, V2, V3, V4, and V5 prompts.",
       loadingTitle: "Synthesizing Optical Engines",
-      loadingSub: "Synthesizing V1, V2, and V3 photographic engines...",
+      loadingSub: "Synthesizing V1, V2, V3, V4, and V5 photographic engines...",
       loadingSteps: [
         "Analyzing Scene Geometry & Spatial Graph",
         "Extracting Optical Physics & Light Propagation",
@@ -1359,7 +1359,7 @@ export const translations: Record<Language, TranslationSchema> = {
       subtitle: "Motor Forense Óptico",
       edition: "EDICIÓN PRO",
       status: "Sistema Online",
-      footer: "PERFECTLY, IMPERFECT. — MOTOR FORENSE ÓPTICO V1 / V2 / V3"
+      footer: "PERFECTLY, IMPERFECT. — MOTOR FORENSE ÓPTICO V1 / V2 / V3 / V4 / V5"
     },
     nav: {
       fromImage: "Desde Imagen",
@@ -2138,9 +2138,9 @@ export const translations: Record<Language, TranslationSchema> = {
       refineCancel: "Cancelar",
       refining: "Refinando...",
       emptyTitle: "No hay prompts generados aún",
-      emptySub: "Sube una imagen de referencia o describe tu idea para generar los prompts V1, V2 y V3.",
+      emptySub: "Sube una imagen de referencia o describe tu idea para generar los prompts V1, V2, V3, V4 y V5.",
       loadingTitle: "Sintetizando Motores Ópticos",
-      loadingSub: "Sintetizando motores fotográficos V1, V2 y V3...",
+      loadingSub: "Sintetizando motores fotográficos V1, V2, V3, V4 y V5...",
       loadingSteps: [
         "Analizando Geometría de Escena y Grafo Espacial",
         "Extrayendo Física Óptica y Propagación de Luz",
@@ -2198,7 +2198,7 @@ export const translations: Record<Language, TranslationSchema> = {
       subtitle: "Motor Óptico Forense",
       edition: "EDIÇÃO PRO",
       status: "Sistema Online",
-      footer: "PERFECTLY, IMPERFECT. — MOTOR ÓPTICO FORENSE V1 / V2 / V3"
+      footer: "PERFECTLY, IMPERFECT. — MOTOR ÓPTICO FORENSE V1 / V2 / V3 / V4 / V5"
     },
     nav: {
       fromImage: "Da Imagem",
@@ -2977,9 +2977,9 @@ export const translations: Record<Language, TranslationSchema> = {
       refineCancel: "Cancelar",
       refining: "Refinando...",
       emptyTitle: "Nenhum prompt gerado ainda",
-      emptySub: "Envie uma imagem de referência ou descreva sua ideia para gerar os prompts V1, V2 e V3.",
+      emptySub: "Envie uma imagem de referência ou descreva sua ideia para gerar os prompts V1, V2, V3, V4 e V5.",
       loadingTitle: "Sintetizando Motores Ópticos",
-      loadingSub: "Sintetizando motores fotográficos V1, V2 e V3...",
+      loadingSub: "Sintetizando motores fotográficos V1, V2, V3, V4 e V5...",
       loadingSteps: [
         "Analisando Geometria de Cena e Grafo Espacial",
         "Extraindo Física Óptica e Propagação de Luz",

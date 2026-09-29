@@ -29,19 +29,19 @@ type CommandItem = {
 const copy = {
   pt: {
     title: 'Central de comandos', subtitle: 'Navegue e controle o workspace', search: 'Buscar comando…',
-    input: 'Ir para entrada', inputD: 'Referência, ideia e contexto', settings: 'Ir para controles', settingsD: 'Modo Simple / Advanced', output: 'Ir para resultado', outputD: 'V1, V2, V3 e comparação',
+    input: 'Ir para entrada', inputD: 'Referência, ideia e contexto', settings: 'Ir para controles', settingsD: 'Modo Simple / Advanced', output: 'Ir para resultado', outputD: 'V1, V2, V3, V4, V5 e comparação',
     simple: 'Ativar Simple', advanced: 'Ativar Advanced', presets: 'Abrir predefinições', history: 'Abrir histórico', language: 'Idioma e saída', appSettings: 'Configurações',
     theme: 'Alternar tema', focus: 'Alternar modo foco', empty: 'Nenhum comando encontrado', active: 'Ativo', mode: 'Modo do workspace', presetsD: 'Configurações de captura salvas', historyD: 'Gerações anteriores', settingsD2: 'Preferências do workspace', darkToLight: 'Escuro → Claro', lightToDark: 'Claro → Escuro', onToOff: 'Ligado → Desligado', offToOn: 'Desligado → Ligado'
   },
   es: {
     title: 'Centro de comandos', subtitle: 'Navega y controla el workspace', search: 'Buscar comando…',
-    input: 'Ir a entrada', inputD: 'Referencia, idea y contexto', settings: 'Ir a controles', settingsD: 'Modo Simple / Advanced', output: 'Ir al resultado', outputD: 'V1, V2, V3 y comparación',
+    input: 'Ir a entrada', inputD: 'Referencia, idea y contexto', settings: 'Ir a controles', settingsD: 'Modo Simple / Advanced', output: 'Ir al resultado', outputD: 'V1, V2, V3, V4, V5 y comparación',
     simple: 'Activar Simple', advanced: 'Activar Advanced', presets: 'Abrir preajustes', history: 'Abrir historial', language: 'Idioma y salida', appSettings: 'Configuración',
     theme: 'Cambiar tema', focus: 'Cambiar modo foco', empty: 'No se encontró ningún comando', active: 'Activo', mode: 'Modo del workspace', presetsD: 'Configuraciones de captura guardadas', historyD: 'Generaciones anteriores', settingsD2: 'Preferencias del workspace', darkToLight: 'Oscuro → Claro', lightToDark: 'Claro → Oscuro', onToOff: 'Activado → Desactivado', offToOn: 'Desactivado → Activado'
   },
   en: {
     title: 'Command Center', subtitle: 'Navigate and control the workspace', search: 'Search command…',
-    input: 'Jump to input', inputD: 'Reference, idea and context', settings: 'Jump to controls', settingsD: 'Simple / Advanced mode', output: 'Jump to output', outputD: 'V1, V2, V3 and compare',
+    input: 'Jump to input', inputD: 'Reference, idea and context', settings: 'Jump to controls', settingsD: 'Simple / Advanced mode', output: 'Jump to output', outputD: 'V1, V2, V3, V4, V5 and compare',
     simple: 'Activate Simple', advanced: 'Activate Advanced', presets: 'Open presets', history: 'Open history', language: 'Language & output', appSettings: 'Settings',
     theme: 'Toggle theme', focus: 'Toggle Focus Mode', empty: 'No commands found', active: 'Active', mode: 'Workspace mode', presetsD: 'Saved capture setups', historyD: 'Previous generations', settingsD2: 'Workspace preferences', darkToLight: 'Dark → Light', lightToDark: 'Light → Dark', onToOff: 'On → Off', offToOn: 'Off → On'
   }

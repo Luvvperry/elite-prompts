@@ -25,7 +25,7 @@ const LanguageGate: React.FC<LanguageGateProps> = ({ onChoose }) => {
       <div className="language-gate-inner">
         <header className="language-gate-brand">
           <div className="language-gate-brand-name">
-            <span className="language-gate-mark" aria-hidden="true">EP</span>
+            <span className="language-gate-brand-text">ELITE PROMPTS</span>
             <span>ELITE PROMPTS</span>
           </div>
           <a
