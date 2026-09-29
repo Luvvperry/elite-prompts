@@ -10,6 +10,7 @@ export interface ContextualStarterContext {
   captureProfile?: CaptureProfile;
   timeOfDay?: string;
   shuffleKey?: number;
+  library?: boolean;
 }
 
 export interface StarterItem {
@@ -783,7 +784,8 @@ export function getContextualStarters(context: ContextualStarterContext): Starte
     typeId = '',
     cameraMode = 'auto',
     captureProfile = 'auto',
-    shuffleKey = 0
+    shuffleKey = 0,
+    library = false
   } = context;
 
   // Determine the semantic starter family first.
@@ -901,17 +903,24 @@ export function getContextualStarters(context: ContextualStarterContext): Starte
     (profileSuffix[captureProfile]?.[language] || '') +
     (modeSuffix[cameraMode]?.[language] || '');
 
-  const rotated = [...ranked];
+  const rotated = library
+    ? Object.entries(STARTERS_BY_CATEGORY).flatMap(([sourceCategory, pool]) =>
+        (pool[language] || pool.pt || []).map(item => ({
+          ...item,
+          libraryCategory: sourceCategory
+        }))
+      )
+    : [...ranked];
   if (rotated.length > 1 && shuffleKey > 0) {
     const offset = shuffleKey % rotated.length;
     rotated.push(...rotated.splice(0, offset));
   }
 
-  return rotated.slice(0, 4).map((item, idx) => ({
-    id: `starter_${categoryKey}_${typeId || 'general'}_${idx}_${shuffleKey}`,
+  return (library ? rotated : rotated.slice(0, 4)).map((item: any, idx) => ({
+    id: `starter_${item.libraryCategory || categoryKey}_${typeId || 'general'}_${idx}_${shuffleKey}`,
     title: item.title,
     promptText: `${item.text}${suffix}`,
-    categoryTag: categoryKey.toUpperCase().replace('_', ' ')
+    categoryTag: (item.libraryCategory || categoryKey).toUpperCase().replace('_', ' ')
   }));
 }
 

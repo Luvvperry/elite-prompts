@@ -80,6 +80,8 @@ const InputZone: React.FC<InputZoneProps> = ({
       cameraTypeTitle: 'Tipo de fotografia',
       quickStarts: 'Começos rápidos',
       shuffle: 'Trocar',
+      quickLibraryTitle: 'Biblioteca de ideias',
+      quickSearch: 'Buscar por cena, lugar ou ação...',
       suggestions: 'Sugestões para sua ideia',
       characters: 'caracteres',
       addMore: 'Adicionar',
@@ -94,6 +96,8 @@ const InputZone: React.FC<InputZoneProps> = ({
       cameraTypeTitle: 'Tipo de fotografía',
       quickStarts: 'Inicios rápidos',
       shuffle: 'Cambiar',
+      quickLibraryTitle: 'Biblioteca de ideas',
+      quickSearch: 'Buscar por escena, lugar o acción...',
       suggestions: 'Sugerencias para tu idea',
       characters: 'caracteres',
       addMore: 'Añadir',
@@ -107,7 +111,9 @@ const InputZone: React.FC<InputZoneProps> = ({
       change: 'Change',
       cameraTypeTitle: 'Photography type',
       quickStarts: 'Quick starts',
-      shuffle: 'Shuffle',
+      shuffle: 'Browse',
+      quickLibraryTitle: 'Idea library',
+      quickSearch: 'Search by scene, place or action...',
       suggestions: 'Suggestions for your idea',
       characters: 'characters',
       addMore: 'Add',
@@ -130,6 +136,7 @@ const InputZone: React.FC<InputZoneProps> = ({
   
   // Shuffle key for contextual starters
   const [shuffleKey, setShuffleKey] = useState<number>(0);
+  const [isQuickStartSheetOpen, setIsQuickStartSheetOpen] = useState(false);
 
   // Active Type metadata
   const activeTypeItem = useMemo(() => {
@@ -208,6 +215,30 @@ const InputZone: React.FC<InputZoneProps> = ({
       shuffleKey
     });
   }, [lang, modality, selectedTypeId, mode, camera, cameraMode, captureProfile, shuffleKey]);
+
+  const allStarters = useMemo(() => getContextualStarters({
+    language: lang,
+    modality,
+    typeId: selectedTypeId,
+    sourceMode: mode,
+    camera,
+    cameraMode,
+    captureProfile,
+    shuffleKey,
+    library: true
+  }), [lang, modality, selectedTypeId, mode, camera, cameraMode, captureProfile, shuffleKey]);
+
+  const quickStartOptions: SelectOption[] = useMemo(() => allStarters.map((starter) => ({
+    id: starter.id,
+    name: starter.title,
+    category: starter.categoryTag || 'IDEAS',
+    categoryLabel: starter.categoryTag || 'IDEAS',
+    sub: starter.promptText
+  })), [allStarters]);
+
+  const quickStartCategories = useMemo(() => Array.from(
+    new Set(quickStartOptions.map(option => option.category))
+  ).map(category => ({ id: category, label: category })), [quickStartOptions]);
 
   // Intelligent Suggestions for when user already typed
   const intelligentComplements = useMemo(() => {
@@ -298,6 +329,25 @@ const InputZone: React.FC<InputZoneProps> = ({
         recentTitle={t.simple.recent || ui.recent}
         favoritesTitle={t.simple.favorites || ui.favorites}
         optionsLabel={ui.options}
+        emptyLabel={ui.empty}
+        clearLabel={ui.clear}
+        doneLabel={ui.done}
+        selectionHint={ui.selectHint}
+      />
+
+      <SearchableBottomSheet
+        isOpen={isQuickStartSheetOpen}
+        onClose={() => setIsQuickStartSheetOpen(false)}
+        title={ui.quickLibraryTitle}
+        searchPlaceholder={ui.quickSearch}
+        options={quickStartOptions}
+        categories={quickStartCategories}
+        selectedValue=""
+        onSelect={(option) => onIdeaChange(option.sub || option.name)}
+        favorites={[]}
+        onToggleFavorite={() => undefined}
+        recents={[]}
+        optionsLabel={ui.quickStarts}
         emptyLabel={ui.empty}
         clearLabel={ui.clear}
         doneLabel={ui.done}
@@ -473,7 +523,10 @@ const InputZone: React.FC<InputZoneProps> = ({
                 
                 <button
                   type="button"
-                  onClick={() => setShuffleKey(prev => prev + 1)}
+                  onClick={() => {
+                    setShuffleKey(prev => prev + 1);
+                    setIsQuickStartSheetOpen(true);
+                  }}
                   className="flex items-center gap-1 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer font-sans"
                   title={ui.shuffle}
                 >
