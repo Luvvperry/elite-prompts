@@ -25,6 +25,64 @@ export interface SuggestionComplement {
   appendText: string;
 }
 
+const LIBRARY_VARIATIONS: Record<Language, {
+  time: Array<{ label: string; text: string }>;
+  light: Array<{ label: string; text: string }>;
+  framing: Array<{ label: string; text: string }>;
+}> = {
+  pt: {
+    time: [
+      { label: 'amanhecer', text: 'no amanhecer' }, { label: 'manhã', text: 'durante a manhã' },
+      { label: 'meio-dia', text: 'perto do meio-dia' }, { label: 'fim de tarde', text: 'no fim da tarde' },
+      { label: 'hora azul', text: 'na hora azul' }, { label: 'noite', text: 'durante a noite' }
+    ],
+    light: [
+      { label: 'luz natural', text: 'com luz natural irregular' }, { label: 'flash direto', text: 'com flash direto de celular' },
+      { label: 'luz baixa', text: 'com pouca luz e ruído digital realista' }, { label: 'luz lateral', text: 'com luz lateral suave' },
+      { label: 'luz mista', text: 'com mistura real de luz ambiente e luz artificial' }
+    ],
+    framing: [
+      { label: 'vertical 9:16', text: 'em enquadramento vertical 9:16' }, { label: 'câmera traseira', text: 'com câmera traseira de smartphone' },
+      { label: 'altura do peito', text: 'fotografado aproximadamente na altura do peito' }, { label: 'ângulo casual', text: 'com leve inclinação casual de celular' },
+      { label: 'distante', text: 'a alguns metros de distância, sem pose de modelo' }
+    ]
+  },
+  es: {
+    time: [
+      { label: 'amanecer', text: 'al amanecer' }, { label: 'mañana', text: 'durante la mañana' },
+      { label: 'mediodía', text: 'cerca del mediodía' }, { label: 'tarde', text: 'al final de la tarde' },
+      { label: 'hora azul', text: 'durante la hora azul' }, { label: 'noche', text: 'durante la noche' }
+    ],
+    light: [
+      { label: 'luz natural', text: 'con luz natural irregular' }, { label: 'flash directo', text: 'con flash directo de celular' },
+      { label: 'poca luz', text: 'con poca luz y ruido digital realista' }, { label: 'luz lateral', text: 'con luz lateral suave' },
+      { label: 'luz mixta', text: 'con mezcla real de luz ambiental y artificial' }
+    ],
+    framing: [
+      { label: 'vertical 9:16', text: 'en encuadre vertical 9:16' }, { label: 'cámara trasera', text: 'con cámara trasera de smartphone' },
+      { label: 'altura del pecho', text: 'fotografiado aproximadamente a la altura del pecho' }, { label: 'ángulo casual', text: 'con ligera inclinación casual de celular' },
+      { label: 'distante', text: 'a varios metros de distancia, sin pose de modelo' }
+    ]
+  },
+  en: {
+    time: [
+      { label: 'dawn', text: 'at dawn' }, { label: 'morning', text: 'during the morning' },
+      { label: 'midday', text: 'near midday' }, { label: 'late afternoon', text: 'in the late afternoon' },
+      { label: 'blue hour', text: 'during blue hour' }, { label: 'night', text: 'at night' }
+    ],
+    light: [
+      { label: 'natural light', text: 'with uneven natural light' }, { label: 'direct flash', text: 'with direct phone flash' },
+      { label: 'low light', text: 'in low light with realistic digital noise' }, { label: 'side light', text: 'with soft side light' },
+      { label: 'mixed light', text: 'with a believable mix of ambient and artificial light' }
+    ],
+    framing: [
+      { label: 'vertical 9:16', text: 'in a vertical 9:16 frame' }, { label: 'rear camera', text: 'with a smartphone rear camera' },
+      { label: 'chest height', text: 'photographed approximately at chest height' }, { label: 'casual angle', text: 'with a slight casual phone tilt' },
+      { label: 'distant', text: 'from several meters away, without a model pose' }
+    ]
+  }
+};
+
 // Comprehensive database of authentic photographic starters strictly tailored by type
 const STARTERS_BY_CATEGORY: Record<
   string,
@@ -904,12 +962,24 @@ export function getContextualStarters(context: ContextualStarterContext): Starte
     (modeSuffix[cameraMode]?.[language] || '');
 
   const rotated = library
-    ? Object.entries(STARTERS_BY_CATEGORY).flatMap(([sourceCategory, pool]) =>
-        (pool[language] || pool.pt || []).map(item => ({
-          ...item,
-          libraryCategory: sourceCategory
-        }))
-      )
+    ? (() => {
+        const variation = LIBRARY_VARIATIONS[language] || LIBRARY_VARIATIONS.en;
+        const base = Object.entries(STARTERS_BY_CATEGORY).flatMap(([sourceCategory, pool]) =>
+          (pool[language] || pool.pt || []).map((item, baseIndex) => ({
+            ...item,
+            libraryCategory: sourceCategory,
+            libraryIndex: baseIndex
+          }))
+        );
+        return base.flatMap((item: any) => variation.time.flatMap(time =>
+          variation.light.flatMap(light => variation.framing.map(framing => ({
+            ...item,
+            title: `${item.title} · ${time.label} · ${light.label}`,
+            text: `${item.text}, ${time.text}, ${light.text}, ${framing.text}`,
+            libraryKey: `${item.libraryCategory}_${item.libraryIndex}_${time.label}_${light.label}_${framing.label}`
+          })))
+        ));
+      })()
     : [...ranked];
   if (rotated.length > 1 && shuffleKey > 0) {
     const offset = shuffleKey % rotated.length;
@@ -917,7 +987,7 @@ export function getContextualStarters(context: ContextualStarterContext): Starte
   }
 
   return (library ? rotated : rotated.slice(0, 4)).map((item: any, idx) => ({
-    id: `starter_${item.libraryCategory || categoryKey}_${typeId || 'general'}_${idx}_${shuffleKey}`,
+    id: `starter_${item.libraryKey || `${item.libraryCategory || categoryKey}_${idx}`}_${typeId || 'general'}_${shuffleKey}`,
     title: item.title,
     promptText: `${item.text}${suffix}`,
     categoryTag: (item.libraryCategory || categoryKey).toUpperCase().replace('_', ' ')
