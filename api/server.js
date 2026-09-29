@@ -567,52 +567,98 @@ Selected Type ID: ${selectedTypeId}
 Base Modality: ${modality}
 
 ==================================================
-V3 — PERSON / SOLO PERSON / PORTRAIT / LIFESTYLE
+V3 — PERSON / SOLO PERSON / MULTI-SUBJECT STRUCTURED PROMPT
 ==================================================
-For a single person, start the final prompt with the exact language-matched handoff sentence: Portuguese "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."; Spanish "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."; English "Create an image of the man from the uploaded photo, following 100% of his characteristics." Then continue with only wardrobe, environment, action, camera, light, angle and imperfections. Never output the instruction itself.
-body position: { standing/sitting/turning, scale in frame and body mechanics needed for geometry }.
-the person is wearing: { every visible garment, exact color, material, thickness, cut, collar, sleeves, closure, hem, footwear, socks/no socks, accessories, eyewear, watch/jewelry, natural folds/compression caused by the pose }.
-environment: { exact room/street/driveway/garage/etc., foreground, subject plane, background, viewer-left and viewer-right anchors, real everyday details, architecture, floor/wall texture, vehicles/objects with spatial positions }.
-person action: { exact photographed instant, torso orientation, head/chin/gaze, shoulders, viewer-left arm/hand, viewer-right arm/hand, pelvis, legs, feet, weight distribution, contact with furniture/vehicle/object, asymmetry, whether distracted or looking away }.
-the photo is taken: { smartphone device, rear/front mode, lens mode, photographer position, approximate distance, camera height, orientation, crop, subject scale in frame, natural phone perspective }.
-photo imperfections: { only scene-caused imperfections: digital noise, slight focus miss, hand shake, motion blur, flash clipping, white balance shift, compression — only when physically justified }.
-effect: { authentic smartphone capture behavior, no cinema language, no fake pro bokeh, no polished advertisement look }.
-angle: { exact front/side/3-quarter/rear relation, camera height, tilt, horizon/crop, centered/off-center placement }.
-photo format: { selected aspect ratio / output format and how the crop should preserve the subject and environment }.
-light: { source, direction, hardness/softness, falloff, near/far exposure relationship, cast shadows, reflections }.
-materials and reflections: { only materials actually present; fabric response, glass, metal, leather, car paint, wood, stone, water, etc. }.
+V3 MUST USE THE USER'S NEW STRUCTURED MOULD BELOW FOR PEOPLE. The final output is a paste-ready image prompt, not an explanation of this instruction. Keep the section order and the curly-brace blocks exactly. Translate every heading and every value completely into the requested output language.
 
-==================================================
-V3 — TWO PEOPLE / DUO
-==================================================
-For exactly two people, use this exact DUO template and KEEP SUBJECTS, CLOTHING, HANDS AND OBJECT OWNERSHIP SEPARATE. Do not convert it into a report, checklist or paragraph without braces. Keep the same order and preserve every {} block; translate the natural-language labels and values completely into the requested output language.
+V3 REFERENCE HANDOFF:
+- Portuguese opening for one person: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
+- Spanish opening for one person: "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."
+- English opening for one person: "Create an image of the man from the uploaded photo, following 100% of his characteristics."
+For two or more people, use the equivalent language-matched opening that explicitly preserves the exact number of people from the supplied references. The reference images may be used to preserve the requested identity through the separate image-reference channel, while the text prompt describes scene, clothing, pose, action, composition, camera and light. Do not add a facial-analysis paragraph or invent appearance traits in text.
 
-PROMPT EM DUPLA:
-faça uma imagem dos dois homens principais enviados na foto acima, seguindo 100% das características deles.
-o da primeira foto veste: { complete wardrobe and accessories of the first man, exact colors, materials, logos and reference fidelity }.
-ação do primeiro homem: { exact body position, hand use, object contact, gaze, posture and weight distribution }.
-vestimenta do segundo homem: { complete wardrobe and accessories of the second man, preserving his separate reference }.
-ação do segundo homem: { exact action, hand/object interaction, posture and gaze }.
-ambiente: { exact room/street/vehicle geometry, furniture, windows, foreground, midground, background and lived-in details }.
-ao redor e sobre a mesa: { every relevant object with count, material, position, orientation, ownership, contact and partial occlusion }.
-a foto é tirada deles: { rear iPhone/smartphone camera, flash state, distance, camera height, side/front angle, lens mode, crop and handheld behavior }.
-imperfeições: { only causal smartphone flaws such as blown flash, slight focus miss, motion softness or compression when justified }.
-efeito: { medium natural handheld shake or other requested capture behavior, never artificial blur or cinematic grading }.
-pele: { natural unretouched skin and real texture, without artificial smoothing }.
-sombras: { physically correct flash/ambient shadow direction, softness, falloff and background exposure }.
-ângulo da foto: { exact side/front/three-quarter relation that includes both men correctly and preserves natural proportions }.
-formato da foto: { selected platform and aspect ratio }.
+V3 PERSON COUNT CONTRACT:
+- ONE PERSON: output one [PERSONAGEM] block and never add a second-person block.
+- TWO PEOPLE: output [PERSONAGEM 1] and [PERSONAGEM 2], each with separate clothing, posture, action, gaze, hands and object ownership. Never merge them.
+- THREE PEOPLE: output [PERSONAGEM 1], [PERSONAGEM 2] and [PERSONAGEM 3] with the same separate fields.
+- FOUR OR MORE / GROUP: output one separate [PERSONAGEM N] block for every important person identified by position (viewer-left, left-center, center, right-center, viewer-right), plus [OUTROS PARTICIPANTES] only when the remaining people cannot be individually resolved. Preserve the exact count when known.
+- If the selected subject count is auto, infer the count from the explicit idea and references; never default a duo or group to one person.
+- Every person's action must be physically compatible with the shared environment and must identify who touches, holds or owns each object.
 
-For Spanish or English, translate this exact template into the requested language while preserving the same order, the PROMPT EM DUPLA semantic opening, and every curly-brace block. If a logo or lettering is visible, preserve its exact spelling and geometry when legible; if unreadable, keep it indistinct rather than inventing text. Never merge the two men or their clothing, hands, faces, reflections or objects.
+V3 OUTPUT MOULD — USE THIS ORDER FOR PEOPLE:
 
-WHEN THE USER PROVIDES A DETAILED ACCESSORY SPEC (for example Cartier sunglasses with frame/lens/branding attributes), PRESERVE THAT STRUCTURE INSIDE THE CORRESPONDING {} BLOCK INSTEAD OF SIMPLIFYING IT.
+[REFERÊNCIAS]
+Crie uma imagem extremamente realista baseada nas fotos de referência enviadas. Use as referências para preservar a pessoa ou pessoas, a posição na cena, a pose, a roupa, a ação e a composição solicitadas. Preserve rosto, cabelo, tom de pele e proporções somente quando isso for explicitamente solicitado e sempre através da referência visual separada; não transforme a aparência em uma descrição inventada no texto.
 
-==================================================
-V3 — GROUP / MULTI-SUBJECT
-==================================================
-For groups, create one separate identity/wardrobe/action block per important subject whenever enough information exists.
-Never collapse a group into "people standing naturally".
-Map who is viewer-left, center, viewer-right; what each person is doing; who interacts with each object; and how shared light hits them.
+[PERSONAGEM 1]
+Idade aparente: { somente se explicitamente fornecida ou claramente necessária para a solicitação; caso contrário, não inventar }
+Cabelo: { somente se explicitamente solicitado; caso contrário, preservar pela referência visual sem descrever }
+Expressão: { expressão visível ou solicitada, sem inventar traços faciais }
+Postura: { posição do corpo, orientação do torso, cabeça, ombros, quadril, pernas, pés e distribuição de peso }
+Roupa e tecido: { cada peça visível, cor, material, espessura, corte, caimento, fechamento, dobras e compressões causadas pela pose }
+Acessórios: { somente os acessórios visíveis ou solicitados, posição e contato }
+Calçado: { tipo, cor, material, meias quando visíveis, contato com o chão e desgaste quando relevante }
+
+[PERSONAGEM 2] (somente se houver)
+Idade aparente: { somente se explicitamente fornecida; caso contrário, não inventar }
+Cabelo: { somente se explicitamente solicitado; caso contrário, preservar pela referência visual sem descrever }
+Expressão: { expressão visível ou solicitada, sem inventar traços faciais }
+Postura: { posição independente, orientação, distribuição de peso e relação espacial com os demais }
+Roupa e tecido: { peças, cores, materiais, caimento, dobras e compressões próprios deste personagem }
+Acessórios: { acessórios próprios, posição e contato }
+Calçado: { tipo, material, cor e contato com o chão }
+
+[PERSONAGEM 3] (somente se houver)
+Idade aparente: { somente se explicitamente fornecida; caso contrário, não inventar }
+Cabelo: { somente se explicitamente solicitado; caso contrário, preservar pela referência visual sem descrever }
+Expressão: { expressão visível ou solicitada, sem inventar traços faciais }
+Postura: { posição independente, orientação, distribuição de peso e relação espacial com os demais }
+Roupa e tecido: { peças, cores, materiais, caimento, dobras e compressões próprios deste personagem }
+Acessórios: { acessórios próprios, posição e contato }
+Calçado: { tipo, material, cor e contato com o chão }
+
+[PERSONAGENS ADICIONAIS] (somente para quatro ou mais)
+{ um bloco separado por pessoa importante; posição no quadro, roupa, postura, ação, gaze, mãos e relação com objetos. Nunca resumir pessoas importantes em "pessoas ao fundo" }
+
+[AMBIENTE]
+Localização: { lugar específico, tipo de espaço e relação espacial entre primeiro plano, plano dos personagens e fundo }
+Elementos específicos (móveis, objetos): { objetos presentes, quantidade, material, posição, orientação, contato, propriedade e o que cada pessoa toca }
+Elementos de fundo: { arquitetura, janelas, portas, veículos, pessoas distantes e detalhes cotidianos somente quando compatíveis com a referência }
+Horário: { hora ou período do dia, clima e condição do local quando fornecidos ou visíveis }
+
+[AÇÃO]
+O que cada pessoa está fazendo, especificamente: { descreva uma ação diferente para cada personagem quando necessário; mãos esquerda/direita, objeto segurado, contato, direção do olhar, fase do movimento, postura e consequência física na roupa e no ambiente }
+
+[COMPOSIÇÃO]
+Enquadramento: { vertical ou horizontal, plano geral/médio/fechado, crop e escala de cada pessoa }
+Posição das pessoas: { viewer-left, left-center, center, right-center, viewer-right; distância entre elas, sobreposição e quem está à frente/atrás }
+Distância da câmera: { distância realista entre fotógrafo e cena, altura da câmera e perspectiva }
+Primeiro plano / fundo: { elementos próximos, profundidade, linhas de fuga, espaço negativo e o que fica parcialmente oculto }
+
+[CÂMERA]
+Tipo: câmera traseira/frontal de smartphone { preservar a escolha explícita; padrão: câmera traseira }
+Lente equivalente: { 0.5x/1x/2x/3x ou equivalente plausível; não transformar smartphone em lente profissional }
+Distância: { distância física e posição do fotógrafo }
+Profundidade de campo: { profundidade natural de smartphone, sem modo retrato e sem desfoque artificial }
+
+[IMPERFEIÇÕES]
+{ escolher somente 1 ou 2 imperfeições coerentes com a cena: leve motion blur / ruído digital / reflexo / exposição irregular / foco ligeiramente impreciso / compressão / enquadramento levemente torto; nunca despejar todos os defeitos }
+
+[PELE]
+Pele com textura natural, poros visíveis, sem efeito plástico. Não inventar descrição de rosto, cabelo, tom de pele, idade ou identidade no texto quando a referência visual separada já fornece isso.
+
+[REALISMO]
+A imagem deve parecer fotografia real, não renderização 3D. Manter mãos, dedos, roupas, objetos, sombras, reflexos, escala, contato com superfícies e distribuição de peso fisicamente coerentes. Evitar aparência de CGI, publicidade, editorial de moda, simetria perfeita, iluminação de estúdio, bokeh artificial, HDR exagerado e composição cinematográfica quando não solicitados.
+
+[PROPORÇÃO]
+{ sempre 9:16, formato vertical para Instagram, salvo instrução explícita diferente do usuário }
+
+V3 QUALITY METHOD — APPLY SILENTLY BEFORE OUTPUT:
+- Use the principles of a good prompt: concrete subject, clothing, environment, action, camera, light, imperfections, smartphone behavior, reference usage, coherent scene, spontaneous behavior and controlled variations.
+- A good prompt describes what changes pixels: spatial relationships, contact points, materials, hand ownership, body mechanics, light direction and camera position. Avoid hollow adjectives such as "beautiful", "perfectly realistic" or "cinematic" without physical evidence.
+- For variations of the same concept, change one controlled variable at a time (location, action, time, framing or light) while preserving the requested people, clothing and reference fidelity.
+- The educational topics (50 prompt examples, checklist, blank model, variation exercise, editing commands and common AI errors) are internal quality guidance only. Never print those lessons, the checklist, the 50 prompts or meta-commentary in the final image prompt.
+- Return ONLY the completed structured V3 prompt. Do not output analysis, headings such as "ENGINE 3", a checklist, a report or instructions to another AI.
 
 ==================================================
 V3 — OBJECT / POV (CRITICAL)
