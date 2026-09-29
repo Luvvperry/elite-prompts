@@ -24,8 +24,21 @@ const LanguageGate: React.FC<LanguageGateProps> = ({ onChoose }) => {
     <main className="language-gate" aria-labelledby="language-gate-title">
       <div className="language-gate-inner">
         <header className="language-gate-brand">
-          <span className="language-gate-mark" aria-hidden="true">✦</span>
-          <span>ELITE PROMPTS</span>
+          <div className="language-gate-brand-name">
+            <span className="language-gate-mark" aria-hidden="true">✦</span>
+            <span>ELITE PROMPTS</span>
+          </div>
+          <a
+            href="https://www.instagram.com/goatxav/"
+            target="_blank"
+            rel="noreferrer"
+            className="language-gate-instagram instagram-top-link"
+            aria-label="Open @goatxav on Instagram"
+            title="@goatxav"
+          >
+            <InstagramMark />
+            <span>@goatxav</span>
+          </a>
         </header>
 
         <section className="language-gate-hero">
@@ -52,17 +65,6 @@ const LanguageGate: React.FC<LanguageGateProps> = ({ onChoose }) => {
 
         <footer className="language-gate-footer">
           <span>ELITE PROMPTS — REAL IMAGE INTELLIGENCE</span>
-          <a
-            href="https://www.instagram.com/goatxav/"
-            target="_blank"
-            rel="noreferrer"
-            className="language-gate-instagram"
-            aria-label="Open @goatxav on Instagram"
-            title="@goatxav"
-          >
-            <InstagramMark />
-            <span>@goatxav</span>
-          </a>
         </footer>
       </div>
     </main>

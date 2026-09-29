@@ -46,6 +46,13 @@ const Header: React.FC<HeaderProps> = ({
       {/* Desktop — professional instrument rail. The mark is intentionally symbol-only. */}
       <aside className="pro-rail hidden lg:flex" aria-label={copy.nav}>
         <div className="pro-rail-top">
+          <a className="instagram-top-link pro-nav-button" href="https://www.instagram.com/goatxav/" target="_blank" rel="noreferrer" aria-label="Open @goatxav on Instagram" title="@goatxav">
+            <svg className="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
+              <circle cx="12" cy="12" r="4.1" />
+              <circle cx="17.4" cy="6.7" r=".9" fill="currentColor" stroke="none" />
+            </svg>
+          </a>
           <button type="button" onClick={onOpenCommand} className={`${actionClass} pro-nav-primary`} title={copy.command}>
             <Search size={18} strokeWidth={1.7} />
           </button>
@@ -77,6 +84,13 @@ const Header: React.FC<HeaderProps> = ({
       {/* Mobile — deliberately compact, app-like top bar. */}
       <header className="mobile-topbar lg:hidden">
         <div className="mobile-topbar-inner">
+          <a className="instagram-top-link mobile-topbar-button" href="https://www.instagram.com/goatxav/" target="_blank" rel="noreferrer" aria-label="Open @goatxav on Instagram" title="@goatxav">
+            <svg className="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
+              <circle cx="12" cy="12" r="4.1" />
+              <circle cx="17.4" cy="6.7" r=".9" fill="currentColor" stroke="none" />
+            </svg>
+          </a>
           <button type="button" onClick={onOpenCommand} className="mobile-topbar-context" title={copy.command}>
             <SlidersHorizontal size={16} strokeWidth={1.7} />
             <span>{copy.create}</span>

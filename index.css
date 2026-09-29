@@ -2162,3 +2162,21 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
 
 .instagram-svg { width: 17px; height: 17px; display: block; flex: 0 0 auto; }
 .studio-instagram-symbol { display: none !important; }
+
+/* Instagram is a persistent top-level action, never a footer action. */
+.language-gate-brand { justify-content: space-between; }
+.language-gate-brand-name { display: inline-flex; align-items: center; gap: 12px; }
+.instagram-top-link { color: #777773; text-decoration: none; }
+.instagram-top-link:hover { color: #fff; }
+.language-gate-instagram { font: 600 10px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .04em; }
+.studio-footer .studio-instagram-link { display: none !important; }
+.studio-footer { display: none !important; }
+.pro-rail-top .instagram-top-link { margin-bottom: 8px; }
+.mobile-topbar-inner { gap: 12px; }
+.mobile-topbar-inner > .instagram-top-link { flex: 0 0 auto; }
+.mobile-topbar-inner > .mobile-topbar-context { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 640px) {
+  .language-gate-brand { align-items: flex-start; }
+  .language-gate-brand .language-gate-instagram span { display: none; }
+  .language-gate-brand .instagram-svg { width: 20px; height: 20px; }
+}
