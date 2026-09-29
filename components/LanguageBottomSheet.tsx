@@ -12,15 +12,15 @@ interface LanguageBottomSheetProps {
 
 const copy = {
   pt: {
-    title: 'Idioma', subtitle: 'Interface e saída dos prompts', interface: 'Idioma da interface', prompt: 'Idioma dos prompts', auto: 'Automático', autoDesc: 'Usa o idioma atual da interface', apply: 'Aplicar', cancel: 'Cancelar',
+    title: 'Idioma', subtitle: 'Interface e saída dos prompts', interface: 'Idioma da interface', prompt: 'Idioma dos prompts', auto: 'Automático', autoDesc: 'Usa o idioma atual da interface', apply: 'Aplicar', cancel: 'Cancelar', close: 'Fechar',
     promptPt: 'Prompts em Português', promptEn: 'Prompts em Inglês', promptEs: 'Prompts em Espanhol'
   },
   es: {
-    title: 'Idioma', subtitle: 'Interfaz y salida de los prompts', interface: 'Idioma de la interfaz', prompt: 'Idioma de los prompts', auto: 'Automático', autoDesc: 'Usa el idioma actual de la interfaz', apply: 'Aplicar', cancel: 'Cancelar',
+    title: 'Idioma', subtitle: 'Interfaz y salida de los prompts', interface: 'Idioma de la interfaz', prompt: 'Idioma de los prompts', auto: 'Automático', autoDesc: 'Usa el idioma actual de la interfaz', apply: 'Aplicar', cancel: 'Cancelar', close: 'Cerrar',
     promptPt: 'Prompts en Portugués', promptEn: 'Prompts en Inglés', promptEs: 'Prompts en Español'
   },
   en: {
-    title: 'Language', subtitle: 'Interface and prompt output', interface: 'Interface language', prompt: 'Prompt language', auto: 'Automatic', autoDesc: 'Uses the current interface language', apply: 'Apply', cancel: 'Cancel',
+    title: 'Language', subtitle: 'Interface and prompt output', interface: 'Interface language', prompt: 'Prompt language', auto: 'Automatic', autoDesc: 'Uses the current interface language', apply: 'Apply', cancel: 'Cancel', close: 'Close',
     promptPt: 'Prompts in Portuguese', promptEn: 'Prompts in English', promptEs: 'Prompts in Spanish'
   }
 } as const;
@@ -84,7 +84,7 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
             <div className="w-8 h-8 rounded-lg border border-[var(--border-main)] bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-secondary)]"><Globe2 size={16} /></div>
             <div><h3 className="text-sm font-semibold text-[var(--text-primary)]">{ui.title}</h3><p className="text-[11px] text-[var(--text-muted)]">{ui.subtitle}</p></div>
           </div>
-          <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"><X size={16} /></button>
+          <button type="button" onClick={onClose} aria-label={ui.close} title={ui.close} className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"><X size={16} /></button>
         </div>
 
         <div className="p-5 flex flex-col gap-6 max-h-[74vh] overflow-y-auto custom-scrollbar">
