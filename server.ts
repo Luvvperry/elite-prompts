@@ -416,6 +416,19 @@ PROHIBITED: "Actúa como...", "Eres experto...", "Tu misión...", "Chain-of-thou
 Deliver pure, executable image generation prompts!
 
 ==================================================
+GLOBAL ORDINARY PHONE REALITY — APPLY TO V1, V2, V3, V4 AND V5
+==================================================
+The target is an ordinary, physically possible smartphone photograph, not an image that merely says "photorealistic". Apply these rules to every engine and every scene:
+- Build the background as a continuous real place connected to the subject's ground, walls, horizon and light. Preserve scale, perspective, depth order and occlusion from foreground through distance. Never create a wallpaper-like background, random skyline, floating architecture, impossible perspective, repeated windows, cloned trees, melted cars or decorative light blobs.
+- Prefer the exact ordinary environment requested by the user over spectacle. A garage, driveway, bedroom, street, kitchen or sidewalk must show its actual surfaces, transitions, clutter and limits; do not upgrade it into a luxury set, postcard, studio or cinematic location.
+- A phone camera does not make every plane into perfect bokeh. Use moderate, distance-based softness and realistic computational sharpening. Nearby objects may be partially cropped, the subject may be slightly off-center, and distant details may remain recognizable instead of dissolving into decorative blur.
+- Make light unified across the whole frame: one believable time of day, consistent sun or practical lamps, plausible color temperature, contact shadows and falloff. Do not combine sunset sky, studio key light, rim light and unrelated ambient colors unless the scene physically contains those sources.
+- Keep real-world scale and gravity: feet meet the ground, cars sit on the driveway, buildings meet the horizon, hands touch the objects they hold, shadows stay attached to objects, and reflections follow the surface that produces them.
+- Use normal phone color and exposure: restrained HDR, imperfect auto white balance, slight exposure compromise between subject and background, no glossy 8K clarity, no hyper-detailed background, no teal-orange grade and no perfect edge separation.
+- If the scene has no evidence for a dramatic element, omit it. Do not add mountains, skyline landmarks, luxury cars, palm trees, neon, cinematic fog, dramatic clouds, rim light or extra people just to make the frame more impressive.
+- Before returning each version, perform a silent continuity check: could one person physically stand there and could one handheld phone capture all visible planes, shadows, reflections and objects from the stated position in one moment? If not, simplify the scene rather than inventing detail.
+
+==================================================
 ENGINE 1: V1 — SMART NATURAL SNAPSHOT
 ==================================================
 ${V1_SMART_INSTRUCTION}
@@ -931,7 +944,7 @@ ${userTextDescription}`
         if (!responseText) throw new Error("Empty response from model.");
 
         const parsed = JSON.parse(responseText);
-        const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, cartoon, anime, illustration, oversaturated, artificial studio lighting, shallow cinematic bokeh, exaggerated fake blur, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, invented watermark, fake signature, misspelled text, random characters, melted lettering, warped logo geometry, mirrored writing, doubled glyphs, weird eyes, unnatural specular highlights";
+        const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, beauty filter, cartoon, anime, illustration, oversaturated, artificial studio lighting, sunset color grading without a real sunset, teal-orange grade, shallow cinematic bokeh, cutout subject, halo edges, fake depth map, background wallpaper, generic AI background, impossible perspective, floating architecture, repeated windows, cloned trees, melted cars, warped horizon, disconnected shadows, inconsistent reflections, decorative light blobs, hyper-detailed distant background, glossy 8K clarity, perfect symmetry, posed fashion campaign, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, invented watermark, fake signature, misspelled text, random characters, melted lettering, warped logo geometry, mirrored writing, doubled glyphs, weird eyes, unnatural specular highlights";
 
                         // Dedicated long-form pass: V4/V5 get their own output budget so the five-engine
                 // response does not compress the human/phone realism requested by the user.
