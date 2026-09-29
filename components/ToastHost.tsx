@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { Language } from '../types';
 
 export type ToastPayload = {
   id: number;
@@ -9,10 +10,11 @@ export type ToastPayload = {
 
 interface ToastHostProps {
   toast: ToastPayload;
+  lang: Language;
   onClose: () => void;
 }
 
-const ToastHost: React.FC<ToastHostProps> = ({ toast, onClose }) => {
+const ToastHost: React.FC<ToastHostProps> = ({ toast, lang, onClose }) => {
   useEffect(() => {
     if (!toast) return;
     const timer = window.setTimeout(onClose, 4200);
@@ -21,6 +23,8 @@ const ToastHost: React.FC<ToastHostProps> = ({ toast, onClose }) => {
 
   if (!toast) return null;
 
+  const closeLabel = lang === 'pt' ? 'Fechar notificação' : lang === 'es' ? 'Cerrar notificación' : 'Close notification';
+
   return (
     <div className="toast-host" role="status" aria-live="polite">
       <div className={`toast-card toast-${toast.type}`}>
@@ -28,7 +32,7 @@ const ToastHost: React.FC<ToastHostProps> = ({ toast, onClose }) => {
           {toast.type === 'error' ? <AlertCircle size={17} /> : <CheckCircle2 size={17} />}
         </div>
         <div className="toast-message">{toast.message}</div>
-        <button type="button" className="toast-close" onClick={onClose} aria-label="Close notification">
+        <button type="button" className="toast-close" onClick={onClose} aria-label={closeLabel}>
           <X size={15} />
         </button>
       </div>

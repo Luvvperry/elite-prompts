@@ -915,11 +915,12 @@ const App: React.FC = () => {
 
       <UsageGateModal
         open={isUsageGateOpen}
+        lang={lang}
         onClose={() => setIsUsageGateOpen(false)}
         onUnlocked={() => setUsage(getUsageState())}
       />
 
-      <ToastHost toast={toast} onClose={() => setToast(null)} />
+      <ToastHost toast={toast} lang={lang} onClose={() => setToast(null)} />
 
       </div>
     </div>
