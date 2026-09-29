@@ -26,11 +26,32 @@ export interface SuggestionComplement {
 }
 
 const LIBRARY_VARIATIONS: Record<Language, {
+  scenes: Array<{ label: string; text: string }>;
   time: Array<{ label: string; text: string }>;
   light: Array<{ label: string; text: string }>;
   framing: Array<{ label: string; text: string }>;
 }> = {
   pt: {
+    scenes: [
+      { label: 'esperando o elevador', text: 'esperando o elevador de um prédio antigo, olhando distraído para o painel' },
+      { label: 'comprando café', text: 'pegando um café para viagem em uma padaria movimentada, com pessoas passando ao fundo' },
+      { label: 'na lavanderia', text: 'sentado em uma lavanderia automática com máquinas funcionando e roupas dobradas ao lado' },
+      { label: 'no estacionamento', text: 'atravessando um estacionamento aberto com carrinhos espalhados e carros estacionados de forma irregular' },
+      { label: 'na banca de jornal', text: 'parado diante de uma banca de jornal de esquina, folheando uma revista sem olhar para a câmera' },
+      { label: 'no mercado', text: 'empurrando um carrinho em um mercado quase vazio, escolhendo algo em uma prateleira' },
+      { label: 'no posto', text: 'parado ao lado de um carro em um posto de gasolina, com mangueira e placas visíveis' },
+      { label: 'na escada', text: 'sentado no meio de uma escada de concreto, com mochila e objetos pessoais próximos' },
+      { label: 'na janela do ônibus', text: 'sentado junto à janela de um ônibus urbano, com reflexos da rua sobre o vidro' },
+      { label: 'na cozinha', text: 'preparando algo simples na cozinha de casa, com louça e utensílios usados na bancada' },
+      { label: 'no campo de futebol', text: 'parado na lateral de um campo de futebol vazio depois do treino, com cones e rede ao fundo' },
+      { label: 'na praia nublada', text: 'caminhando perto da água em uma praia nublada, com areia molhada e poucas pessoas distantes' },
+      { label: 'na garagem', text: 'procurando alguma coisa em uma garagem desorganizada, entre caixas, ferramentas e objetos antigos' },
+      { label: 'no terraço', text: 'apoiado no parapeito de um terraço residencial, observando prédios e antenas ao redor' },
+      { label: 'no hotel', text: 'saindo de um quarto de hotel com uma mala aberta e itens pessoais sobre a cama' },
+      { label: 'na feira', text: 'andando por uma feira de rua cheia de barracas, sacolas e vendedores ocupados' },
+      { label: 'na biblioteca', text: 'sentado entre estantes de uma biblioteca, com livros abertos e anotações sobre a mesa' },
+      { label: 'na chuva', text: 'atravessando uma calçada molhada depois de uma chuva recente, segurando um guarda-chuva fechado' }
+    ],
     time: [
       { label: 'amanhecer', text: 'no amanhecer' }, { label: 'manhã', text: 'durante a manhã' },
       { label: 'meio-dia', text: 'perto do meio-dia' }, { label: 'fim de tarde', text: 'no fim da tarde' },
@@ -48,6 +69,26 @@ const LIBRARY_VARIATIONS: Record<Language, {
     ]
   },
   es: {
+    scenes: [
+      { label: 'esperando el ascensor', text: 'esperando el ascensor de un edificio antiguo, mirando distraído el panel' },
+      { label: 'comprando café', text: 'recogiendo un café para llevar en una panadería concurrida, con gente pasando al fondo' },
+      { label: 'en la lavandería', text: 'sentado en una lavandería automática con máquinas funcionando y ropa doblada al lado' },
+      { label: 'en el estacionamiento', text: 'cruzando un estacionamiento abierto con carritos y coches aparcados de forma irregular' },
+      { label: 'en el quiosco', text: 'parado frente a un quiosco de esquina, hojeando una revista sin mirar a la cámara' },
+      { label: 'en el mercado', text: 'empujando un carrito en un mercado casi vacío, eligiendo algo de una estantería' },
+      { label: 'en la gasolinera', text: 'parado junto a un coche en una gasolinera, con manguera y letreros visibles' },
+      { label: 'en las escaleras', text: 'sentado en medio de una escalera de hormigón, con mochila y objetos personales cerca' },
+      { label: 'en la ventana del autobús', text: 'sentado junto a la ventana de un autobús urbano, con reflejos de la calle sobre el vidrio' },
+      { label: 'en la cocina', text: 'preparando algo sencillo en una cocina doméstica, con platos y utensilios usados sobre la encimera' },
+      { label: 'en el campo de fútbol', text: 'parado junto a un campo de fútbol vacío después del entrenamiento, con conos y red al fondo' },
+      { label: 'en la playa nublada', text: 'caminando cerca del agua en una playa nublada, con arena mojada y pocas personas distantes' },
+      { label: 'en el garaje', text: 'buscando algo en un garaje desordenado, entre cajas, herramientas y objetos antiguos' },
+      { label: 'en la terraza', text: 'apoyado en la barandilla de una terraza residencial, observando edificios y antenas' },
+      { label: 'en el hotel', text: 'saliendo de una habitación de hotel con una maleta abierta y objetos personales sobre la cama' },
+      { label: 'en el mercado callejero', text: 'caminando por un mercado callejero lleno de puestos, bolsas y vendedores ocupados' },
+      { label: 'en la biblioteca', text: 'sentado entre estanterías de una biblioteca, con libros abiertos y notas sobre la mesa' },
+      { label: 'bajo la lluvia', text: 'cruzando una acera mojada después de una lluvia reciente, sosteniendo un paraguas cerrado' }
+    ],
     time: [
       { label: 'amanecer', text: 'al amanecer' }, { label: 'mañana', text: 'durante la mañana' },
       { label: 'mediodía', text: 'cerca del mediodía' }, { label: 'tarde', text: 'al final de la tarde' },
@@ -65,6 +106,26 @@ const LIBRARY_VARIATIONS: Record<Language, {
     ]
   },
   en: {
+    scenes: [
+      { label: 'waiting for the elevator', text: 'waiting for an elevator in an old building, distractedly watching the panel' },
+      { label: 'buying coffee', text: 'picking up takeaway coffee in a busy bakery with people passing in the background' },
+      { label: 'at the laundromat', text: 'sitting in a laundromat with machines running and folded clothes beside the seat' },
+      { label: 'in the parking lot', text: 'crossing an open parking lot with scattered carts and irregularly parked cars' },
+      { label: 'at the newsstand', text: 'standing at a corner newsstand, flipping through a magazine without looking at the camera' },
+      { label: 'at the market', text: 'pushing a cart through an almost empty grocery store while choosing something from a shelf' },
+      { label: 'at the gas station', text: 'standing beside a car at a gas station with the hose and signs visible' },
+      { label: 'on the stairs', text: 'sitting halfway up a concrete stairwell with a backpack and personal items nearby' },
+      { label: 'by the bus window', text: 'sitting beside the window of a city bus with street reflections across the glass' },
+      { label: 'in the kitchen', text: 'preparing something simple in a home kitchen with used dishes and utensils on the counter' },
+      { label: 'at the football field', text: 'standing beside an empty football field after practice with cones and netting in the background' },
+      { label: 'on the cloudy beach', text: 'walking near the water on a cloudy beach with wet sand and only a few distant people' },
+      { label: 'in the garage', text: 'looking for something in a messy garage among boxes, tools and old objects' },
+      { label: 'on the terrace', text: 'leaning on the railing of a residential terrace while watching surrounding buildings and antennas' },
+      { label: 'at the hotel', text: 'leaving a hotel room with an open suitcase and personal items spread across the bed' },
+      { label: 'at the street market', text: 'walking through a crowded street market with stalls, shopping bags and busy vendors' },
+      { label: 'in the library', text: 'sitting between library shelves with open books and notes on the table' },
+      { label: 'after the rain', text: 'crossing a wet sidewalk after recent rain while holding a closed umbrella' }
+    ],
     time: [
       { label: 'dawn', text: 'at dawn' }, { label: 'morning', text: 'during the morning' },
       { label: 'midday', text: 'near midday' }, { label: 'late afternoon', text: 'in the late afternoon' },
@@ -971,8 +1032,18 @@ export function getContextualStarters(context: ContextualStarterContext): Starte
             libraryIndex: baseIndex
           }))
         );
-        return base.flatMap((item: any) => variation.time.flatMap(time =>
-          variation.light.flatMap(light => variation.framing.map(framing => ({
+        const distinctScenes = variation.scenes.map((scene, sceneIndex) => ({
+          title: scene.label,
+          text: scene.text,
+          libraryCategory: 'scenes',
+          libraryIndex: sceneIndex
+        }));
+        const sources = [...base, ...distinctScenes];
+        const times = variation.time.slice(0, 3);
+        const lights = variation.light.slice(0, 3);
+        const framings = variation.framing.slice(0, 3);
+        return sources.flatMap((item: any) => times.flatMap(time =>
+          lights.flatMap(light => framings.map(framing => ({
             ...item,
             title: `${item.title} · ${time.label} · ${light.label}`,
             text: `${item.text}, ${time.text}, ${light.text}, ${framing.text}`,
