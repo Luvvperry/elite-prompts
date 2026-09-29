@@ -7,8 +7,8 @@ interface LanguageGateProps {
 
 const options: Array<{ language: Language; name: string; native: string }> = [
   { language: 'en', name: 'English', native: 'ENGLISH' },
-  { language: 'pt', name: 'Português', native: 'BRASIL' },
-  { language: 'es', name: 'Español', native: 'ESPAÑOL' }
+  { language: 'pt', name: 'Portuguese', native: 'PORTUGUESE' },
+  { language: 'es', name: 'Spanish', native: 'SPANISH' }
 ];
 
 const InstagramMark = () => (
@@ -42,9 +42,9 @@ const LanguageGate: React.FC<LanguageGateProps> = ({ onChoose }) => {
         </header>
 
         <section className="language-gate-hero">
-          <p className="language-gate-kicker">WELCOME / BEM-VINDO</p>
+          <p className="language-gate-kicker">WELCOME</p>
           <h1 id="language-gate-title">Choose your<br />language.</h1>
-          <p className="language-gate-subtitle">Escolha como você quer ver o seu estúdio de prompts.</p>
+          <p className="language-gate-subtitle">Choose how you want to use your prompt studio.</p>
         </section>
 
         <div className="language-gate-options" role="list" aria-label="Choose language">

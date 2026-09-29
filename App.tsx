@@ -660,9 +660,9 @@ const App: React.FC = () => {
   const canGenerate = (mode === 'image' && (references.length > 0 || ideaText.trim().length > 0)) || (mode === 'idea' && ideaText.trim().length > 0);
 
   const workspaceLabels = {
-    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', liveWorkspace: 'Workspace ativo', kicker: 'Laboratório de imagem / 05 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
-    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', liveWorkspace: 'Workspace activo', kicker: 'Laboratorio de imagen / 05 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
-    en: { input: 'Input', controls: 'Controls', output: 'Output', liveWorkspace: 'Active workspace', kicker: 'Image laboratory / 05 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
+    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', kicker: 'Laboratório de imagem / 05 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
+    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', kicker: 'Laboratorio de imagen / 05 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
+    en: { input: 'Input', controls: 'Controls', output: 'Output', kicker: 'Image laboratory / 05 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
   }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   return (
@@ -716,11 +716,6 @@ const App: React.FC = () => {
                   <span className="ep-masthead-kicker"><i />{workspaceLabels.kicker}</span>
                   <h1 id="ep-masthead-title">{workspaceLabels.headline}</h1>
                   <p>{workspaceLabels.subline}</p>
-                </div>
-                <div className="ep-masthead-signal" aria-label={workspaceLabels.liveWorkspace}>
-                  <span className="ep-signal-pulse" />
-                  <span>{workspaceLabels.liveWorkspace}</span>
-                  <b>05</b>
                 </div>
               </section>
 
