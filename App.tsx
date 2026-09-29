@@ -36,6 +36,7 @@ import CommandPalette from './components/CommandPalette';
 import MobileCommandDock from './components/MobileCommandDock';
 import ToastHost, { ToastPayload } from './components/ToastHost';
 import CosmicCanvas from './components/CosmicCanvas';
+import LanguageGate from './components/LanguageGate';
 
 
 const normalizeInterfaceLanguage = (value: string | null | undefined): Language => {
@@ -282,7 +283,12 @@ const App: React.FC = () => {
     const urlLang = new URLSearchParams(window.location.search).get('lang');
     if (urlLang) return normalizeInterfaceLanguage(urlLang);
     const stored = localStorage.getItem('ep_lang');
-    return stored ? normalizeInterfaceLanguage(stored) : 'es';
+    return stored ? normalizeInterfaceLanguage(stored) : 'en';
+  });
+
+  const [hasChosenLanguage, setHasChosenLanguage] = useState<boolean>(() => {
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    return Boolean(urlLang || localStorage.getItem('ep_language_chosen'));
   });
 
   const [promptLang, setPromptLang] = useState<PromptLanguage>(() => {
@@ -368,6 +374,15 @@ const App: React.FC = () => {
     localStorage.setItem('ep_lang', lang);
     document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
   }, [lang]);
+
+  const handleChooseLanguage = useCallback((nextLanguage: Language) => {
+    setLang(nextLanguage);
+    setPromptLang(nextLanguage);
+    setHasChosenLanguage(true);
+    localStorage.setItem('ep_language_chosen', 'true');
+    localStorage.setItem('ep_lang', nextLanguage);
+    localStorage.setItem('ep_prompt_lang', nextLanguage);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('ep_prompt_lang', promptLang);
@@ -655,6 +670,8 @@ const App: React.FC = () => {
 
   return (
     <div className={`app-shell min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
+      {!hasChosenLanguage && <LanguageGate onChoose={handleChooseLanguage} />}
+      <div className={hasChosenLanguage ? '' : 'language-gated-app'} aria-hidden={!hasChosenLanguage}>
       <div className="ep-universe" aria-hidden="true">
         <CosmicCanvas />
         <span className="ep-universe-nebula ep-universe-nebula-a" />
@@ -819,9 +836,11 @@ const App: React.FC = () => {
         </main>
       </div>
 
-      <footer className="studio-footer mt-auto lg:pl-[64px]">
-        <span className="studio-footer-line" />
-        <span className="studio-footer-credit"><i aria-hidden="true">✦</i> Made by xavi</span>
+      <footer className="studio-footer mt-auto lg:pl-[64px]" aria-label="Elite Prompts footer">
+        <a className="studio-instagram-link" href="https://www.instagram.com/goatxav/" target="_blank" rel="noreferrer" aria-label="Open @goatxav on Instagram">
+          <span className="studio-instagram-symbol" aria-hidden="true">◎</span>
+          <span>@goatxav</span>
+        </a>
       </footer>
 
       {/* 4. Presets Modal */}
@@ -917,6 +936,7 @@ const App: React.FC = () => {
 
       <ToastHost toast={toast} onClose={() => setToast(null)} />
 
+      </div>
     </div>
   );
 };
