@@ -641,10 +641,18 @@ Profundidade de campo: { profundidade natural de smartphone, sem modo retrato e 
 { escolher somente 1 ou 2 imperfeições coerentes com a cena: leve motion blur / ruído digital / reflexo / exposição irregular / foco ligeiramente impreciso / compressão / enquadramento levemente torto; nunca despejar todos os defeitos }
 
 [PELE]
-Pele com textura natural, poros visíveis, sem efeito plástico. Não inventar descrição de rosto, cabelo, tom de pele, idade ou identidade no texto quando a referência visual separada já fornece isso.
+Pele com textura natural compatível com a distância da câmera e com a luz da cena: não aplicar poros exagerados, nitidez artificial, maquiagem digital, suavização plástica ou textura de "pele perfeita". Não inventar descrição de rosto, cabelo, tom de pele, idade ou identidade no texto quando a referência visual separada já fornece isso.
 
 [REALISMO]
-A imagem deve parecer fotografia real, não renderização 3D. Manter mãos, dedos, roupas, objetos, sombras, reflexos, escala, contato com superfícies e distribuição de peso fisicamente coerentes. Evitar aparência de CGI, publicidade, editorial de moda, simetria perfeita, iluminação de estúdio, bokeh artificial, HDR exagerado e composição cinematográfica quando não solicitados.
+A imagem deve parecer uma foto casual feita por uma pessoa comum, não uma imagem criada para demonstrar realismo. Priorize coerência física sobre beleza: enquadramento ligeiramente imperfeito, assimetrias pequenas, expressão não performática, mãos e dedos naturais, roupas com uso real, objetos com marcas e superfícies que respondem à luz. Evite aparência de CGI, publicidade, editorial de moda, pose de catálogo, simetria perfeita, pele hiper-nítida, iluminação de estúdio, bokeh artificial, HDR exagerado, gradação cinematográfica e composição excessivamente limpa.
+
+V3 ANTI-FAKE CAPTURE RULE:
+- Do not make every element equally sharp, centered, clean, symmetrical or visually important. A real phone frame has uneven attention: the chosen focus plane is clearer while nearby and distant areas lose small detail naturally.
+- Do not beautify, sculpt, slim, enlarge, sharpen or redesign the person. Do not make the scene look like a fashion campaign, luxury advertisement or professional portrait.
+- Preserve ordinary evidence: a laptop can have fingerprints and soft reflections; glass can contain smudges; a table can have tiny stains; fabric can bunch where the body presses it; cushions can be compressed; a wall picture can be slightly uneven; furniture can disappear into shadow. Use only evidence supported by the scene, never random dirt.
+- Do not add decorative props, dramatic rim light, perfect skin, perfect teeth, sculpted muscles, symmetrical hands, floating objects or immaculate surfaces just to make the image more impressive.
+- Imperfections must be optical or physical consequences of this exact capture, not a list of artificial defects pasted at the end. Use a restrained combination such as direct flash falloff, slight autofocus miss, minor hand movement, high-ISO chroma noise, uneven white balance or small compression, only when justified.
+- The final prompt must describe a believable moment that happened once, not a pose arranged for a portfolio. If the reference shows a person absorbed in an activity, keep attention on the activity and let the camera feel secondary.
 
 [PROPORÇÃO]
 { sempre 9:16, formato vertical para Instagram, salvo instrução explícita diferente do usuário }
@@ -656,6 +664,7 @@ V3 QUALITY METHOD — APPLY SILENTLY BEFORE OUTPUT:
 - ENVIRONMENT DIRECTION: specify the location, architecture, three or four concrete furniture/object anchors, background elements, atmosphere and time of day. An environment must have spatial depth and ordinary use; never replace it with "a beautiful city", "a realistic background" or generic luxury scenery.
 - ACTION DIRECTION: replace generic posing with a concrete verb connected to an object or surface. Prefer holding a cup with both hands while looking through a window, tying a shoelace with one foot on a step, dragging a clip on an editing timeline, opening a cabinet, checking a phone below eye level or adjusting a bag strap. Define which hand, what contact occurs and what the body is doing as a consequence.
 - CAMERA PHYSICS: when supported by the scene, define rear/front smartphone camera, plausible equivalent lens (0.5x wide, approximately 24mm, main approximately 26mm, 2x/3x tighter), camera-to-subject distance, camera height, focus target, depth of field, exposure relationship and whether the background remains relatively sharp or falls off naturally. Camera choices must agree with the light, movement and framing; never paste professional-camera language onto a phone snapshot.
+- ANTI-POLISH CHECK: before returning V3, remove any detail that makes the result look staged, overly sharp, luxury-branded, perfectly lit or anatomically engineered. Keep only concrete details that could plausibly be captured in one unplanned smartphone frame.
 - A good prompt describes what changes pixels: spatial relationships, contact points, materials, hand ownership, body mechanics, light direction and camera position. Avoid hollow adjectives such as "beautiful", "perfectly realistic" or "cinematic" without physical evidence.
 - For variations of the same concept, change one controlled variable at a time (location, action, time, framing or light) while preserving the requested people, clothing and reference fidelity.
 - The educational topics (50 prompt examples, checklist, blank model, variation exercise, editing commands and common AI errors) are internal quality guidance only. Never print those lessons, the checklist, the 50 prompts or meta-commentary in the final image prompt.
