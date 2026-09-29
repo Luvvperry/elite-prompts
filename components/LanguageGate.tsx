@@ -26,7 +26,6 @@ const LanguageGate: React.FC<LanguageGateProps> = ({ onChoose }) => {
         <header className="language-gate-brand">
           <div className="language-gate-brand-name">
             <span className="language-gate-brand-text">ELITE PROMPTS</span>
-            <span>ELITE PROMPTS</span>
           </div>
           <a
             href="https://www.instagram.com/goatxav/"

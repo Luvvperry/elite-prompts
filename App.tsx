@@ -286,10 +286,7 @@ const App: React.FC = () => {
     return stored ? normalizeInterfaceLanguage(stored) : 'en';
   });
 
-  const [hasChosenLanguage, setHasChosenLanguage] = useState<boolean>(() => {
-    const urlLang = new URLSearchParams(window.location.search).get('lang');
-    return Boolean(urlLang) || localStorage.getItem('ep_language_chosen') === 'true';
-  });
+  const [hasChosenLanguage, setHasChosenLanguage] = useState<boolean>(false);
 
   const [promptLang, setPromptLang] = useState<PromptLanguage>(() => {
     const urlLang = new URLSearchParams(window.location.search).get('lang');
