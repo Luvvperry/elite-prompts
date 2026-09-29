@@ -2427,3 +2427,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Modal and library states use the same contrast contract. */
 .search-sheet, .settings-sheet, .history-drawer, .presets-modal, .command-palette, .toast-card { background: #141619 !important; border-color: #3B4148 !important; color: #F5F5F2 !important; }
 .search-sheet button:hover, .settings-sheet button:hover, .history-drawer button:hover, .presets-modal button:hover, .command-palette button:hover { background: #272B30 !important; color: #F5F5F2 !important; }
+
+/* Language sheet interaction contract — immediate choices, safe mobile presentation. */
+body.language-sheet-open { overflow: hidden !important; }
+body.language-sheet-open .mobile-command-dock { display: none !important; }
+.language-sheet { padding-bottom: env(safe-area-inset-bottom); }
+.language-sheet-panel { max-height: min(86svh, 680px); }
+.language-sheet-panel > .max-h-\[74vh\] { max-height: min(62svh, 470px) !important; overscroll-behavior: contain; }
+.language-sheet button { touch-action: manipulation; }
+@media (max-width: 640px) {
+  .language-sheet-panel { max-height: calc(100svh - env(safe-area-inset-top) - 12px); border-radius: 18px 18px 0 0 !important; }
+  .language-sheet-panel > .max-h-\[74vh\] { max-height: calc(100svh - 190px) !important; padding-bottom: 18px !important; }
+  .language-sheet-panel > div:first-child + div { padding-top: 12px !important; }
+}

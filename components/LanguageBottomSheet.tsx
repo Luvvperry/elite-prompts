@@ -44,6 +44,11 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
   }, [isOpen, currentLang, currentPromptLang]);
 
   useEffect(() => {
+    document.body.classList.toggle('language-sheet-open', isOpen);
+    return () => document.body.classList.remove('language-sheet-open');
+  }, [isOpen]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && isOpen && onClose();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -70,8 +75,8 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
       : 'bg-[var(--surface-secondary)] border-[var(--border-main)] text-[var(--text-secondary)] hover:border-[var(--border-active)] hover:text-[var(--text-primary)]'}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center sm:items-center bg-black/65 animate-in fade-in duration-150" onClick={onClose}>
-      <div className="w-full sm:max-w-md bg-[var(--surface-main)] border-t sm:border border-[var(--border-main)] rounded-t-2xl sm:rounded-2xl shadow-[var(--shadow-float)] overflow-hidden animate-in slide-in-from-bottom duration-200" onClick={(e) => e.stopPropagation()}>
+    <div className="language-sheet fixed inset-0 z-[100] flex flex-col justify-end sm:justify-center sm:items-center bg-black/65 animate-in fade-in duration-150" onClick={onClose}>
+      <div className="language-sheet-panel w-full sm:max-w-md bg-[var(--surface-main)] border-t sm:border border-[var(--border-main)] rounded-t-2xl sm:rounded-2xl shadow-[var(--shadow-float)] overflow-hidden animate-in slide-in-from-bottom duration-200" onClick={(e) => e.stopPropagation()}>
         <div className="w-full pt-3 pb-1 flex justify-center sm:hidden"><div className="w-9 h-1 bg-[var(--border-active)] rounded-full" /></div>
 
         <div className="px-5 py-4 border-b border-[var(--border-main)] flex items-center justify-between">
@@ -88,7 +93,7 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
             <div className="flex flex-col gap-1.5">
               {interfaceOptions.map(opt => {
                 const selected = selectedLang === opt.id;
-                return <button key={opt.id} type="button" onClick={() => setSelectedLang(opt.id)} className={row(selected)}>
+                return <button key={opt.id} type="button" onClick={() => { setSelectedLang(opt.id); onApply(opt.id, selectedPromptLang); }} className={row(selected)}>
                   <div className="flex flex-col"><span className="text-xs font-medium">{opt.label}</span><span className="text-[10px] opacity-65">{opt.sub}</span></div>
                   {selected && <div className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center"><Check size={12} strokeWidth={2.5} /></div>}
                 </button>;
@@ -101,7 +106,7 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
             <div className="flex flex-col gap-1.5">
               {promptOptions.map(opt => {
                 const selected = selectedPromptLang === opt.id;
-                return <button key={opt.id} type="button" onClick={() => setSelectedPromptLang(opt.id)} className={row(selected)}>
+                return <button key={opt.id} type="button" onClick={() => { setSelectedPromptLang(opt.id); onApply(selectedLang, opt.id); }} className={row(selected)}>
                   <div className="flex flex-col"><span className="text-xs font-medium">{opt.label}</span><span className="text-[10px] opacity-65">{opt.sub}</span></div>
                   {selected && <div className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center"><Check size={12} strokeWidth={2.5} /></div>}
                 </button>;
@@ -110,10 +115,6 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
           </section>
         </div>
 
-        <div className="p-4 border-t border-[var(--border-main)] flex items-center gap-2">
-          <button type="button" onClick={onClose} className="flex-1 h-10 rounded-lg border border-[var(--border-main)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]">{ui.cancel}</button>
-          <button type="button" onClick={() => { onApply(selectedLang, selectedPromptLang); onClose(); }} className="flex-1 h-10 rounded-lg bg-white text-black text-xs font-semibold">{ui.apply}</button>
-        </div>
       </div>
     </div>
   );
