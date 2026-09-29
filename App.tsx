@@ -838,7 +838,11 @@ const App: React.FC = () => {
 
       <footer className="studio-footer mt-auto lg:pl-[64px]" aria-label="Elite Prompts footer">
         <a className="studio-instagram-link" href="https://www.instagram.com/goatxav/" target="_blank" rel="noreferrer" aria-label="Open @goatxav on Instagram">
-          <span className="studio-instagram-symbol" aria-hidden="true">◎</span>
+          <svg className="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7">
+            <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
+            <circle cx="12" cy="12" r="4.1" />
+            <circle cx="17.4" cy="6.7" r=".9" fill="currentColor" stroke="none" />
+          </svg>
           <span>@goatxav</span>
         </a>
       </footer>

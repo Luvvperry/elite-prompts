@@ -11,6 +11,14 @@ const options: Array<{ language: Language; name: string; native: string }> = [
   { language: 'es', name: 'Español', native: 'ESPAÑOL' }
 ];
 
+const InstagramMark = () => (
+  <svg className="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7">
+    <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
+    <circle cx="12" cy="12" r="4.1" />
+    <circle cx="17.4" cy="6.7" r=".9" fill="currentColor" stroke="none" />
+  </svg>
+);
+
 const LanguageGate: React.FC<LanguageGateProps> = ({ onChoose }) => {
   return (
     <main className="language-gate" aria-labelledby="language-gate-title">
@@ -52,7 +60,7 @@ const LanguageGate: React.FC<LanguageGateProps> = ({ onChoose }) => {
             aria-label="Open @goatxav on Instagram"
             title="@goatxav"
           >
-            <span className="language-gate-instagram-symbol" aria-hidden="true">◎</span>
+            <InstagramMark />
             <span>@goatxav</span>
           </a>
         </footer>

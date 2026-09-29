@@ -2159,3 +2159,6 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
   .language-gate-option-native { margin-left: auto; margin-right: 34px; }
   .language-gate-footer { align-items: flex-start; flex-direction: column; gap: 18px; }
 }
+
+.instagram-svg { width: 17px; height: 17px; display: block; flex: 0 0 auto; }
+.studio-instagram-symbol { display: none !important; }
