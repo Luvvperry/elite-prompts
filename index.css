@@ -2369,3 +2369,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .studio-output-pane .prompt-console-state { min-height: 220px !important; }
   .elite-rail-wordmark-only { display: none; }
 }
+
+/* Compact workspace masthead — keep task controls visually primary. */
+.ep-masthead { padding: 14px 0 18px !important; }
+.ep-masthead-kicker { font-size: 9px !important; }
+.ep-masthead h1 { max-width: 680px !important; margin: 8px 0 6px !important; font-size: clamp(2rem, 3.7vw, 3.7rem) !important; line-height: .98 !important; }
+.ep-masthead p { font-size: 12px !important; max-width: 500px !important; }
