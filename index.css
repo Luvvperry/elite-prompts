@@ -2290,3 +2290,59 @@ input[type="range"] { accent-color: #FF6A3D !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }
+
+/* MONOCHROME ELITE PASS — replaces the previous orange treatment across every surface. */
+:root, .dark {
+  --bg-main: #090A0B !important;
+  --bg-deep: #090A0B !important;
+  --surface-main: #121416 !important;
+  --surface-secondary: #1B1E21 !important;
+  --surface-elevated: #22262A !important;
+  --border-main: #30353A !important;
+  --border-active: #CDD2D8 !important;
+  --border-subtle: rgba(205,210,216,.10) !important;
+  --text-primary: #F3F3EF !important;
+  --text-secondary: #ADB3BA !important;
+  --text-muted: #7E858D !important;
+  --selected-bg: #F3F3EF !important;
+  --selected-text: #090A0B !important;
+}
+html, body, #root, .app-shell, .pro-shell, .studio-main, .studio-frame { background: #090A0B !important; }
+.pro-rail { background: #090A0B !important; border-color: #30353A !important; }
+.elite-rail-brand { width: 100%; margin: 0 0 18px; display: flex; flex-direction: column; align-items: center; gap: 7px; color: #F3F3EF; }
+.elite-rail-mark { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid #CDD2D8; border-radius: 7px; color: #F3F3EF; font: 700 9px/1 "DM Mono", monospace; letter-spacing: -.08em; }
+.elite-rail-wordmark { color: #ADB3BA; font: 700 7px/1.15 Inter, sans-serif; letter-spacing: .12em; text-align: center; }
+.elite-mobile-brand { display: inline-flex; align-items: center; gap: 8px; color: #F3F3EF; white-space: nowrap; }
+.elite-mobile-brand .elite-rail-mark { width: 24px; height: 24px; border-radius: 6px; font-size: 8px; }
+.elite-mobile-wordmark { font: 700 9px/1 Inter, sans-serif; letter-spacing: .12em; }
+.ep-masthead-kicker { color: #CDD2D8 !important; }
+.ep-masthead-kicker i { background: #CDD2D8 !important; }
+.controls-panel button.w-full, .advanced-panel-shell button.w-full { background: #F3F3EF !important; color: #090A0B !important; box-shadow: 0 8px 24px rgba(0,0,0,.24) !important; }
+.controls-panel button.w-full:hover, .advanced-panel-shell button.w-full:hover { background: #CDD2D8 !important; }
+.controls-panel button.w-full:disabled, .advanced-panel-shell button.w-full:disabled { background: #454B51 !important; color: #9DA4AB !important; }
+input[type="range"] { accent-color: #CDD2D8 !important; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline-color: #CDD2D8 !important; }
+.prompt-engine-tab.is-active { color: #090A0B !important; background: #F3F3EF !important; border-color: #F3F3EF !important; }
+.prompt-console-state svg { color: #CDD2D8 !important; }
+.generation-progress span { background: #CDD2D8 !important; }
+.language-gate-mark { border-color: #CDD2D8 !important; border-radius: 6px !important; font: 700 8px/1 "DM Mono", monospace !important; letter-spacing: -.08em; }
+.language-gate-option-number { color: #090A0B !important; background: #F3F3EF !important; }
+.language-gate-option:hover, .language-gate-option:focus-visible { color: #090A0B !important; background: #F3F3EF !important; }
+.language-gate-option-native { color: #ADB3BA !important; }
+.studio-instagram-link, .language-gate-instagram, .instagram-top-link { color: #ADB3BA !important; }
+.studio-instagram-link:hover, .language-gate-instagram:hover, .instagram-top-link:hover { color: #F3F3EF !important; }
+.mode-switch button.is-active, .prompt-engine-tabs button.bg-white { background: #F3F3EF !important; color: #090A0B !important; }
+.toast, .search-sheet, .settings-sheet, .history-drawer, .presets-modal, .command-palette { background: #121416 !important; border-color: #30353A !important; }
+
+/* Compact, legible language entry rather than an oversized landing page. */
+.language-gate-inner { max-width: 1040px; }
+.language-gate-hero { margin: auto 0 clamp(34px, 6vh, 64px) !important; }
+.language-gate-hero h1 { font-size: clamp(3.3rem, 8vw, 6.8rem) !important; letter-spacing: -.085em !important; }
+.language-gate-options { border-color: #30353A !important; }
+.language-gate-option { border-color: #30353A !important; }
+
+@media (max-width: 700px) {
+  .mobile-topbar-inner { padding-inline: 14px !important; }
+  .elite-mobile-wordmark { display: none; }
+  .mobile-topbar-inner > .mobile-topbar-context { flex-basis: 0; }
+}

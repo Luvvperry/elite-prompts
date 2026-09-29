@@ -46,6 +46,10 @@ const Header: React.FC<HeaderProps> = ({
       {/* Desktop — professional instrument rail. The mark is intentionally symbol-only. */}
       <aside className="pro-rail hidden lg:flex" aria-label={copy.nav}>
         <div className="pro-rail-top">
+          <div className="elite-rail-brand" aria-label="Elite Prompts">
+            <span className="elite-rail-mark" aria-hidden="true">EP</span>
+            <span className="elite-rail-wordmark">ELITE<br />PROMPTS</span>
+          </div>
           <a className="instagram-top-link pro-nav-button" href="https://www.instagram.com/goatxav/" target="_blank" rel="noreferrer" aria-label="Open @goatxav on Instagram" title="@goatxav">
             <svg className="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7">
               <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
@@ -84,6 +88,10 @@ const Header: React.FC<HeaderProps> = ({
       {/* Mobile — deliberately compact, app-like top bar. */}
       <header className="mobile-topbar lg:hidden">
         <div className="mobile-topbar-inner">
+          <div className="elite-mobile-brand" aria-label="Elite Prompts">
+            <span className="elite-rail-mark" aria-hidden="true">EP</span>
+            <span className="elite-mobile-wordmark">ELITE PROMPTS</span>
+          </div>
           <a className="instagram-top-link mobile-topbar-button" href="https://www.instagram.com/goatxav/" target="_blank" rel="noreferrer" aria-label="Open @goatxav on Instagram" title="@goatxav">
             <svg className="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7">
               <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
