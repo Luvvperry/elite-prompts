@@ -2375,3 +2375,55 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .ep-masthead-kicker { font-size: 9px !important; }
 .ep-masthead h1 { max-width: 680px !important; margin: 8px 0 6px !important; font-size: clamp(2rem, 3.7vw, 3.7rem) !important; line-height: .98 !important; }
 .ep-masthead p { font-size: 12px !important; max-width: 500px !important; }
+
+/* CONTRAST PASS — color and states only; layout and behavior remain unchanged. */
+:root, .dark {
+  --bg-main: #0B0C0E !important;
+  --bg-deep: #0B0C0E !important;
+  --surface-main: #141619 !important;
+  --surface-secondary: #1D2024 !important;
+  --surface-elevated: #272B30 !important;
+  --border-main: #3B4148 !important;
+  --border-active: #FF7A3D !important;
+  --border-subtle: rgba(184,190,198,.16) !important;
+  --text-primary: #F5F5F2 !important;
+  --text-secondary: #B8BEC6 !important;
+  --text-muted: #89919A !important;
+  --selected-bg: #FF7A3D !important;
+  --selected-text: #17110D !important;
+}
+html, body, #root, .app-shell, .pro-shell, .studio-main, .studio-frame { background: #0B0C0E !important; color: #F5F5F2 !important; }
+.workspace-panel, .prompt-console, .advanced-panel-shell, .control-row, .reference-card, .idea-editor, .upload-zone, .segmented-control { background-color: #141619 !important; border-color: #3B4148 !important; }
+input, textarea, select, option { background-color: #1D2024 !important; color: #F5F5F2 !important; border-color: #3B4148 !important; }
+input::placeholder, textarea::placeholder { color: #B8BEC6 !important; opacity: 1 !important; }
+
+/* The camera-library trigger is a field, never a primary action. */
+.controls-panel button.w-full:not(.generate-prompts-button),
+.advanced-panel-shell button.w-full:not(.generate-prompts-button) { background: #1D2024 !important; color: #F5F5F2 !important; border-color: #3B4148 !important; }
+.controls-panel button.w-full:not(.generate-prompts-button):hover,
+.advanced-panel-shell button.w-full:not(.generate-prompts-button):hover { background: #272B30 !important; color: #F5F5F2 !important; border-color: #FF7A3D !important; }
+.controls-panel button.w-full:not(.generate-prompts-button):focus-visible,
+.advanced-panel-shell button.w-full:not(.generate-prompts-button):focus-visible { background: #1D2024 !important; color: #F5F5F2 !important; border-color: #FF7A3D !important; }
+.controls-panel button.w-full:not(.generate-prompts-button) svg,
+.advanced-panel-shell button.w-full:not(.generate-prompts-button) svg { color: #B8BEC6 !important; opacity: 1 !important; }
+
+.generate-prompts-button { background: #FF7A3D !important; color: #17110D !important; border-color: #FF7A3D !important; opacity: 1 !important; }
+.generate-prompts-button:hover:not(:disabled) { background: #FF9463 !important; color: #17110D !important; }
+.generate-prompts-button:active:not(:disabled) { background: #E8652E !important; color: #17110D !important; }
+.generate-prompts-button:disabled { background: #272B30 !important; color: #B8BEC6 !important; border-color: #3B4148 !important; opacity: 1 !important; }
+.generate-prompts-button svg { color: inherit !important; opacity: 1 !important; }
+
+/* Selected controls retain a dark surface plus a clear orange state. */
+.pro-studio-grid button.bg-white, .pro-studio-grid button[class*="bg-white"] { background: rgba(255,122,61,.16) !important; color: #FFB391 !important; border-color: #FF7A3D !important; }
+.pro-studio-grid button[class*="bg-white"] svg { color: #FFB391 !important; }
+.mode-switch button.is-active, .prompt-engine-tab.is-active { background: #FF7A3D !important; color: #17110D !important; border-color: #FF7A3D !important; }
+.prompt-engine-tab:not(.is-active):hover { background: #272B30 !important; color: #F5F5F2 !important; }
+input[type="range"] { accent-color: #FF7A3D !important; }
+.generation-progress span { background: #FF7A3D !important; }
+.section-kicker, .pane-eyebrow { color: #B8BEC6 !important; }
+.pane-description, .prompt-console-state p, .prompt-console-state .text-zinc-500 { color: #B8BEC6 !important; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid #FF7A3D !important; outline-offset: 2px; }
+
+/* Modal and library states use the same contrast contract. */
+.search-sheet, .settings-sheet, .history-drawer, .presets-modal, .command-palette, .toast-card { background: #141619 !important; border-color: #3B4148 !important; color: #F5F5F2 !important; }
+.search-sheet button:hover, .settings-sheet button:hover, .history-drawer button:hover, .presets-modal button:hover, .command-palette button:hover { background: #272B30 !important; color: #F5F5F2 !important; }

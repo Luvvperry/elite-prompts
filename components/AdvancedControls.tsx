@@ -1720,7 +1720,7 @@ const AdvancedControls: React.FC<AdvancedControlsProps> = ({
           type="button"
           onClick={onGenerate}
           disabled={!canGenerate || isLoading}
-          className="w-full h-13 py-3.5 px-6 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-xs sm:text-sm font-bold uppercase tracking-widest font-sans transition-all duration-300 hover:bg-zinc-800 dark:hover:bg-zinc-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none flex items-center justify-center gap-3 rounded-xl cursor-pointer"
+          className="generate-prompts-button w-full h-13 py-3.5 px-6 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-xs sm:text-sm font-bold uppercase tracking-widest font-sans transition-all duration-300 hover:bg-zinc-800 dark:hover:bg-zinc-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none flex items-center justify-center gap-3 rounded-xl cursor-pointer"
         >
           {isLoading ? (
             <>
