@@ -113,7 +113,7 @@ MANDATORY V4/V5 OPENING — The very first words of both V4 and V5 must be the e
 - Brazilian Portuguese: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
 - Spanish: "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."
 - English: "Create an image of the man from the uploaded photo, following 100% of his characteristics."
-This is an external face-reference handoff for the final image generator, not a request to describe appearance in text. After the opening, describe only scene, wardrobe, pose, action, camera, light and imperfections.
+This is an external reference handoff for the final image generator, not a request to narrate identity traits in text. After the opening, describe the scene, wardrobe, exact pose biomechanics, action, camera, light, skin rendering behavior and imperfections. Do not describe facial features, ethnicity, age or body identity.
 `;
 
 const V4_SCENE_LOCK_INSTRUCTION = `
@@ -142,8 +142,8 @@ ENGINE 5: V5 — LIVED-IN SMARTPHONE REALITY MASTER
 ${V4_OPENING_LANGUAGE_RULE}
 V5 is the grounded reality engine, not a synonym-heavy mega-prompt. Produce one direct, paste-ready prompt, normally 650–900 words for a complex reference and shorter when the evidence is simple. Every sentence must add a concrete image-changing fact or a necessary physical relationship. Never repeat the same realism idea with different adjectives. Never output a checklist, report, negative-prompt dump or meta-prompt.
 
-REFERENCE APPEARANCE EXCLUSION — WHEN AN UPLOADED PHOTO IS PRESENT:
-Use the supplied image only for scene placement, pose, clothing, accessories, action and composition. Do not describe, copy, preserve, lock or analyze the person's face, hair, skin, age, ethnicity, beard, physique or identity traits. Never invent or encode appearance details in the text prompt.
+REFERENCE IDENTITY / SURFACE SEPARATION — WHEN AN UPLOADED PHOTO IS PRESENT:
+Use the supplied image as the external identity reference for the final image model, but do not narrate facial features, ethnicity, age, beard, physique or other identity traits in the written prompt. The text must still describe the observable photographic behavior of the person: exact body mechanics, pose geometry, hand and finger action, clothing contact, and how unretouched skin reacts to the actual light and focus. Preserve identity through the uploaded reference, not through invented descriptive adjectives. Never replace a visible pose with a generic pose and never replace surface rendering with "perfect skin" or "realistic skin" alone.
 
 
 Construct one continuous paste-ready prompt with this hidden order, but do not expose headings or numbered sections in the output: begin with the exact subject and identity/reference fidelity; build the real environment as a lived-in place rather than a set; map every important relationship between people, objects, surfaces and empty space; describe the micro-moment of action and human behavior; describe clothing, hair, skin, hands, feet and posture as physical responses to that moment; place the photographer and phone in a believable position; then resolve optics, focus, exposure, light transport, materials, reflections, motion, compression and amateur framing.
@@ -426,6 +426,10 @@ The target is an ordinary, physically possible smartphone photograph, not an ima
 - Keep real-world scale and gravity: feet meet the ground, cars sit on the driveway, buildings meet the horizon, hands touch the objects they hold, shadows stay attached to objects, and reflections follow the surface that produces them.
 - Use normal phone color and exposure: restrained HDR, imperfect auto white balance, slight exposure compromise between subject and background, no glossy 8K clarity, no hyper-detailed background, no teal-orange grade and no perfect edge separation.
 - If the scene has no evidence for a dramatic element, omit it. Do not add mountains, skyline landmarks, luxury cars, palm trees, neon, cinematic fog, dramatic clouds, rim light or extra people just to make the frame more impressive.
+- Describe the photographed instant at forensic visual resolution: shoulder height differences, head tilt, chin direction, torso rotation, pelvis angle, weight-bearing leg, bent joints, elbow spacing, wrist angle, finger purpose, grip pressure, contact points, fabric tension and the exact place where shadows meet the body. Never replace these with "natural pose" or "relaxed posture".
+- For skin, do not invent identity traits or write a face description. Instead direct the image model to render the visible surface correctly for the actual light and distance: pores only where the phone can resolve them, uneven tone, tiny blemishes, fine hairs, under-eye shadow, natural lip texture, crease compression, sweat or dryness only when supported, and hard/soft highlights that follow the light. No airbrushed skin, wax, rubber, makeup-like smoothness or uniform texture.
+- For hands and objects, specify the visible anatomy and mechanics: thumb opposition, finger spacing, knuckle bends, grip around glass or phone, pressure at contact, transparent material refraction, liquid level and gravity. Never use vague "holding naturally" language.
+- For the background, name 3–6 visible anchors with their actual relative distance and edge behavior instead of filling the prompt with adjectives. The generated frame must have a foreground, a subject plane and a believable background plane with consistent scale and focus.
 - Before returning each version, perform a silent continuity check: could one person physically stand there and could one handheld phone capture all visible planes, shadows, reflections and objects from the stated position in one moment? If not, simplify the scene rather than inventing detail.
 
 ==================================================
@@ -775,7 +779,7 @@ Never overwrite a higher-priority fact with a guess. Never invent unreadable log
 ADAPTIVE BLOCKS:
 - Use natural-language blocks with curly braces {}, not headings, checklists, JSON, phases, reports, or meta-instructions.
 - Include only blocks that matter to the selected type and actual scene. Do not add hands, skin, vehicle, flash, food, or other categories when they are absent or irrelevant.
-- For people, resolve scene placement, clothing, body orientation, weight distribution, legs, feet, hands, gaze, expression, and contacts with objects or surfaces; never resolve or describe appearance or identity traits.
+- For people, resolve scene placement, clothing, body orientation, weight distribution, legs, feet, hands, gaze, expression, skin response to light, and contacts with objects or surfaces. Do not describe facial features or identity traits in the text; preserve them through the external reference.
 - For two or more people, keep each identity, wardrobe, action, gaze, hands, and accessories separate; describe their spacing and interaction explicitly.
 - For objects/POV, prioritize support, weight, contact patches, orientation, scale, surface curvature, occlusion, wear, fingerprints, packaging, grease/crumbs, reflections, and surrounding context. Never make an object float or turn the result into a clean product advertisement.
 - For vehicles, resolve the visible side, doors, windows, roofline, steering wheel/seat when relevant, tire contact, body curvature, reflections, and the exact physical contact with a person or object.
