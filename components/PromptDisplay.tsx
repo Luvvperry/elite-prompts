@@ -171,43 +171,26 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
       {/* Top Header with Editorial Segmented Tabs & Global Actions */}
       <div className="prompt-console-head px-4 sm:px-5 py-3.5 border-b border-[var(--border-main)] flex flex-wrap items-center justify-between gap-3 sticky top-0 z-20">
         
-        {/* Single engine selector: keeps all five engines organized in one list. */}
-        <div className="prompt-engine-tabs flex items-center gap-1 p-1 rounded-xl border">
-          <div className="engine-picker">
+        {/* Visible engine tabs keep all five engines discoverable without changing behavior. */}
+        <div className="prompt-engine-tabs prompt-engine-tabs-visible" role="tablist" aria-label="Prompt engines">
+          {(['v1', 'v2', 'v3', 'v4', 'v5'] as EngineType[]).map((engine) => (
             <button
+              key={engine}
               type="button"
-              aria-haspopup="listbox"
-              aria-expanded={isEngineMenuOpen}
-              onClick={() => setIsEngineMenuOpen((open) => !open)}
-              className="engine-picker-trigger"
+              role="tab"
+              aria-selected={activeTab === engine}
+              onClick={() => setActiveTab(engine)}
+              className={`prompt-engine-tab ${activeTab === engine ? 'is-active' : ''}`}
             >
-              <span className="engine-picker-label">{activeTab === 'compare' ? t.output.compare : engineLabels[activeTab].tab}</span>
-              <ChevronDown size={14} strokeWidth={1.8} className={isEngineMenuOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+              <span className="prompt-engine-tab-code">{engine.toUpperCase()}</span>
+              <span className="prompt-engine-tab-name">{engineLabels[engine].tab.replace(/^V[1-5]\s*[·—-]?\s*/i, '')}</span>
             </button>
-            {isEngineMenuOpen && (
-              <div className="engine-picker-menu" role="listbox" aria-label="Prompt engines">
-                {(['v1', 'v2', 'v3', 'v4', 'v5'] as EngineType[]).map((engine) => (
-                  <button
-                    key={engine}
-                    type="button"
-                    role="option"
-                    aria-selected={activeTab === engine}
-                    onClick={() => { setActiveTab(engine); setIsEngineMenuOpen(false); }}
-                    className={`engine-picker-option ${activeTab === engine ? 'is-selected' : ''}`}
-                  >
-                    <span className="engine-picker-code">{engine.toUpperCase()}</span>
-                    <span>{engineLabels[engine].tab}</span>
-                    {activeTab === engine && <Check size={13} />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          ))}
 
           <button
             type="button"
             onClick={() => setActiveTab('compare')}
-            className={`engine-compare-button flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all cursor-pointer ${
+            className={`engine-compare-button prompt-engine-tab prompt-engine-tab-compare flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all cursor-pointer ${
               activeTab === 'compare'
                 ? 'bg-white dark:bg-[#242424] text-zinc-950 dark:text-white shadow-sm'
                 : 'text-zinc-500 dark:text-[var(--text-secondary)] hover:text-zinc-950 dark:hover:text-white'

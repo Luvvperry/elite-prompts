@@ -2180,3 +2180,113 @@ html, body, #root, .app-shell, .pro-shell, .studio-main { background: #000 !impo
   .language-gate-brand .language-gate-instagram span { display: none; }
   .language-gate-brand .instagram-svg { width: 20px; height: 20px; }
 }
+
+/* ELITE STUDIO SYSTEM — focused visual redesign; generation logic remains untouched. */
+:root, .dark {
+  --bg-main: #0B0C0E !important;
+  --bg-deep: #0B0C0E !important;
+  --surface-main: #141619 !important;
+  --surface-secondary: #1C1F23 !important;
+  --surface-elevated: #202328 !important;
+  --border-main: rgba(243,241,236,.11) !important;
+  --border-active: rgba(255,106,61,.78) !important;
+  --border-subtle: rgba(243,241,236,.055) !important;
+  --text-primary: #F3F1EC !important;
+  --text-secondary: #A6ABB3 !important;
+  --text-muted: #727881 !important;
+  --selected-bg: #FF6A3D !important;
+  --selected-text: #0B0C0E !important;
+  --shadow-soft: 0 14px 40px rgba(0,0,0,.22) !important;
+  --shadow-float: 0 24px 80px rgba(0,0,0,.34) !important;
+}
+html, body, #root, .app-shell, .pro-shell, .studio-main, .studio-frame { background: #0B0C0E !important; color: #F3F1EC !important; }
+body { font-family: Inter, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important; }
+.app-shell { min-height: 100svh; }
+.ep-universe { display: none !important; }
+.pro-shell { padding-left: 72px !important; }
+.studio-frame { width: min(100%, 1680px) !important; margin: 0 auto !important; padding: 18px clamp(20px, 3.2vw, 56px) 42px !important; }
+
+/* Compact product navigation. */
+.pro-rail { width: 72px !important; background: #0B0C0E !important; border-right: 1px solid rgba(243,241,236,.10) !important; }
+.pro-rail-top, .pro-rail-bottom { padding-inline: 14px !important; }
+.pro-nav-button { color: #A6ABB3 !important; border-radius: 10px !important; transition: color .18s ease, background .18s ease, transform .18s ease !important; }
+.pro-nav-button:hover, .pro-nav-button:focus-visible { color: #F3F1EC !important; background: #1C1F23 !important; }
+.pro-nav-button:active { transform: scale(.97); }
+.pro-nav-lang { color: #FF6A3D !important; }
+
+/* Editorial masthead: useful context, less wasted height. */
+.ep-masthead { min-height: 0 !important; padding: 22px 0 26px !important; border-bottom: 1px solid rgba(243,241,236,.10) !important; }
+.ep-masthead-kicker { color: #FF6A3D !important; font: 600 10px/1.2 "DM Mono", monospace !important; letter-spacing: .12em !important; text-transform: uppercase !important; }
+.ep-masthead-kicker i { background: #FF6A3D !important; box-shadow: none !important; }
+.ep-masthead h1 { max-width: 760px !important; margin: 12px 0 8px !important; color: #F3F1EC !important; font: 500 clamp(2.3rem, 5vw, 5.2rem)/.95 Inter, sans-serif !important; letter-spacing: -.075em !important; }
+.ep-masthead p { max-width: 520px !important; color: #A6ABB3 !important; font-size: 13px !important; line-height: 1.55 !important; }
+
+/* Workspace architecture: three purposeful zones, with breathing room. */
+.pro-studio-grid { display: grid !important; grid-template-columns: minmax(290px, .82fr) minmax(310px, .9fr) minmax(460px, 1.38fr) !important; grid-template-areas: "input settings output" !important; gap: 22px !important; padding: 22px 0 0 !important; border: 0 !important; background: transparent !important; overflow: visible !important; }
+.pro-studio-grid > section { min-width: 0 !important; min-height: 0 !important; padding: 0 !important; background: transparent !important; }
+.pane-heading { min-height: 42px !important; margin: 0 0 12px !important; padding: 0 2px 11px !important; border-bottom: 1px solid rgba(243,241,236,.10) !important; align-items: flex-start !important; }
+.pane-eyebrow { color: #F3F1EC !important; font: 600 10px/1.2 "DM Mono", monospace !important; letter-spacing: .14em !important; text-transform: uppercase !important; }
+.pane-description { margin-top: 6px !important; color: #727881 !important; font-size: 11px !important; }
+.studio-input-pane .workspace-panel, .studio-settings-pane .workspace-panel, .studio-settings-pane .advanced-panel-shell, .studio-output-pane .prompt-console { border: 1px solid rgba(243,241,236,.11) !important; border-radius: 13px !important; background: #141619 !important; box-shadow: 0 14px 40px rgba(0,0,0,.16) !important; }
+.studio-input-pane .workspace-panel, .studio-settings-pane .workspace-panel, .studio-settings-pane .advanced-panel-shell { padding: 18px !important; }
+.studio-output-pane .prompt-console { min-height: calc(100vh - 230px) !important; overflow: hidden !important; }
+.studio-settings-pane .controls-panel, .studio-settings-pane .advanced-panel-shell { max-height: calc(100vh - 198px); overflow: auto; scrollbar-color: #454a50 transparent; }
+
+/* Unified surfaces and form controls. */
+.workspace-panel, .advanced-panel-shell > *, .prompt-console { color: #F3F1EC !important; }
+.control-row, .reference-card, .idea-editor, .quick-start-card, .upload-zone, .segmented-control { background: #1C1F23 !important; border-color: rgba(243,241,236,.10) !important; border-radius: 10px !important; }
+input, textarea, select { color: #F3F1EC !important; background-color: #1C1F23 !important; border-color: rgba(243,241,236,.14) !important; }
+input::placeholder, textarea::placeholder { color: #727881 !important; opacity: 1 !important; }
+button { font-family: Inter, "DM Sans", sans-serif; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid #FF6A3D !important; outline-offset: 2px; }
+
+/* Orange is reserved for primary action and state. */
+.controls-panel button.w-full, .advanced-panel-shell button.w-full { background: #FF6A3D !important; color: #0B0C0E !important; border-color: transparent !important; border-radius: 9px !important; box-shadow: 0 8px 22px rgba(255,106,61,.16) !important; }
+.controls-panel button.w-full:hover, .advanced-panel-shell button.w-full:hover { background: #ff805d !important; transform: translateY(-1px); }
+.controls-panel button.w-full:disabled, .advanced-panel-shell button.w-full:disabled { background: #6a4036 !important; color: #c7aaa3 !important; box-shadow: none !important; }
+input[type="range"] { accent-color: #FF6A3D !important; }
+
+/* Result console: readable text, explicit engine navigation, quiet chrome. */
+.prompt-console-head { padding: 14px 16px !important; background: #141619 !important; border-color: rgba(243,241,236,.10) !important; }
+.prompt-console-body { padding: 20px !important; background: #0F1113 !important; }
+.prompt-code { color: #E4E2DD !important; font: 400 13px/1.78 "DM Mono", monospace !important; }
+.prompt-engine-tabs-visible { display: flex !important; flex: 1 1 auto; min-width: 0; gap: 4px !important; padding: 0 !important; border: 0 !important; background: transparent !important; overflow-x: auto; scrollbar-width: none; }
+.prompt-engine-tabs-visible::-webkit-scrollbar { display: none; }
+.prompt-engine-tab { flex: 0 0 auto; min-height: 38px; padding: 7px 10px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid transparent; border-radius: 8px; color: #A6ABB3; background: transparent; cursor: pointer; transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease; }
+.prompt-engine-tab:hover { color: #F3F1EC; background: #1C1F23; }
+.prompt-engine-tab:active { transform: scale(.97); }
+.prompt-engine-tab.is-active { color: #0B0C0E !important; background: #FF6A3D !important; border-color: #FF6A3D !important; }
+.prompt-engine-tab-code { font: 700 10px/1 "DM Mono", monospace; letter-spacing: .08em; }
+.prompt-engine-tab-name { font-size: 11px; white-space: nowrap; }
+.prompt-engine-tab-compare { margin-left: auto; border-color: rgba(243,241,236,.13) !important; }
+.prompt-console-body > div > div.relative.rounded-xl { background: #141619 !important; border-color: rgba(243,241,236,.10) !important; border-radius: 10px !important; }
+.prompt-compare-card { background: #141619 !important; border-color: rgba(243,241,236,.10) !important; border-radius: 10px !important; }
+
+/* Empty and loading states should feel intentional, not oversized. */
+.prompt-console-state { min-height: calc(100vh - 230px) !important; background: #141619 !important; border-color: rgba(243,241,236,.11) !important; }
+.prompt-console-state svg { color: #FF6A3D !important; }
+.generation-progress span { background: #FF6A3D !important; }
+
+@media (max-width: 1279px) and (min-width: 701px) {
+  .pro-studio-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; grid-template-areas: "input settings" "output output" !important; gap: 24px !important; }
+  .studio-output-pane .prompt-console, .prompt-console-state { min-height: 520px !important; }
+  .studio-settings-pane .controls-panel, .studio-settings-pane .advanced-panel-shell { max-height: none; overflow: visible; }
+}
+@media (max-width: 700px) {
+  .pro-shell { padding-left: 0 !important; }
+  .studio-frame { padding: 12px 14px 92px !important; }
+  .ep-masthead { padding: 18px 0 20px !important; }
+  .ep-masthead h1 { font-size: clamp(2.2rem, 12vw, 3.8rem) !important; }
+  .pro-studio-grid { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "input" "settings" "output" !important; gap: 22px !important; padding-top: 16px !important; }
+  .studio-settings-pane .controls-panel, .studio-settings-pane .advanced-panel-shell { max-height: none; overflow: visible; }
+  .studio-output-pane .prompt-console, .prompt-console-state { min-height: 520px !important; }
+  .prompt-console-head { align-items: stretch !important; flex-direction: column !important; }
+  .prompt-engine-tab-name { display: none; }
+  .prompt-engine-tab { padding-inline: 12px; }
+  .prompt-engine-tab-compare { margin-left: 0; }
+  .prompt-console-body { padding: 14px !important; }
+  .prompt-code { font-size: 12px !important; line-height: 1.7 !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
