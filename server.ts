@@ -179,6 +179,15 @@ V6 must contain concrete scene evidence rather than generic claims: 3–6 backgr
 The final prompt should feel like a real photograph that happened once: imperfect but not deliberately damaged, technically coherent but not professionally staged, detailed but not hyper-sharp. Use ordinary phone color, HDR off or barely perceptible, modest sharpening, neutral ungraded phone color and a real exposure compromise between subject and background. Return only the final prompt.
 `;
 
+const REFERENCE_FIDELITY_LOCK = `
+REFERENCE FIDELITY HARD LOCK — HIGHEST PRIORITY FOR PEOPLE:
+When a supplied image contains the person, the final image model must use that image as a strict visual identity anchor, not as loose inspiration. Preserve the same recognizable face identity, facial geometry, hair arrangement, skin tone, body proportions and age presentation through the external image-reference channel. Do not substitute a generic attractive face, influencer face, altered jaw/eyes/nose, beauty-filtered skin, different hairstyle or redesigned body.
+
+If the supplied reference also shows the person’s body or a complete scene, preserve the visible pose and composition unless the user explicitly requests a different one. Match the reference’s subject orientation, head direction, chin tilt, shoulder line, torso rotation, hip/pelvis angle, support leg, bent leg, arm positions, wrist angles, hand placement, finger purpose, camera-facing side, subject scale and crop. Do not replace a specific pose with “standing naturally,” “relaxed pose,” “looking at camera,” centered portrait or another generic arrangement. Preserve the exact pose silhouette first, then describe clothing and photographic imperfections around it.
+
+If the user explicitly requests a new pose, change only the requested pose while keeping identity, proportions and the requested scene locks. If the image is a face-only reference, use it strictly for identity and follow the separately specified pose. This is a visual instruction to the final image model, not a request to write facial traits into the prompt. Never output a facial-analysis paragraph or describe identity features textually; the external reference must carry those details.
+`;
+
 const RAW_PHONE_COLOR_POLICY = `
 GLOBAL RAW PHONE COLOR / EXPOSURE POLICY — OVERRIDES GENERIC REALISM WORDING:
 The generated image must look like an ordinary phone file straight from the camera roll, not a cinematic interpretation. Treat RAW/casual as restrained sensor capture, not a polished commercial grade. Use neutral, slightly imperfect phone white balance and normal sRGB-like color: believable skin and fabric colors, modest saturation, no teal shadows, no orange highlights, no cyan sky, no neon separation, no dramatic color contrast and no artificial glow.
@@ -433,6 +442,9 @@ Before composing V2 and V3, extract the exact physical reality:
 
 DO NOT INVENT WHAT IS NOT VISIBLE:
 If a brand is not readable, describe the physical silhouette and color. Do not guess city or watch model unless explicitly stated.
+REFERENCE FIDELITY OVERRIDE:
+When people are visible in a supplied reference, identity and visible pose are hard visual locks. Do not paraphrase them into a generic person or generic posture. Keep the exact reference face identity through the external image channel and keep the exact visible body geometry unless the user explicitly changes it.
+
 Hierarchy of Truth:
 1. Explicit user instructions / idea
 2. Assigned reference image facts
@@ -849,6 +861,7 @@ Return ONLY the final V3 prompt text.
 ==================================================
 ${V4_SCENE_LOCK_INSTRUCTION}
 ${V5_MASTER_ADAPTIVE_INSTRUCTION}
+        ${REFERENCE_FIDELITY_LOCK}
         ${RAW_PHONE_COLOR_POLICY}
 ${V6_CALIBRATED_REALITY_INSTRUCTION}
 ==================================================
@@ -998,6 +1011,7 @@ ${userTextDescription}`
         ${V4_SCENE_LOCK_INSTRUCTION}
 
         ${V5_MASTER_ADAPTIVE_INSTRUCTION}
+        ${REFERENCE_FIDELITY_LOCK}
         ${RAW_PHONE_COLOR_POLICY}
 
         ${V6_CALIBRATED_REALITY_INSTRUCTION}`,
