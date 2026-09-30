@@ -36,6 +36,7 @@ import CommandPalette from './components/CommandPalette';
 import MobileCommandDock from './components/MobileCommandDock';
 import ToastHost, { ToastPayload } from './components/ToastHost';
 import CosmicCanvas from './components/CosmicCanvas';
+import LithosRevealLayer from './components/LithosRevealLayer';
 import LanguageGate from './components/LanguageGate';
 
 
@@ -670,6 +671,7 @@ const App: React.FC = () => {
     <div className={`app-shell min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
       {!hasChosenLanguage && <LanguageGate onChoose={handleChooseLanguage} />}
       <div className={hasChosenLanguage ? '' : 'language-gated-app'} aria-hidden={!hasChosenLanguage}>
+      <LithosRevealLayer />
       <div className="ep-universe" aria-hidden="true">
         <CosmicCanvas />
         <span className="ep-universe-nebula ep-universe-nebula-a" />

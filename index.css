@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap');
 
 :root {
   --bg-main: #f4f4f2;
@@ -2481,4 +2481,47 @@ body.language-sheet-open .mobile-command-dock { display: none !important; }
     min-width: 58px !important;
   }
   .prompt-console-head > .flex.items-center { align-self: stretch; }
+}
+
+/* Imported Lithos visual language — decorative only, behind the existing workspace. */
+.lithos-reveal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: .12;
+  mix-blend-mode: screen;
+  isolation: isolate;
+}
+.lithos-reveal-base,
+.lithos-reveal-image,
+.lithos-reveal-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.lithos-reveal-base,
+.lithos-reveal-image {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transform: scale(1.035);
+  filter: saturate(.55) contrast(.92) brightness(.62);
+}
+.lithos-reveal-base { opacity: .36; }
+.lithos-reveal-image {
+  opacity: .78;
+  -webkit-mask-image: radial-gradient(circle 260px at var(--lithos-x, -500px) var(--lithos-y, -500px), rgba(255,255,255,1) 0%, rgba(255,255,255,1) 35%, rgba(255,255,255,.72) 57%, rgba(255,255,255,.28) 78%, transparent 100%);
+  mask-image: radial-gradient(circle 260px at var(--lithos-x, -500px) var(--lithos-y, -500px), rgba(255,255,255,1) 0%, rgba(255,255,255,1) 35%, rgba(255,255,255,.72) 57%, rgba(255,255,255,.28) 78%, transparent 100%);
+}
+.lithos-reveal-vignette { background: radial-gradient(ellipse at center, transparent 24%, rgba(0,0,0,.32) 100%); }
+@keyframes lithosHeroZoom { from { transform: scale(1.08); } to { transform: scale(1.035); } }
+.lithos-reveal-base { animation: lithosHeroZoom 1.8s cubic-bezier(.16,1,.3,1) both; }
+@media (max-width: 700px) {
+  .lithos-reveal-layer { opacity: .07; }
+  .lithos-reveal-image { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lithos-reveal-base { animation: none; }
 }
