@@ -1031,6 +1031,7 @@ return res.json({
                     v3: parsed.v3?.trim() || "",
                     v4: dedicatedV4,
                     v5: dedicatedV5,
+                    v6: dedicatedV6,
                     negativePrompt: defaultNegativePrompt,
                     autoDetected: parsed.autoDetected || {}
                 });
