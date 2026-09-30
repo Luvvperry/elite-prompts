@@ -625,6 +625,19 @@ V3 — PERSON / SOLO PERSON / MULTI-SUBJECT STRUCTURED PROMPT
 ==================================================
 V3 MUST USE THE USER'S NEW STRUCTURED MOULD BELOW FOR PEOPLE. The final output is a paste-ready image prompt, not an explanation of this instruction. Keep the section order and the curly-brace blocks exactly. Translate every heading and every value completely into the requested output language.
 
+V3 POWER MODE — STRUCTURAL COMPLETENESS AND REFERENCE FIDELITY:
+- For one person, output exactly one [PERSONAGEM] block. Never output [PERSONAGEM 2], group language or a second subject when only one person is present.
+- Keep the exact block order: [REFERÊNCIAS], [PERSONAGEM], [AMBIENTE], [AÇÃO], [COMPOSIÇÃO], [CÂMERA], [LUZ], [IMPERFEIÇÕES], [PELE], [REALISMO], [PROPORÇÃO]. Do not skip a block and do not add an ENGINE heading.
+- Every { } must be filled with concrete, scene-specific information. Never leave empty braces, use “auto”, or answer with “realista”, “natural”, “bonito”, “casual” or “conforme a referência” as a substitute for evidence. If something cannot be resolved, state a conservative physical choice rather than inventing a decorative detail.
+- [REFERÊNCIAS] is a visual handoff: require the external image model to preserve the person’s recognizable identity, face, hair, skin tone, body proportions, visible pose, head direction, gaze, shoulder line, torso rotation, leg position, hand placement, subject scale and crop. Do not narrate facial traits in the written prompt.
+- [PERSONAGEM] must resolve the visible body geometry before wardrobe: support leg, unloaded leg, knee bend, pelvis angle, torso rotation, shoulder asymmetry, elbow/wrist angle, hand/finger purpose, head direction and clothing compression at contact points. Never replace this with “pose natural”.
+- [AMBIENTE] must name 3–6 real spatial anchors distributed across foreground, subject plane and background, including surfaces, boundaries, depth order, occlusion and ordinary signs of use. Never generate a generic background.
+- [AÇÃO] must describe one frozen instant with a concrete verb, object ownership, left/right hand, contact, gaze and the physical consequence of the movement. The action must be possible for the stated body position.
+- [COMPOSIÇÃO] and [CÂMERA] must agree: subject scale, camera height, distance, lens, perspective, crop, focus plane and visible edges must describe one phone that could actually occupy that position.
+- [LUZ] must identify the real source, direction, falloff, near/far exposure compromise, shadow attachment and surface reflections. Do not add cinematic light, artificial fill, HDR glow or color grading.
+- [IMPERFEIÇÕES] must contain only one or two causal phone artifacts. [PELE] must describe unretouched surface behavior at the actual camera distance without inventing identity traits. [REALISMO] must reject CGI, beauty retouching, advertising polish and impossible anatomy. [PROPORÇÃO] must default to 9:16.
+- The final V3 must be a complete paste-ready prompt in the requested language, with the mould labels translated consistently and the curly-brace structure preserved. Output no explanation, checklist or internal rule.
+
 V3 REFERENCE HANDOFF:
 - Portuguese opening for one person: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
 - Spanish opening for one person: "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."
@@ -873,18 +886,18 @@ ${isSpanish
   ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.
 - V2: Output 100% in Spanish using the structured adaptive curly-brace format.
-- V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.
+- V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do not add headings outside the required V3 mould; use the required translated mould labels.
 - V4, V5 and V6: Output 100% in Spanish as direct, paste-ready prompts using the V4/V5/V6 rules above.`
   : isPortuguese 
   ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.
 - V2: Output 100% in Brazilian Portuguese using the structured adaptive curly-brace format.
-- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.
+- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do not add headings outside the required V3 mould; use the required translated mould labels.
 - V4, V5 and V6: Output 100% in Brazilian Portuguese as direct, paste-ready prompts using the V4/V5/V6 rules above.`
   : `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural English using the smart adaptive curly-brace format.
 - V2: Output 100% in English using the structured adaptive curly-brace format.
-- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.
+- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do not add headings outside the required V3 mould; use the required translated mould labels.
 - V4, V5 and V6: Output 100% in English as direct, paste-ready prompts using the V4/V5/V6 rules above.`
 }
 
