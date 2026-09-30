@@ -550,6 +550,7 @@ export interface GenerationOutput {
   v3: string; // V3 — Forensic Deep Prompt (adaptive curly-brace final prompt, not a meta-blueprint)
   v4: string; // V4 — Scene-Lock Consistency Engine
   v5: string; // V5 — Master Adaptive Image Prompt
+  v6: string; // V6 — Calibrated Reality Reconstruction
   negativePrompt?: string;
   timestamp: number;
   id: string;

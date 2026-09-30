@@ -563,6 +563,7 @@ const App: React.FC = () => {
         v3: result.v3,
         v4: result.v4,
         v5: result.v5,
+        v6: result.v6,
         negativePrompt: result.negativePrompt,
         mode,
         modality,
@@ -591,7 +592,7 @@ const App: React.FC = () => {
   };
 
   // Refine a single engine without random re-generation
-  const handleRefinePrompt = useCallback(async (engine: 'v1' | 'v2' | 'v3' | 'v4' | 'v5', instruction: string) => {
+  const handleRefinePrompt = useCallback(async (engine: 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6', instruction: string) => {
     if (!generation) return;
     const originalText = generation[engine];
     const refined = await refinePrompt(engine, originalText, instruction);

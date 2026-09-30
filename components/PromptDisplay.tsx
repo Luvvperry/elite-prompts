@@ -21,7 +21,7 @@ interface PromptDisplayProps {
   lang: Language;
   generation: GenerationOutput | null;
   isLoading: boolean;
-  onRefinePrompt: (engine: 'v1' | 'v2' | 'v3' | 'v4' | 'v5', instruction: string) => Promise<void>;
+  onRefinePrompt: (engine: 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6', instruction: string) => Promise<void>;
   onSaveToPresets: (name: string) => void;
 }
 
@@ -34,7 +34,7 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
 }) => {
   const t = translations[lang];
 
-  type EngineType = 'v1' | 'v2' | 'v3' | 'v4' | 'v5';
+  type EngineType = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6';
   type TabType = EngineType | 'compare';
   const [activeTab, setActiveTab] = useState<TabType>('v1');
   const [isEngineMenuOpen, setIsEngineMenuOpen] = useState(false);
@@ -73,6 +73,7 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
       case 'v3': return generation.v3;
       case 'v4': return generation.v4 || '';
       case 'v5': return generation.v5 || '';
+      case 'v6': return generation.v6 || '';
       default: return '';
     }
   };
@@ -82,14 +83,15 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
     v2: { tab: t.output.v2Tab, title: t.output.v2Title },
     v3: { tab: t.output.v3Tab, title: t.output.v3Title },
     v4: { tab: lang === 'pt' ? 'V4 Consistência' : lang === 'es' ? 'V4 Consistencia' : 'V4 Scene-Lock', title: lang === 'pt' ? 'V4 — Consistência Física' : lang === 'es' ? 'V4 — Consistencia Física' : 'V4 — Scene-Lock Consistency' },
-    v5: { tab: lang === 'pt' ? 'V5 Master' : lang === 'es' ? 'V5 Maestro' : 'V5 Master', title: lang === 'pt' ? 'V5 — Prompt Master Adaptativo' : lang === 'es' ? 'V5 — Prompt Maestro Adaptativo' : 'V5 — Master Adaptive Prompt' }
+    v5: { tab: lang === 'pt' ? 'V5 Master' : lang === 'es' ? 'V5 Maestro' : 'V5 Master', title: lang === 'pt' ? 'V5 — Prompt Master Adaptativo' : lang === 'es' ? 'V5 — Prompt Maestro Adaptativo' : 'V5 — Master Adaptive Prompt' },
+    v6: { tab: lang === 'pt' ? 'V6 Realidade' : lang === 'es' ? 'V6 Realidad' : 'V6 Calibrated Reality', title: lang === 'pt' ? 'V6 — Reconstrução de Realidade' : lang === 'es' ? 'V6 — Reconstrucción de Realidad' : 'V6 — Calibrated Reality Reconstruction' }
   };
 
   const getEngineTitle = (engine: EngineType) => engineLabels[engine].title;
 
   const handleCopyAll = () => {
     if (!generation) return;
-    const allText = (['v1', 'v2', 'v3', 'v4', 'v5'] as EngineType[])
+    const allText = (['v1', 'v2', 'v3', 'v4', 'v5', 'v6'] as EngineType[])
       .map(engine => `=== ${engineLabels[engine].title} ===\n\n${generation[engine] || ''}`)
       .join('\n\n');
     copyWithFeedback(allText, 'copy-all');
@@ -171,9 +173,9 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
       {/* Top Header with Editorial Segmented Tabs & Global Actions */}
       <div className="prompt-console-head px-4 sm:px-5 py-3.5 border-b border-[var(--border-main)] flex flex-wrap items-center justify-between gap-3 sticky top-0 z-20">
         
-        {/* Visible engine tabs keep all five engines discoverable without changing behavior. */}
+        {/* Visible engine tabs keep all six engines discoverable without changing behavior. */}
         <div className="prompt-engine-tabs prompt-engine-tabs-visible" role="tablist" aria-label="Prompt engines">
-          {(['v1', 'v2', 'v3', 'v4', 'v5'] as EngineType[]).map((engine) => (
+          {(['v1', 'v2', 'v3', 'v4', 'v5', 'v6'] as EngineType[]).map((engine) => (
             <button
               key={engine}
               type="button"
@@ -183,7 +185,7 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
               className={`prompt-engine-tab ${activeTab === engine ? 'is-active' : ''}`}
             >
               <span className="prompt-engine-tab-code">{engine.toUpperCase()}</span>
-              <span className="prompt-engine-tab-name">{engineLabels[engine].tab.replace(/^V[1-5]\s*[·—-]?\s*/i, '')}</span>
+              <span className="prompt-engine-tab-name">{engineLabels[engine].tab.replace(/^V[1-6]\s*[·—-]?\s*/i, '')}</span>
             </button>
           ))}
 
@@ -339,8 +341,8 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
 
         {/* VIEW 2: COMPARE ALL SIDE-BY-SIDE */}
         {activeTab === 'compare' && (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            {(['v1', 'v2', 'v3', 'v4', 'v5'] as EngineType[]).map((engine) => {
+          <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            {(['v1', 'v2', 'v3', 'v4', 'v5', 'v6'] as EngineType[]).map((engine) => {
               const text = generation[engine] || '';
               return (
                 <div key={engine} className="prompt-compare-card flex flex-col gap-3 rounded-xl bg-zinc-50/90 dark:bg-[var(--bg-deep)] border border-zinc-200/90 dark:border-[var(--border-main)]/80 p-4">

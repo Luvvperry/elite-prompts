@@ -109,7 +109,7 @@ V1 QUALITY BAR:
 // V4 / V5 — ADDITIVE ENGINES (V1/V2/V3 remain unchanged)
 // ============================================================================
 const V4_OPENING_LANGUAGE_RULE = `
-MANDATORY V4/V5 OPENING — The very first words of both V4 and V5 must be the exact equivalent of this sentence in the requested output language, with no heading, quotation mark or preamble before it:
+MANDATORY V4/V5/V6 OPENING — The very first words of V4, V5 and V6 must be the exact equivalent of this sentence in the requested output language, with no heading, quotation mark or preamble before it:
 - Brazilian Portuguese: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
 - Spanish: "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características."
 - English: "Create an image of the man from the uploaded photo, following 100% of his characteristics."
@@ -157,6 +157,26 @@ V5 QUALITY CONTROL — before returning the prompt, silently verify: the subject
 The photo must look like an unplanned phone photo with imperfect computational processing, not like a commercial image. Use plausible 24–26mm equivalent rear-camera perspective, no portrait mode and no artificial blur. Select realistic exposure values only when they agree with the light; allow digital noise, focus misses, highlight clipping, rolling-shutter softness, mild motion blur, compression, auto-white-balance drift and an imperfect crop when causally justified. Flash must be direct and local when selected, with hard near shadows, bright skin/fabric highlights and real falloff into the background; never wash an entire distant scene evenly. Daylight without requested flash remains flash-off. Preserve pores, fine hair, small skin variations and material texture without beauty retouching. Make every shadow, reflection, fold, contact patch and perspective line obey physics.
 
 Do not use cinematic, editorial, masterpiece, hyperrealistic, luxury campaign, perfect composition, professional studio, glossy skin, fake bokeh, 3D render, illustration, fantasy lighting, random props, unreadable invented text or generic “beautiful” filler unless explicitly requested. The context may be luxurious, but the capture must remain casual, human and slightly flawed. Return only one very long final image prompt in the requested language, with no explanation, no visible framework, no headings and no instruction addressed to an AI.
+`;
+
+
+
+const V6_CALIBRATED_REALITY_INSTRUCTION = `
+ENGINE 6: V6 — CALIBRATED REALITY RECONSTRUCTION
+V6 is the highest-fidelity engine. It is not a longer prompt and not a pile of negative words. It reconstructs one physically possible phone capture by calibrating subject biomechanics, material behavior, light transport, lens perspective and sensor artifacts against each other.
+
+Write one direct, paste-ready image prompt in the requested language, with no headings, analysis or meta-instructions. Start with the required external reference handoff when a person reference is present. Do not narrate facial identity traits in text; let the supplied image carry identity. Do describe the photographic surface and physical behavior that make the person believable.
+
+Before writing, silently solve five linked layers:
+1. MOMENT: identify the exact fraction of a second, what changed just before and after it, and why the hands, gaze, weight and clothing are in that state.
+2. BODY MECHANICS: specify support leg, pelvis and torso rotation, shoulder asymmetry, joint bends, head/chin direction, elbow and wrist angles, finger purpose, grip pressure, object contact and breathing-level tension. Never say only natural pose.
+3. MATERIAL RESPONSE: make each garment, skin surface, glass, liquid, metal, pavement, wood or paint respond to gravity, compression, folds, wear, moisture and the actual light. Do not decorate the scene with adjectives.
+4. SPACE AND LIGHT: establish foreground, subject plane and background anchors with relative distance, occlusion, horizon and scale. Every shadow, reflection, highlight and exposure change must have a source and a surface.
+5. PHONE EVIDENCE: choose a plausible rear/front smartphone lens, distance, height, shutter and exposure for the actual scene. Keep the ordinary phone tradeoffs: uneven focus, computational sharpening, clipped highlights, shadow noise, white-balance drift, rolling-shutter softness, compression and imperfect crop only when causally justified.
+
+V6 must contain concrete scene evidence rather than generic claims: 3–6 background anchors, exact object positions, contact patches, visible edges, surface transitions and realistic distance relationships. Preserve the requested people/object count. Keep text and logos legible only when the source makes them legible; otherwise do not invent letters. Do not create CGI anatomy, wax skin, perfect symmetry, showroom cleanliness, commercial lighting, cinematic color grading, artificial bokeh, cutout halos, impossible perspective, random props or a spectacular background unsupported by the reference or idea.
+
+The final prompt should feel like a real photograph that happened once: imperfect but not deliberately damaged, technically coherent but not professionally staged, detailed but not hyper-sharp. Use ordinary phone color, restrained HDR and a real exposure compromise between subject and background. Return only the final prompt.
 `;
 
 // Helper to format settings guidance for prompt generation
@@ -359,20 +379,21 @@ app.post('/api/generate-prompts', async (req: Request, res: Response) => {
     const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
-Write V1, V2, V3, V4, V5, and every natural-language value in autoDetected in ${requestedLanguageName}.
-Do not mix languages. V1, V2, V3, V4, V5, and every natural-language value in autoDetected must use the requested output language.
+Write V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected in ${requestedLanguageName}.
+Do not mix languages. V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected must use the requested output language.
 
 FINAL PROMPT CLEANLINESS — ALL ENGINES:
 Never output internal instructions, rule explanations, reference handoff notes, labels such as "the man", "appearance reference", "face/reference", or blocks that say not to describe appearance. The final answer must contain only the requested image prompt: opening sentence, wardrobe, environment, action, effects, shadows, angle, imperfections, camera, light and relevant physical details.
 
-ABSOLUTE APPEARANCE EXCLUSION — ALL ENGINES:
-No version may analyze or describe the person's appearance in the text prompt. The opening handoff may refer to 100% of the separate face reference, but must not expand into appearance details. Do not describe face, facial features, hair, skin tone, ethnicity, age, beard, body shape, physique or identity markers. The reference may guide scene placement, pose, clothing, accessories, action and composition only. Treat the person's appearance as supplied separately to the image generator, but do not encode it in the text prompt. This rule overrides any appearance or identity wording elsewhere in these instructions.
-Your mission is to construct five (5) distinct, highly specialized prompt engines for an image or scene:
+REFERENCE IDENTITY / PHOTOGRAPHIC SURFACE SEPARATION — ALL ENGINES:
+No version may narrate facial identity traits in the text prompt. The opening handoff may refer to 100% of the supplied identity reference, and the final image model must use that reference for the person's face, hair, age, ethnicity, body identity and other recognizable traits. However, every version must describe photographic surface behavior and physical pose precisely when visible or required: skin response to the actual light and distance, pores only at resolvable scale, natural tonal variation, fine hairs, crease compression, shoulder asymmetry, joint angles, hand mechanics, clothing tension, contact shadows and material response. Preserve identity through the image reference, not invented adjectives; never reduce the prompt to "realistic skin" or "natural pose". This rule overrides only facial-identity narration, not forensic photographic detail.
+Your mission is to construct six (6) distinct, highly specialized prompt engines for an image or scene:
 - V1: SMART NATURAL SNAPSHOT (COMPACT, PHYSICALLY RESOLVED)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
 - V3: FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT, EXTREME PHYSICAL SPECIFICITY)
 - V4: HUMAN IPHONE MOMENT RECONSTRUCTION (LONG-FORM REFERENCE-FAITHFUL PROMPT)
 - V5: LIVED-IN SMARTPHONE REALITY MASTER (LONG-FORM HUMAN SNAPSHOT SYNTHESIS)
+- V6: CALIBRATED REALITY RECONSTRUCTION (HIGHEST-FIDELITY PHYSICAL CAPTURE)
 
 ==================================================
 CENTRAL FOUNDATIONAL PRINCIPLE:
@@ -820,6 +841,7 @@ Return ONLY the final V3 prompt text.
 ==================================================
 ${V4_SCENE_LOCK_INSTRUCTION}
 ${V5_MASTER_ADAPTIVE_INSTRUCTION}
+${V6_CALIBRATED_REALITY_INSTRUCTION}
 ==================================================
 
 ==================================================
@@ -830,18 +852,18 @@ ${isSpanish
 - V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.
 - V2: Output 100% in Spanish using the structured adaptive curly-brace format.
 - V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.
-- V4 and V5: Output 100% in Spanish as direct, paste-ready prompts using the V4/V5 rules above.`
+- V4, V5 and V6: Output 100% in Spanish as direct, paste-ready prompts using the V4/V5/V6 rules above.`
   : isPortuguese 
   ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.
 - V2: Output 100% in Brazilian Portuguese using the structured adaptive curly-brace format.
 - V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.
-- V4 and V5: Output 100% in Brazilian Portuguese as direct, paste-ready prompts using the V4/V5 rules above.`
+- V4, V5 and V6: Output 100% in Brazilian Portuguese as direct, paste-ready prompts using the V4/V5/V6 rules above.`
   : `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural English using the smart adaptive curly-brace format.
 - V2: Output 100% in English using the structured adaptive curly-brace format.
 - V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.
-- V4 and V5: Output 100% in English as direct, paste-ready prompts using the V4/V5 rules above.`
+- V4, V5 and V6: Output 100% in English as direct, paste-ready prompts using the V4/V5/V6 rules above.`
 }
 
 ==================================================
@@ -879,7 +901,7 @@ ${settingsContext}
     }
 
     contentsParts.push({
-      text: `OUTPUT LANGUAGE LOCK: Generate V1, V2, V3, V4, V5, and every natural-language value in autoDetected entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.
+      text: `OUTPUT LANGUAGE LOCK: Generate V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.
 
 ${userTextDescription}`
     });
@@ -918,6 +940,7 @@ ${userTextDescription}`
                 v3: { type: Type.STRING },
                 v4: { type: Type.STRING },
                 v5: { type: Type.STRING },
+                v6: { type: Type.STRING },
                 autoDetected: {
                   type: Type.OBJECT,
                   properties: {
@@ -939,7 +962,7 @@ ${userTextDescription}`
                   }
                 }
               },
-              required: ["v1", "v2", "v3", "v4", "v5", "autoDetected"]
+              required: ["v1", "v2", "v3", "v4", "v5", "v6", "autoDetected"]
             }
           }
         });
@@ -950,21 +973,24 @@ ${userTextDescription}`
         const parsed = JSON.parse(responseText);
         const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, beauty filter, cartoon, anime, illustration, oversaturated, artificial studio lighting, sunset color grading without a real sunset, teal-orange grade, shallow cinematic bokeh, cutout subject, halo edges, fake depth map, background wallpaper, generic AI background, impossible perspective, floating architecture, repeated windows, cloned trees, melted cars, warped horizon, disconnected shadows, inconsistent reflections, decorative light blobs, hyper-detailed distant background, glossy 8K clarity, perfect symmetry, posed fashion campaign, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, invented watermark, fake signature, misspelled text, random characters, melted lettering, warped logo geometry, mirrored writing, doubled glyphs, weird eyes, unnatural specular highlights";
 
-                        // Dedicated long-form pass: V4/V5 get their own output budget so the five-engine
+                        // Dedicated long-form pass: V4/V5/V6 get their own output budget so the six-engine
                 // response does not compress the human/phone realism requested by the user.
                 let dedicatedV4 = parsed.v4?.trim() || "";
                 let dedicatedV5 = parsed.v5?.trim() || "";
+                let dedicatedV6 = parsed.v6?.trim() || "";
                 try {
                   const longResponse = await ai.models.generateContent({
                     model: currentModel,
                     contents: contentsParts,
                     config: {
-                      systemInstruction: `OUTPUT ONLY TWO LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4 AND v5. The first sentence of both fields must be the exact language-matched neutral opening defined by V4_OPENING_LANGUAGE_RULE, with no heading or preamble. Neither field may describe appearance or expose internal rules. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, enforce the absolute appearance exclusion whenever a photo is supplied, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
+                      systemInstruction: `OUTPUT ONLY THREE LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4, v5 AND v6. The first sentence of each field must be the exact language-matched neutral opening defined by V4_OPENING_LANGUAGE_RULE, with no heading or preamble. Do not narrate facial identity traits or expose internal rules; each field must still describe pose biomechanics, skin response to light, clothing contact and physical camera behavior. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, and V6 must follow the CALIBRATED REALITY RECONSTRUCTION mold, use the supplied image for identity while preserving forensic photographic surface detail, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
 
         ${V4_OPENING_LANGUAGE_RULE}
         ${V4_SCENE_LOCK_INSTRUCTION}
 
-        ${V5_MASTER_ADAPTIVE_INSTRUCTION}`,
+        ${V5_MASTER_ADAPTIVE_INSTRUCTION}
+
+        ${V6_CALIBRATED_REALITY_INSTRUCTION}`,
                       temperature: 0.08,
                       maxOutputTokens: 12000,
                       responseMimeType: "application/json",
@@ -972,9 +998,10 @@ ${userTextDescription}`
                         type: Type.OBJECT,
                         properties: {
                           v4: { type: Type.STRING },
-                          v5: { type: Type.STRING }
+                          v5: { type: Type.STRING },
+                          v6: { type: Type.STRING }
                         },
-                        required: ["v4", "v5"]
+                        required: ["v4", "v5", "v6"]
                       }
                     }
                   });
@@ -982,9 +1009,10 @@ ${userTextDescription}`
                     const longParsed = JSON.parse(longResponse.text);
                     if (longParsed.v4?.trim()) dedicatedV4 = longParsed.v4.trim();
                     if (longParsed.v5?.trim()) dedicatedV5 = longParsed.v5.trim();
+                    if (longParsed.v6?.trim()) dedicatedV6 = longParsed.v6.trim();
                   }
                 } catch (longErr: any) {
-                  console.warn(`Dedicated V4/V5 pass failed; keeping primary result: ${longErr.message}`);
+                  console.warn(`Dedicated V4/V5/V6 pass failed; keeping primary result: ${longErr.message}`);
                 }
           const localizedRealismTail = isSpanish
                     ? `La escena debe conservar una escala humana y observacional: la postura no es simétrica ni ensayada, el peso cae de forma desigual y cada mano, dedo, rodilla, pie, prenda y objeto tiene una relación física clara con lo que toca. La camisa, los shorts y las sandalias deben responder al movimiento, la gravedad, la humedad y el viento del lugar con pliegues pequeños, tensión en las costuras, compresión en los puntos de apoyo y volumen irregular, nunca como ropa pegada o renderizada. La piel conserva poros, vello fino, variaciones de tono, pequeñas sombras y reflejos reales, sin suavizado de belleza. La cámara trasera de iPhone registra una perspectiva cotidiana de 24–26 mm, enfoque automático ligeramente imperfecto, HDR discreto, color automático no totalmente neutro, ruido digital proporcional a la exposición, compresión móvil y un encuadre apenas torcido. La luz y el flash solo afectan la distancia que físicamente pueden alcanzar; las sombras, reflejos y brillos siguen la dirección de la fuente y caen naturalmente hacia el fondo. Nada debe parecer una campaña, una sesión de moda, una imagen 3D o una composición demasiado perfecta.`
@@ -998,6 +1026,7 @@ ${userTextDescription}`
                     : `Also preserve the small human decisions that make an accidental photograph believable: the gaze may fall a fraction late to the action, shoulders may sit at different heights, fingers may rest without posing, an object may be placed practically, and background people may be absorbed in their own actions without looking at the camera. Keep deck texture, wear marks, dust, fingerprints, moisture, distorted reflections and manufacturing imperfections only when they exist or agree with the evidence. Depth of field must belong to a normal phone, never an artificial cutout; if something is soft, it is soft because of distance, movement, focus or light. Always prioritize a believable, spontaneous, slightly imperfect and physically possible image.`;
                   if (dedicatedV4.length < 2800) dedicatedV4 = `${dedicatedV4} ${localizedRealismTail}`;
                   if (dedicatedV5.length < 3700) dedicatedV5 = `${dedicatedV5} ${localizedRealismTail} ${localizedV5Tail}`;
+                  if (dedicatedV6.length < 4200) dedicatedV6 = `${dedicatedV6} ${localizedRealismTail} ${localizedV5Tail}`;
                   
 return res.json({
           v1: parsed.v1?.trim() || "",
@@ -1005,6 +1034,7 @@ return res.json({
           v3: parsed.v3?.trim() || "",
           v4: dedicatedV4,
           v5: dedicatedV5,
+          v6: dedicatedV6,
           negativePrompt: defaultNegativePrompt,
           autoDetected: parsed.autoDetected || {}
         });
