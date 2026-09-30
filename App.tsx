@@ -661,9 +661,9 @@ const App: React.FC = () => {
   const canGenerate = (mode === 'image' && (references.length > 0 || ideaText.trim().length > 0)) || (mode === 'idea' && ideaText.trim().length > 0);
 
   const workspaceLabels = {
-    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', kicker: 'Laboratório de imagem / 05 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
-    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', kicker: 'Laboratorio de imagen / 05 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
-    en: { input: 'Input', controls: 'Controls', output: 'Output', kicker: 'Image laboratory / 05 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
+    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', kicker: 'Laboratório de imagem / 06 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
+    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', kicker: 'Laboratorio de imagen / 06 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
+    en: { input: 'Input', controls: 'Controls', output: 'Output', kicker: 'Image laboratory / 06 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
   }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   return (
@@ -813,7 +813,7 @@ const App: React.FC = () => {
                 <div className="pane-heading">
                   <div>
                     <span className="pane-eyebrow">{workspaceLabels.output}</span>
-                    <p className="pane-description">V1 · V2 · V3 · V4 · V5</p>
+                    <p className="pane-description">V1 · V2 · V3 · V4 · V5 · V6</p>
                   </div>
                 </div>
                 <PromptDisplay
