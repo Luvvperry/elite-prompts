@@ -2434,3 +2434,51 @@ body.language-sheet-open .mobile-command-dock { display: none !important; }
   .language-sheet-panel > .max-h-\[74vh\] { max-height: calc(100svh - 190px) !important; padding-bottom: 18px !important; }
   .language-sheet-panel > div:first-child + div { padding-top: 12px !important; }
 }
+
+/* Output engine navigation: all six engines remain visible and reachable. */
+.prompt-console-head:has(.prompt-engine-tabs-visible) {
+  align-items: stretch !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.prompt-console-head .prompt-engine-tabs-visible {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  gap: 4px !important;
+}
+.prompt-console-head .prompt-engine-tabs-visible .prompt-engine-tab {
+  min-width: 0 !important;
+  width: 100% !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+.prompt-console-head .prompt-engine-tabs-visible .prompt-engine-tab-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prompt-console-head .prompt-engine-tabs-visible .prompt-engine-tab-compare {
+  margin-left: 0 !important;
+}
+.prompt-console-head > .flex.items-center {
+  align-self: flex-end;
+}
+@media (max-width: 760px) {
+  .prompt-console-head .prompt-engine-tabs-visible {
+    display: flex !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+    padding-bottom: 2px !important;
+  }
+  .prompt-console-head .prompt-engine-tabs-visible::-webkit-scrollbar { display: none; }
+  .prompt-console-head .prompt-engine-tabs-visible .prompt-engine-tab {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 58px !important;
+  }
+  .prompt-console-head > .flex.items-center { align-self: stretch; }
+}
