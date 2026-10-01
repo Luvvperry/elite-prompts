@@ -41,6 +41,9 @@ const LithosRevealLayer: React.FC = () => {
           ['--lithos-y' as string]: `${point.y}px`,
         }}
       />
+      <div className="lithos-reveal-light lithos-reveal-light-a" />
+      <div className="lithos-reveal-light lithos-reveal-light-b" />
+      <div className="lithos-reveal-grain" />
       <div className="lithos-reveal-vignette" />
     </div>
   );
