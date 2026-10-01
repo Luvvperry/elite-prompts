@@ -50,6 +50,9 @@ const normalizeInterfaceLanguage = (value: string | null | undefined): Language 
 const normalizePromptLanguage = (value: string | null | undefined): PromptLanguage => {
   const normalized = String(value || '').trim().toLowerCase();
   if (normalized === 'auto') return 'auto';
+  if (normalized === 'english' || normalized.includes('inglês') || normalized.includes('ingles') || normalized.includes('english')) return 'en';
+  if (normalized === 'spanish' || normalized.includes('español') || normalized.includes('espanhol') || normalized.includes('espan')) return 'es';
+  if (normalized === 'portuguese' || normalized.includes('português') || normalized.includes('portugues')) return 'pt';
   return normalizeInterfaceLanguage(normalized);
 };
 

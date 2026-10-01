@@ -398,6 +398,7 @@ YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
 Write V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected in ${requestedLanguageName}.
 Do not mix languages. V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected must use the requested output language.
+LANGUAGE PURITY ENFORCEMENT: Translate every heading, label, opening sentence, field name, camera term, lighting term, clothing term, realism instruction and descriptive clause into ${requestedLanguageName}. Do not leave English template words in Portuguese or Spanish output, and do not leave Portuguese or Spanish template words in English output. The only allowed exceptions are exact brand names, product names, model names, user-supplied text, URLs and technical tokens such as 9:16, iPhone 16 Pro, ISO and f/1.8. Before returning JSON, silently rewrite any mixed-language phrase into ${requestedLanguageName}.
 
 FINAL PROMPT CLEANLINESS — ALL ENGINES:
 Never output internal instructions, rule explanations, reference handoff notes, labels such as "the man", "appearance reference", "face/reference", or blocks that say not to describe appearance. The final answer must contain only the requested image prompt: opening sentence, wardrobe, environment, action, effects, shadows, angle, imperfections, camera, light and relevant physical details.
