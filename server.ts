@@ -981,7 +981,7 @@ ${userTextDescription}`
       }
     }
 
-    const MODELS_CASCADE = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+    const MODELS_CASCADE = ['gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
     let lastError: any = null;
 
     const promptResponseSchema = wantsJson ? {
@@ -1001,8 +1001,15 @@ ${userTextDescription}`
       required: ["prompt", "camera", "lighting", "aspect_ratio", "quality", "negative_prompt"]
     } : { type: Type.STRING };
 
-    for (let attempt = 0; attempt < MODELS_CASCADE.length; attempt++) {
-      const currentModel = MODELS_CASCADE[Math.min(attempt, MODELS_CASCADE.length - 1)];
+    const isTransientModelError = (err: any) => {
+      const message = String(err?.message || err || '');
+      const status = Number(err?.status || err?.code || 0);
+      return status === 429 || status === 500 || status === 502 || status === 503 || status === 504 || /503|UNAVAILABLE|high demand|overloaded|temporar|rate.?limit|RESOURCE_EXHAUSTED|deadline/i.test(message);
+    };
+    // Rotate models, then retry transient provider-capacity failures once more.
+    const maxAttempts = MODELS_CASCADE.length * 2;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const currentModel = MODELS_CASCADE[attempt % MODELS_CASCADE.length];
       try {
         const response = await ai.models.generateContent({
           model: currentModel,
@@ -1099,8 +1106,8 @@ return res.json({
       } catch (err: any) {
         lastError = err;
         console.warn(`Attempt ${attempt + 1} with model ${currentModel} failed: ${err.message}`);
-        if (attempt < MODELS_CASCADE.length - 1) {
-          await wait(750 * (attempt + 1));
+        if (isTransientModelError(err) && attempt < maxAttempts - 1) {
+          await wait(Math.min(5000, 700 * (attempt + 1)) + Math.floor(Math.random() * 250));
           continue;
         }
         break;
@@ -1110,7 +1117,9 @@ return res.json({
     throw new Error(`Generation failed: ${lastError?.message || 'High model demand. Please try again in a moment.'}`);
   } catch (error: any) {
     console.error("Generate prompts error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate prompts" });
+    const message = error?.message || "Failed to generate prompts";
+    const unavailable = /503|UNAVAILABLE|high demand|overloaded|temporar|rate.?limit|RESOURCE_EXHAUSTED/i.test(String(message));
+    res.status(unavailable ? 503 : 500).json({ error: message, code: unavailable ? "MODEL_UNAVAILABLE" : "GENERATION_FAILED" });
   }
 });
 

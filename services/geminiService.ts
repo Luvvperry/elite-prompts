@@ -43,7 +43,11 @@ export const generateAllPrompts = async (
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `Server error (${response.status}) while generating prompts.`);
+    const errorMessage = typeof errorData?.error === 'string' ? errorData.error : JSON.stringify(errorData?.error || '');
+    if (response.status === 503 || errorData?.code === 'MODEL_UNAVAILABLE' || /503|UNAVAILABLE|high demand|overloaded|temporar/i.test(errorMessage)) {
+      throw new Error('MODEL_BUSY');
+    }
+    throw new Error(errorMessage || `Server error (${response.status}) while generating prompts.`);
   }
 
   return response.json();

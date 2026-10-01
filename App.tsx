@@ -590,7 +590,12 @@ const App: React.FC = () => {
       localStorage.setItem('ep_history', JSON.stringify(updatedHistory));
     } catch (err: any) {
       console.error(err);
-      showToast('error', err.message || translations[lang].errors.failed);
+      const modelBusyMessage: Record<Language, string> = {
+        pt: 'O provedor de IA está com alta demanda agora. Tente gerar novamente em alguns segundos.',
+        es: 'El proveedor de IA tiene mucha demanda ahora. Intenta generar de nuevo en unos segundos.',
+        en: 'The AI provider is under heavy demand right now. Try generating again in a few seconds.'
+      };
+      showToast('error', err?.message === 'MODEL_BUSY' ? modelBusyMessage[lang] : (err.message || translations[lang].errors.failed));
     } finally {
       setIsLoading(false);
     }
