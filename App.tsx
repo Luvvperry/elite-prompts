@@ -559,7 +559,8 @@ const App: React.FC = () => {
         ideaText,
         references,
         settings,
-        selectedTypeId
+        selectedTypeId,
+        jsonMode ? 'json' : 'text'
       );
 
       const newOutput: GenerationOutput = {

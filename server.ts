@@ -378,7 +378,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Generate All Prompts (V1, V2, V3 + Auto Detection)
 app.post('/api/generate-prompts', async (req: Request, res: Response) => {
   try {
-    const { mode, modality, selectedTypeId = modality, promptLanguage, ideaText, references, settings } = req.body;
+    const { mode, modality, selectedTypeId = modality, promptLanguage, ideaText, references, settings, outputFormat = 'text' } = req.body;
     const ai = getAiClient();
     const settingsContext = formatSettingsContext(settings);
 
@@ -392,12 +392,23 @@ app.post('/api/generate-prompts', async (req: Request, res: Response) => {
     const isPortuguese = normalizedPromptLanguage === 'pt';
     const isEnglish = normalizedPromptLanguage === 'en';
     const requestedLanguageName = isPortuguese ? 'Brazilian Portuguese' : isSpanish ? 'Spanish' : 'English';
+    const wantsJson = outputFormat === 'json';
+    const jsonPromptInstruction = wantsJson ? `
+OUTPUT FORMAT — REAL STRUCTURED JSON:
+Return each of V1, V2 and V3 as a complete JSON object, not as a wrapper around a text paragraph and not as Markdown. Each object must contain exactly these top-level fields: "prompt", "camera", "lighting", "aspect_ratio", "quality", "negative_prompt".
+The "prompt" field must contain the full detailed paste-ready image prompt with every scene fact, subject detail that is allowed, clothing, pose biomechanics, skin/surface behavior, objects, background anchors, composition, camera behavior, light, shadows, materials, imperfections and anti-CGI rules. Do not omit details from the prompt just because they are also represented in metadata.
+The "camera" field must be an object with "device", "mode", "lens", "hdr", "flash" and "approx_settings". The other fields must be complete strings. Use valid JSON syntax, double quotes, no trailing commas, no comments and no code fences. Translate all natural-language values into ${requestedLanguageName}; preserve only brands, model names, user text and technical tokens.
+` : `
+OUTPUT FORMAT — PLAIN PROMPT TEXT:
+Return each of V1, V2 and V3 as a direct paste-ready image prompt string. Do not wrap it in JSON or Markdown.
+`;
 
     const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
 Write V1, V2, V3, and every natural-language value in autoDetected in ${requestedLanguageName}.
 Do not mix languages. V1, V2, V3, and every natural-language value in autoDetected must use the requested output language.
+${jsonPromptInstruction}
 LANGUAGE PURITY ENFORCEMENT: Translate every heading, label, opening sentence, field name, camera term, lighting term, clothing term, realism instruction and descriptive clause into ${requestedLanguageName}. Do not leave English template words in Portuguese or Spanish output, and do not leave Portuguese or Spanish template words in English output. The only allowed exceptions are exact brand names, product names, model names, user-supplied text, URLs and technical tokens such as 9:16, iPhone 16 Pro, ISO and f/1.8. Before returning JSON, silently rewrite any mixed-language phrase into ${requestedLanguageName}.
 
 FINAL PROMPT CLEANLINESS — ALL ENGINES:
@@ -950,6 +961,23 @@ ${userTextDescription}`
     const MODELS_CASCADE = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
     let lastError: any = null;
 
+    const promptResponseSchema = wantsJson ? {
+      type: Type.OBJECT,
+      properties: {
+        prompt: { type: Type.STRING },
+        camera: {
+          type: Type.OBJECT,
+          properties: {
+            device: { type: Type.STRING }, mode: { type: Type.STRING }, lens: { type: Type.STRING },
+            hdr: { type: Type.STRING }, flash: { type: Type.STRING }, approx_settings: { type: Type.STRING }
+          },
+          required: ["device", "mode", "lens", "hdr", "flash", "approx_settings"]
+        },
+        lighting: { type: Type.STRING }, aspect_ratio: { type: Type.STRING }, quality: { type: Type.STRING }, negative_prompt: { type: Type.STRING }
+      },
+      required: ["prompt", "camera", "lighting", "aspect_ratio", "quality", "negative_prompt"]
+    } : { type: Type.STRING };
+
     for (let attempt = 0; attempt < MODELS_CASCADE.length; attempt++) {
       const currentModel = MODELS_CASCADE[Math.min(attempt, MODELS_CASCADE.length - 1)];
       try {
@@ -964,9 +992,9 @@ ${userTextDescription}`
             responseSchema: {
               type: Type.OBJECT,
               properties: {
-                v1: { type: Type.STRING },
-                v2: { type: Type.STRING },
-                v3: { type: Type.STRING },
+                v1: promptResponseSchema,
+                v2: promptResponseSchema,
+                v3: promptResponseSchema,
                 autoDetected: {
                   type: Type.OBJECT,
                   properties: {
@@ -1000,9 +1028,9 @@ ${userTextDescription}`
         const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, beauty filter, cartoon, anime, illustration, oversaturated, vivid color grade, HDR halos, tone mapping, local contrast glow, sky replacement, artificial studio lighting, sunset color grading without a real sunset, teal-orange grade, shallow cinematic bokeh, cutout subject, halo edges, fake depth map, background wallpaper, generic AI background, impossible perspective, floating architecture, repeated windows, cloned trees, melted cars, warped horizon, disconnected shadows, inconsistent reflections, decorative light blobs, hyper-detailed distant background, glossy 8K clarity, perfect symmetry, posed fashion campaign, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, invented watermark, fake signature, misspelled text, random characters, melted lettering, warped logo geometry, mirrored writing, doubled glyphs, weird eyes, unnatural specular highlights";
 
 return res.json({
-          v1: parsed.v1?.trim() || "",
-          v2: parsed.v2?.trim() || "",
-          v3: parsed.v3?.trim() || "",
+          v1: typeof parsed.v1 === 'string' ? parsed.v1.trim() : JSON.stringify(parsed.v1 || {}),
+          v2: typeof parsed.v2 === 'string' ? parsed.v2.trim() : JSON.stringify(parsed.v2 || {}),
+          v3: typeof parsed.v3 === 'string' ? parsed.v3.trim() : JSON.stringify(parsed.v3 || {}),
           negativePrompt: defaultNegativePrompt,
           autoDetected: parsed.autoDetected || {}
         });

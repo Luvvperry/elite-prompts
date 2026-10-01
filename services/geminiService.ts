@@ -15,7 +15,8 @@ export const generateAllPrompts = async (
   ideaText: string,
   references: ReferenceImage[],
   settings: FullSettings,
-  selectedTypeId: string = 'person'
+  selectedTypeId: string = 'person',
+  outputFormat: 'text' | 'json' = 'text'
 ): Promise<{
   v1: string;
   v2: string;
@@ -36,6 +37,7 @@ export const generateAllPrompts = async (
       references,
       settings,
       selectedTypeId,
+      outputFormat,
     }),
   });
 

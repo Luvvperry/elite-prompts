@@ -67,12 +67,20 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
     setTimeout(() => setCopiedAction(null), 2200);
   };
 
+  const parseStructuredPrompt = (text: string) => {
+    try {
+      const parsed: unknown = JSON.parse(text);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch {
+      // Plain-text generations remain valid if JSON mode is enabled after generation.
+    }
+    return { prompt: text };
+  };
+
   const getCurrentPromptText = () => {
     if (!generation) return '';
     const prompt = activeTab === 'v1' ? generation.v1 : activeTab === 'v2' ? generation.v2 : activeTab === 'v3' ? generation.v3 : '';
-    if (jsonMode && activeTab !== 'compare') {
-      return JSON.stringify({ version: activeTab.toUpperCase(), prompt }, null, 2);
-    }
+    if (jsonMode && activeTab !== 'compare') return JSON.stringify(parseStructuredPrompt(prompt), null, 2);
     switch (activeTab) {
       case 'v1': return generation.v1;
       case 'v2': return generation.v2;
@@ -93,9 +101,9 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
     if (!generation) return;
     if (jsonMode) {
       copyWithFeedback(JSON.stringify({
-        v1: generation.v1,
-        v2: generation.v2,
-        v3: generation.v3
+        v1: parseStructuredPrompt(generation.v1),
+        v2: parseStructuredPrompt(generation.v2),
+        v3: parseStructuredPrompt(generation.v3)
       }, null, 2), 'copy-all');
       return;
     }
