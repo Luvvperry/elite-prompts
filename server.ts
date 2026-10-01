@@ -392,6 +392,16 @@ app.post('/api/generate-prompts', async (req: Request, res: Response) => {
     const isPortuguese = normalizedPromptLanguage === 'pt';
     const isEnglish = normalizedPromptLanguage === 'en';
     const requestedLanguageName = isPortuguese ? 'Brazilian Portuguese' : isSpanish ? 'Spanish' : 'English';
+    const v3Labels = isEnglish ? {
+      references: '[REFERENCES]', character: '[CHARACTER]', character1: '[CHARACTER 1]', character2: '[CHARACTER 2]', character3: '[CHARACTER 3]', additional: '[ADDITIONAL PEOPLE]',
+      environment: '[ENVIRONMENT]', action: '[ACTION]', composition: '[COMPOSITION]', camera: '[CAMERA]', light: '[LIGHT]', imperfections: '[IMPERFECTIONS]', skin: '[SKIN]', realism: '[REALISM]', proportion: '[ASPECT RATIO]'
+    } : isSpanish ? {
+      references: '[REFERENCIAS]', character: '[PERSONAJE]', character1: '[PERSONAJE 1]', character2: '[PERSONAJE 2]', character3: '[PERSONAJE 3]', additional: '[PERSONAS ADICIONALES]',
+      environment: '[AMBIENTE]', action: '[ACCIÓN]', composition: '[COMPOSICIÓN]', camera: '[CÁMARA]', light: '[LUZ]', imperfections: '[IMPERFECCIONES]', skin: '[PIEL]', realism: '[REALISMO]', proportion: '[PROPORCIÓN]'
+    } : {
+      references: '[REFERÊNCIAS]', character: '[PERSONAGEM]', character1: '[PERSONAGEM 1]', character2: '[PERSONAGEM 2]', character3: '[PERSONAGEM 3]', additional: '[PERSONAGENS ADICIONAIS]',
+      environment: '[AMBIENTE]', action: '[AÇÃO]', composition: '[COMPOSIÇÃO]', camera: '[CÂMERA]', light: '[LUZ]', imperfections: '[IMPERFEIÇÕES]', skin: '[PELE]', realism: '[REALISMO]', proportion: '[PROPORÇÃO]'
+    };
     const wantsJson = outputFormat === 'json';
     const jsonPromptInstruction = wantsJson ? `
 OUTPUT FORMAT — REAL STRUCTURED JSON:
@@ -411,6 +421,8 @@ Do not mix languages. V1, V2, V3, and every natural-language value in autoDetect
 ${jsonPromptInstruction}
 LANGUAGE PURITY ENFORCEMENT: Translate every heading, label, opening sentence, field name, camera term, lighting term, clothing term, realism instruction and descriptive clause into ${requestedLanguageName}. Do not leave English template words in Portuguese or Spanish output, and do not leave Portuguese or Spanish template words in English output. The only allowed exceptions are exact brand names, product names, model names, user-supplied text, URLs and technical tokens such as 9:16, iPhone 16 Pro, ISO and f/1.8. Before returning JSON, silently rewrite any mixed-language phrase into ${requestedLanguageName}.
 
+V3 BRACKET-LABEL LANGUAGE LOCK — THIS IS LITERAL, NOT A SUGGESTION:
+V3 must use only the exact square-bracket labels for the requested language. Never copy Portuguese labels into English or Spanish. The required labels for this request are: ${v3Labels.references}, ${v3Labels.character}, ${v3Labels.character1}, ${v3Labels.character2}, ${v3Labels.character3}, ${v3Labels.additional}, ${v3Labels.environment}, ${v3Labels.action}, ${v3Labels.composition}, ${v3Labels.camera}, ${v3Labels.light}, ${v3Labels.imperfections}, ${v3Labels.skin}, ${v3Labels.realism}, ${v3Labels.proportion}. Before returning V3, scan every bracket label and replace any label from another language with the exact requested-language equivalent. This also applies inside the JSON prompt value.
 FINAL PROMPT CLEANLINESS — ALL ENGINES:
 Never output internal instructions, rule explanations, reference handoff notes, labels such as "the man", "appearance reference", "face/reference", or blocks that say not to describe appearance. The final answer must contain only the requested image prompt: opening sentence, wardrobe, environment, action, effects, shadows, angle, imperfections, camera, light and relevant physical details.
 
@@ -421,6 +433,10 @@ Your mission is to construct exactly three (3) distinct, highly specialized prom
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
 - V3: FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT, EXTREME PHYSICAL SPECIFICITY)
 Do not generate, name, reference or return V4, V5 or V6.
+
+FORENSIC HUMAN SKIN AND POSTURE LOCK — ALL ENGINES:
+Do not let the image model invent a cartoon, doll, wax, rubber, airbrushed or painted person. Preserve the supplied identity through the image reference, while rendering the visible skin as a real sensor capture: uneven low-frequency tone, subtle pores only at the phone's resolving distance, fine vellus hair, tiny blemishes and crease shadows where visible, slight under-eye or neck shadow when supported, physically correct soft and hard highlights, and natural transition from lit to unlit planes. Do not add uniform pore grids, plastic smoothness, beauty-filter symmetry, makeup-like blur, over-sharpened skin or artificial skin grain. Skin must share the same exposure, white balance, noise and motion softness as nearby fabric and background; it must never look pasted on.
+For posture, preserve the actual reference geometry instead of inventing a model pose: head direction, chin angle, shoulder height, torso rotation, pelvis tilt, weight-bearing leg, knee bend, elbow angle, wrist orientation, finger placement and contact with surfaces must agree in one physically possible instant. No floating joints, mannequin stiffness, symmetrical limbs, impossible hand placement or generic standing pose. If the requested scene changes the pose, describe the new pose with explicit joint mechanics and weight transfer, not with vague words like natural or realistic.
 
 ==================================================
 CENTRAL FOUNDATIONAL PRINCIPLE:
@@ -467,7 +483,7 @@ PROHIBITED: "Actúa como...", "Eres experto...", "Tu misión...", "Chain-of-thou
 Deliver pure, executable image generation prompts!
 
 ==================================================
-GLOBAL ORDINARY PHONE REALITY — APPLY TO V1, V2, V3, V4 AND V5
+GLOBAL ORDINARY PHONE REALITY — APPLY TO V1, V2 AND V3
 ==================================================
 The target is an ordinary, physically possible smartphone photograph, not an image that merely says "photorealistic". Apply these rules to every engine and every scene:
 - Build the background as a continuous real place connected to the subject's ground, walls, horizon and light. Preserve scale, perspective, depth order and occlusion from foreground through distance. Never create a wallpaper-like background, random skyline, floating architecture, impossible perspective, repeated windows, cloned trees, melted cars or decorative light blobs.
@@ -631,16 +647,16 @@ V3 — PERSON / SOLO PERSON / MULTI-SUBJECT STRUCTURED PROMPT
 V3 MUST USE THE USER'S NEW STRUCTURED MOULD BELOW FOR PEOPLE. The final output is a paste-ready image prompt, not an explanation of this instruction. Keep the section order and the curly-brace blocks exactly. Translate every heading and every value completely into the requested output language.
 
 V3 POWER MODE — STRUCTURAL COMPLETENESS AND REFERENCE FIDELITY:
-- For one person, output exactly one [PERSONAGEM] block. Never output [PERSONAGEM 2], group language or a second subject when only one person is present.
-- Keep the exact block order: [REFERÊNCIAS], [PERSONAGEM], [AMBIENTE], [AÇÃO], [COMPOSIÇÃO], [CÂMERA], [LUZ], [IMPERFEIÇÕES], [PELE], [REALISMO], [PROPORÇÃO]. Do not skip a block and do not add an ENGINE heading.
+- For one person, output exactly one ${v3Labels.character} block. Never output ${v3Labels.character2}, group language or a second subject when only one person is present.
+- Keep the exact block order: ${v3Labels.references}, ${v3Labels.character}, ${v3Labels.environment}, ${v3Labels.action}, ${v3Labels.composition}, ${v3Labels.camera}, ${v3Labels.light}, ${v3Labels.imperfections}, ${v3Labels.skin}, ${v3Labels.realism}, ${v3Labels.proportion}. Do not skip a block and do not add an ENGINE heading.
 - Every { } must be filled with concrete, scene-specific information. Never leave empty braces, use “auto”, or answer with “realista”, “natural”, “bonito”, “casual” or “conforme a referência” as a substitute for evidence. If something cannot be resolved, state a conservative physical choice rather than inventing a decorative detail.
-- [REFERÊNCIAS] is a visual handoff: require the external image model to preserve the person’s recognizable identity, face, hair, skin tone, body proportions, visible pose, head direction, gaze, shoulder line, torso rotation, leg position, hand placement, subject scale and crop. Do not narrate facial traits in the written prompt.
-- [PERSONAGEM] must resolve the visible body geometry before wardrobe: support leg, unloaded leg, knee bend, pelvis angle, torso rotation, shoulder asymmetry, elbow/wrist angle, hand/finger purpose, head direction and clothing compression at contact points. Never replace this with “pose natural”.
-- [AMBIENTE] must name 3–6 real spatial anchors distributed across foreground, subject plane and background, including surfaces, boundaries, depth order, occlusion and ordinary signs of use. Never generate a generic background.
-- [AÇÃO] must describe one frozen instant with a concrete verb, object ownership, left/right hand, contact, gaze and the physical consequence of the movement. The action must be possible for the stated body position.
-- [COMPOSIÇÃO] and [CÂMERA] must agree: subject scale, camera height, distance, lens, perspective, crop, focus plane and visible edges must describe one phone that could actually occupy that position.
-- [LUZ] must identify the real source, direction, falloff, near/far exposure compromise, shadow attachment and surface reflections. Do not add cinematic light, artificial fill, HDR glow or color grading.
-- [IMPERFEIÇÕES] must contain only one or two causal phone artifacts. [PELE] must describe unretouched surface behavior at the actual camera distance without inventing identity traits. [REALISMO] must reject CGI, beauty retouching, advertising polish and impossible anatomy. [PROPORÇÃO] must default to 9:16.
+- ${v3Labels.references} is a visual handoff: require the external image model to preserve the person’s recognizable identity, face, hair, skin tone, body proportions, visible pose, head direction, gaze, shoulder line, torso rotation, leg position, hand placement, subject scale and crop. Do not narrate facial traits in the written prompt.
+- ${v3Labels.character} must resolve the visible body geometry before wardrobe: support leg, unloaded leg, knee bend, pelvis angle, torso rotation, shoulder asymmetry, elbow/wrist angle, hand/finger purpose, head direction and clothing compression at contact points. Never replace this with “pose natural”.
+- ${v3Labels.environment} must name 3–6 real spatial anchors distributed across foreground, subject plane and background, including surfaces, boundaries, depth order, occlusion and ordinary signs of use. Never generate a generic background.
+- ${v3Labels.action} must describe one frozen instant with a concrete verb, object ownership, left/right hand, contact, gaze and the physical consequence of the movement. The action must be possible for the stated body position.
+- ${v3Labels.composition} and ${v3Labels.camera} must agree: subject scale, camera height, distance, lens, perspective, crop, focus plane and visible edges must describe one phone that could actually occupy that position.
+- ${v3Labels.light} must identify the real source, direction, falloff, near/far exposure compromise, shadow attachment and surface reflections. Do not add cinematic light, artificial fill, HDR glow or color grading.
+- ${v3Labels.imperfections} must contain only one or two causal phone artifacts. ${v3Labels.skin} must describe unretouched surface behavior at the actual camera distance without inventing identity traits. ${v3Labels.realism} must reject CGI, beauty retouching, advertising polish and impossible anatomy. ${v3Labels.proportion} must default to 9:16.
 - The final V3 must be a complete paste-ready prompt in the requested language, with the mould labels translated consistently and the curly-brace structure preserved. Output no explanation, checklist or internal rule.
 
 V3 REFERENCE HANDOFF:
@@ -650,19 +666,19 @@ V3 REFERENCE HANDOFF:
 For two or more people, use the equivalent language-matched opening that explicitly preserves the exact number of people from the supplied references. The reference images may be used to preserve the requested identity through the separate image-reference channel, while the text prompt describes scene, clothing, pose, action, composition, camera and light. Do not add a facial-analysis paragraph or invent appearance traits in text.
 
 V3 PERSON COUNT CONTRACT:
-- ONE PERSON: output one [PERSONAGEM] block and never add a second-person block.
-- TWO PEOPLE: output [PERSONAGEM 1] and [PERSONAGEM 2], each with separate clothing, posture, action, gaze, hands and object ownership. Never merge them.
-- THREE PEOPLE: output [PERSONAGEM 1], [PERSONAGEM 2] and [PERSONAGEM 3] with the same separate fields.
-- FOUR OR MORE / GROUP: output one separate [PERSONAGEM N] block for every important person identified by position (viewer-left, left-center, center, right-center, viewer-right), plus [OUTROS PARTICIPANTES] only when the remaining people cannot be individually resolved. Preserve the exact count when known.
+- ONE PERSON: output one ${v3Labels.character} block and never add a second-person block.
+- TWO PEOPLE: output ${v3Labels.character1} and ${v3Labels.character2}, each with separate clothing, posture, action, gaze, hands and object ownership. Never merge them.
+- THREE PEOPLE: output ${v3Labels.character1}, ${v3Labels.character2} and ${v3Labels.character3} with the same separate fields.
+- FOUR OR MORE / GROUP: output one separate [PERSONAGEM N] block for every important person identified by position (viewer-left, left-center, center, right-center, viewer-right), plus ${v3Labels.additional} only when the remaining people cannot be individually resolved. Preserve the exact count when known.
 - If the selected subject count is auto, infer the count from the explicit idea and references; never default a duo or group to one person.
 - Every person's action must be physically compatible with the shared environment and must identify who touches, holds or owns each object.
 
 V3 OUTPUT MOULD — USE THIS ORDER FOR PEOPLE:
 
-[REFERÊNCIAS]
+${v3Labels.references}
 Crie uma imagem extremamente realista baseada nas fotos de referência enviadas. Use as referências para preservar a pessoa ou pessoas, a posição na cena, a pose, a roupa, a ação e a composição solicitadas. Preserve rosto, cabelo, tom de pele e proporções somente quando isso for explicitamente solicitado e sempre através da referência visual separada; não transforme a aparência em uma descrição inventada no texto.
 
-[PERSONAGEM 1]
+${v3Labels.character1}
 Idade aparente: { somente se explicitamente fornecida ou claramente necessária para a solicitação; caso contrário, não inventar }
 Cabelo: { somente se explicitamente solicitado; caso contrário, preservar pela referência visual sem descrever }
 Expressão: { expressão visível ou solicitada, sem inventar traços faciais }
@@ -671,7 +687,7 @@ Roupa e tecido: { cada peça visível, cor, material, espessura, corte, caimento
 Acessórios: { somente os acessórios visíveis ou solicitados, posição e contato }
 Calçado: { tipo, cor, material, meias quando visíveis, contato com o chão e desgaste quando relevante }
 
-[PERSONAGEM 2] (somente se houver)
+${v3Labels.character2} (somente se houver)
 Idade aparente: { somente se explicitamente fornecida; caso contrário, não inventar }
 Cabelo: { somente se explicitamente solicitado; caso contrário, preservar pela referência visual sem descrever }
 Expressão: { expressão visível ou solicitada, sem inventar traços faciais }
@@ -680,7 +696,7 @@ Roupa e tecido: { peças, cores, materiais, caimento, dobras e compressões pró
 Acessórios: { acessórios próprios, posição e contato }
 Calçado: { tipo, material, cor e contato com o chão }
 
-[PERSONAGEM 3] (somente se houver)
+${v3Labels.character3} (somente se houver)
 Idade aparente: { somente se explicitamente fornecida; caso contrário, não inventar }
 Cabelo: { somente se explicitamente solicitado; caso contrário, preservar pela referência visual sem descrever }
 Expressão: { expressão visível ou solicitada, sem inventar traços faciais }
@@ -689,37 +705,37 @@ Roupa e tecido: { peças, cores, materiais, caimento, dobras e compressões pró
 Acessórios: { acessórios próprios, posição e contato }
 Calçado: { tipo, material, cor e contato com o chão }
 
-[PERSONAGENS ADICIONAIS] (somente para quatro ou mais)
+${v3Labels.additional} (somente para quatro ou mais)
 { um bloco separado por pessoa importante; posição no quadro, roupa, postura, ação, gaze, mãos e relação com objetos. Nunca resumir pessoas importantes em "pessoas ao fundo" }
 
-[AMBIENTE]
+${v3Labels.environment}
 Localização: { lugar específico, tipo de espaço e relação espacial entre primeiro plano, plano dos personagens e fundo }
 Elementos específicos (móveis, objetos): { objetos presentes, quantidade, material, posição, orientação, contato, propriedade e o que cada pessoa toca }
 Elementos de fundo: { arquitetura, janelas, portas, veículos, pessoas distantes e detalhes cotidianos somente quando compatíveis com a referência }
 Horário: { hora ou período do dia, clima e condição do local quando fornecidos ou visíveis }
 
-[AÇÃO]
+${v3Labels.action}
 O que cada pessoa está fazendo, especificamente: { descreva uma ação diferente para cada personagem quando necessário; mãos esquerda/direita, objeto segurado, contato, direção do olhar, fase do movimento, postura e consequência física na roupa e no ambiente }
 
-[COMPOSIÇÃO]
+${v3Labels.composition}
 Enquadramento: { vertical ou horizontal, plano geral/médio/fechado, crop e escala de cada pessoa }
 Posição das pessoas: { viewer-left, left-center, center, right-center, viewer-right; distância entre elas, sobreposição e quem está à frente/atrás }
 Distância da câmera: { distância realista entre fotógrafo e cena, altura da câmera e perspectiva }
 Primeiro plano / fundo: { elementos próximos, profundidade, linhas de fuga, espaço negativo e o que fica parcialmente oculto }
 
-[CÂMERA]
+${v3Labels.camera}
 Tipo: câmera traseira/frontal de smartphone { preservar a escolha explícita; padrão: câmera traseira }
 Lente equivalente: { 0.5x/1x/2x/3x ou equivalente plausível; não transformar smartphone em lente profissional }
 Distância: { distância física e posição do fotógrafo }
 Profundidade de campo: { profundidade natural de smartphone, sem modo retrato e sem desfoque artificial }
 
-[IMPERFEIÇÕES]
+${v3Labels.imperfections}
 { escolher somente 1 ou 2 imperfeições coerentes com a cena: leve motion blur / ruído digital / reflexo / exposição irregular / foco ligeiramente impreciso / compressão / enquadramento levemente torto; nunca despejar todos os defeitos }
 
-[PELE]
+${v3Labels.skin}
 Pele com textura natural compatível com a distância da câmera e com a luz da cena: não aplicar poros exagerados, nitidez artificial, maquiagem digital, suavização plástica ou textura de "pele perfeita". Não inventar descrição de rosto, cabelo, tom de pele, idade ou identidade no texto quando a referência visual separada já fornece isso.
 
-[REALISMO]
+${v3Labels.realism}
 A imagem deve parecer uma foto casual feita por uma pessoa comum, não uma imagem criada para demonstrar realismo. Priorize coerência física sobre beleza: enquadramento ligeiramente imperfeito, assimetrias pequenas, expressão não performática, mãos e dedos naturais, roupas com uso real, objetos com marcas e superfícies que respondem à luz. Evite aparência de CGI, publicidade, editorial de moda, pose de catálogo, simetria perfeita, pele hiper-nítida, iluminação de estúdio, bokeh artificial, HDR exagerado, gradação cinematográfica e composição excessivamente limpa.
 
 V3 ANTI-FAKE CAPTURE RULE:
@@ -730,7 +746,7 @@ V3 ANTI-FAKE CAPTURE RULE:
 - Imperfections must be optical or physical consequences of this exact capture, not a list of artificial defects pasted at the end. Use a restrained combination such as direct flash falloff, slight autofocus miss, minor hand movement, high-ISO chroma noise, uneven white balance or small compression, only when justified.
 - The final prompt must describe a believable moment that happened once, not a pose arranged for a portfolio. If the reference shows a person absorbed in an activity, keep attention on the activity and let the camera feel secondary.
 
-[PROPORÇÃO]
+${v3Labels.proportion}
 { sempre 9:16, formato vertical para Instagram, salvo instrução explícita diferente do usuário }
 
 V3 QUALITY METHOD — APPLY SILENTLY BEFORE OUTPUT:
@@ -1025,12 +1041,51 @@ ${userTextDescription}`
         if (!responseText) throw new Error("Empty response from model.");
 
         const parsed = JSON.parse(responseText);
-        const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, beauty filter, cartoon, anime, illustration, oversaturated, vivid color grade, HDR halos, tone mapping, local contrast glow, sky replacement, artificial studio lighting, sunset color grading without a real sunset, teal-orange grade, shallow cinematic bokeh, cutout subject, halo edges, fake depth map, background wallpaper, generic AI background, impossible perspective, floating architecture, repeated windows, cloned trees, melted cars, warped horizon, disconnected shadows, inconsistent reflections, decorative light blobs, hyper-detailed distant background, glossy 8K clarity, perfect symmetry, posed fashion campaign, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, invented watermark, fake signature, misspelled text, random characters, melted lettering, warped logo geometry, mirrored writing, doubled glyphs, weird eyes, unnatural specular highlights";
+        const normalizeV3Output = (value: any): string => {
+      const replaceLabels = (text: string) => {
+        const labels: Record<string, string> = {
+          '[REFERÊNCIAS]': v3Labels.references, '[REFERENCIAS]': v3Labels.references, '[REFERENCES]': v3Labels.references,
+          '[PERSONAGEM]': v3Labels.character, '[PERSONAJE]': v3Labels.character, '[CHARACTER]': v3Labels.character,
+          '[PERSONAGEM 1]': v3Labels.character1, '[PERSONAJE 1]': v3Labels.character1, '[CHARACTER 1]': v3Labels.character1,
+          '[PERSONAGEM 2]': v3Labels.character2, '[PERSONAJE 2]': v3Labels.character2, '[CHARACTER 2]': v3Labels.character2,
+          '[PERSONAGEM 3]': v3Labels.character3, '[PERSONAJE 3]': v3Labels.character3, '[CHARACTER 3]': v3Labels.character3,
+          '[PERSONAGENS ADICIONAIS]': v3Labels.additional, '[PERSONAS ADICIONALES]': v3Labels.additional, '[ADDITIONAL PEOPLE]': v3Labels.additional,
+          '[AMBIENTE]': v3Labels.environment, '[AMBIENT]': v3Labels.environment, '[ENVIRONMENT]': v3Labels.environment,
+          '[AÇÃO]': v3Labels.action, '[ACCION]': v3Labels.action, '[ACTION]': v3Labels.action,
+          '[COMPOSIÇÃO]': v3Labels.composition, '[COMPOSICION]': v3Labels.composition, '[COMPOSITION]': v3Labels.composition,
+          '[CÂMERA]': v3Labels.camera, '[CAMARA]': v3Labels.camera, '[CÁMARA]': v3Labels.camera, '[CAMERA]': v3Labels.camera,
+          '[LUZ]': v3Labels.light, '[LIGHT]': v3Labels.light,
+          '[IMPERFEIÇÕES]': v3Labels.imperfections, '[IMPERFECCIONES]': v3Labels.imperfections, '[IMPERFECTIONS]': v3Labels.imperfections,
+          '[PELE]': v3Labels.skin, '[PIEL]': v3Labels.skin, '[SKIN]': v3Labels.skin,
+          '[REALISMO]': v3Labels.realism, '[REALISM]': v3Labels.realism,
+          '[PROPORÇÃO]': v3Labels.proportion, '[PROPORCION]': v3Labels.proportion, '[PROPORCIÓN]': v3Labels.proportion, '[ASPECT RATIO]': v3Labels.proportion
+        };
+        return Object.entries(labels).reduce((result, [from, to]) => result.split(from).join(to), text);
+      };
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (parsed && typeof parsed === 'object' && typeof parsed.prompt === 'string') {
+            parsed.prompt = replaceLabels(parsed.prompt);
+            return JSON.stringify(parsed);
+          }
+        } catch { /* plain V3 text */ }
+        return replaceLabels(value);
+      }
+      if (value && typeof value === 'object') {
+        const parsed = { ...value };
+        if (typeof parsed.prompt === 'string') parsed.prompt = replaceLabels(parsed.prompt);
+        return JSON.stringify(parsed);
+      }
+      return '';
+    };
+
+    const defaultNegativePrompt = "fake AI look, CGI, 3D render, cartoon, illustration, anime, doll face, mannequin skin, wax skin, rubber skin, plastic smooth skin, airbrushed, beauty filter, cartoon, anime, illustration, oversaturated, vivid color grade, HDR halos, tone mapping, local contrast glow, sky replacement, artificial studio lighting, sunset color grading without a real sunset, teal-orange grade, shallow cinematic bokeh, cutout subject, halo edges, fake depth map, background wallpaper, generic AI background, impossible perspective, floating architecture, repeated windows, cloned trees, melted cars, warped horizon, disconnected shadows, inconsistent reflections, decorative light blobs, hyper-detailed distant background, glossy 8K clarity, perfect symmetry, posed fashion campaign, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, invented watermark, fake signature, misspelled text, random characters, melted lettering, warped logo geometry, mirrored writing, doubled glyphs, weird eyes, unnatural specular highlights";
 
 return res.json({
           v1: typeof parsed.v1 === 'string' ? parsed.v1.trim() : JSON.stringify(parsed.v1 || {}),
           v2: typeof parsed.v2 === 'string' ? parsed.v2.trim() : JSON.stringify(parsed.v2 || {}),
-          v3: typeof parsed.v3 === 'string' ? parsed.v3.trim() : JSON.stringify(parsed.v3 || {}),
+          v3: normalizeV3Output(parsed.v3),
           negativePrompt: defaultNegativePrompt,
           autoDetected: parsed.autoDetected || {}
         });
