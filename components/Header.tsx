@@ -7,12 +7,15 @@ import {
   Globe2,
   Settings as SettingsIcon,
   Search,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Braces
 } from 'lucide-react';
 
 interface HeaderProps {
   lang: Language;
   onForceEnglishPrompts: () => void;
+  jsonMode: boolean;
+  onToggleJsonMode: () => void;
   onOpenLanguageSheet: () => void;
   onOpenHistory: () => void;
   onOpenPresets: () => void;
@@ -25,6 +28,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   lang,
   onForceEnglishPrompts,
+  jsonMode,
+  onToggleJsonMode,
   onOpenLanguageSheet,
   onOpenHistory,
   onOpenPresets,
@@ -78,6 +83,10 @@ const Header: React.FC<HeaderProps> = ({
           <button type="button" onClick={onForceEnglishPrompts} className={`${actionClass} pro-nav-english-prompts`} title="Force all prompts to English" aria-label="Force all prompts to English">
             <span className="pro-nav-lang">EN PROMPTS</span>
           </button>
+          <button type="button" onClick={onToggleJsonMode} className={`${actionClass} ${jsonMode ? 'is-active' : ''}`} title={jsonMode ? 'Disable JSON format' : 'Enable JSON format'} aria-label={jsonMode ? 'Disable JSON format' : 'Enable JSON format'}>
+            <Braces size={18} strokeWidth={1.65} />
+            <span className="pro-nav-lang">JSON</span>
+          </button>
         </nav>
 
         <div className="pro-rail-bottom">
@@ -116,6 +125,9 @@ const Header: React.FC<HeaderProps> = ({
             </button>
             <button type="button" onClick={onForceEnglishPrompts} className="mobile-topbar-button mobile-lang-button" title="Force all prompts to English" aria-label="Force all prompts to English">
               <span>EN</span>
+            </button>
+            <button type="button" onClick={onToggleJsonMode} className={`mobile-topbar-button mobile-lang-button ${jsonMode ? 'is-active' : ''}`} title={jsonMode ? 'Disable JSON format' : 'Enable JSON format'} aria-label={jsonMode ? 'Disable JSON format' : 'Enable JSON format'}>
+              <Braces size={16} strokeWidth={1.65} />
             </button>
             <button type="button" onClick={onOpenSettings} className="mobile-topbar-button" title={copy.settings}>
               <SettingsIcon size={17} strokeWidth={1.65} />

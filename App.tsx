@@ -330,6 +330,7 @@ const App: React.FC = () => {
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isUsageGateOpen, setIsUsageGateOpen] = useState(false);
   const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
+  const [jsonMode, setJsonMode] = useState<boolean>(() => localStorage.getItem('ep_json_mode') === 'true');
   const [toast, setToast] = useState<ToastPayload>(null);
   const magicRequestIdRef = useRef(0);
   const magicControllerRef = useRef<AbortController | null>(null);
@@ -390,6 +391,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('ep_focus_mode', focusMode ? 'true' : 'false');
   }, [focusMode]);
+
+  useEffect(() => {
+    localStorage.setItem('ep_json_mode', jsonMode ? 'true' : 'false');
+  }, [jsonMode]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -677,6 +682,11 @@ const App: React.FC = () => {
           localStorage.setItem('ep_prompt_lang', 'en');
           showToast('success', 'Prompts will be generated in English.');
         }}
+        jsonMode={jsonMode}
+        onToggleJsonMode={() => {
+          setJsonMode(value => !value);
+          showToast('success', jsonMode ? 'JSON format disabled.' : 'JSON format enabled.');
+        }}
         onOpenLanguageSheet={() => setIsLanguageSheetOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenPresets={() => setIsPresetsOpen(true)}
@@ -810,6 +820,7 @@ const App: React.FC = () => {
                   lang={lang}
                   generation={generation}
                   isLoading={isLoading}
+                  jsonMode={jsonMode}
                   onRefinePrompt={handleRefinePrompt}
                   onSaveToPresets={handleSaveCurrentPreset}
                 />

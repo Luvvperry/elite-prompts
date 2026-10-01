@@ -21,6 +21,7 @@ interface PromptDisplayProps {
   lang: Language;
   generation: GenerationOutput | null;
   isLoading: boolean;
+  jsonMode: boolean;
   onRefinePrompt: (engine: 'v1' | 'v2' | 'v3', instruction: string) => Promise<void>;
   onSaveToPresets: (name: string) => void;
 }
@@ -29,6 +30,7 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
   lang,
   generation,
   isLoading,
+  jsonMode,
   onRefinePrompt,
   onSaveToPresets
 }) => {
@@ -67,6 +69,10 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
 
   const getCurrentPromptText = () => {
     if (!generation) return '';
+    const prompt = activeTab === 'v1' ? generation.v1 : activeTab === 'v2' ? generation.v2 : activeTab === 'v3' ? generation.v3 : '';
+    if (jsonMode && activeTab !== 'compare') {
+      return JSON.stringify({ version: activeTab.toUpperCase(), prompt }, null, 2);
+    }
     switch (activeTab) {
       case 'v1': return generation.v1;
       case 'v2': return generation.v2;
@@ -85,6 +91,14 @@ const PromptDisplay: React.FC<PromptDisplayProps> = ({
 
   const handleCopyAll = () => {
     if (!generation) return;
+    if (jsonMode) {
+      copyWithFeedback(JSON.stringify({
+        v1: generation.v1,
+        v2: generation.v2,
+        v3: generation.v3
+      }, null, 2), 'copy-all');
+      return;
+    }
     const allText = (['v1', 'v2', 'v3'] as EngineType[])
       .map(engine => `=== ${engineLabels[engine].title} ===\n\n${generation[engine] || ''}`)
       .join('\n\n');
