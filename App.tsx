@@ -35,8 +35,6 @@ import StudioStatusRail from './components/StudioStatusRail';
 import CommandPalette from './components/CommandPalette';
 import MobileCommandDock from './components/MobileCommandDock';
 import ToastHost, { ToastPayload } from './components/ToastHost';
-import CosmicCanvas from './components/CosmicCanvas';
-import LithosRevealLayer from './components/LithosRevealLayer';
 import LanguageGate from './components/LanguageGate';
 
 
@@ -565,9 +563,6 @@ const App: React.FC = () => {
         v1: result.v1,
         v2: result.v2,
         v3: result.v3,
-        v4: result.v4,
-        v5: result.v5,
-        v6: result.v6,
         negativePrompt: result.negativePrompt,
         mode,
         modality,
@@ -596,7 +591,7 @@ const App: React.FC = () => {
   };
 
   // Refine a single engine without random re-generation
-  const handleRefinePrompt = useCallback(async (engine: 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6', instruction: string) => {
+  const handleRefinePrompt = useCallback(async (engine: 'v1' | 'v2' | 'v3', instruction: string) => {
     if (!generation) return;
     const originalText = generation[engine];
     const refined = await refinePrompt(engine, originalText, instruction);
@@ -665,33 +660,23 @@ const App: React.FC = () => {
   const canGenerate = (mode === 'image' && (references.length > 0 || ideaText.trim().length > 0)) || (mode === 'idea' && ideaText.trim().length > 0);
 
   const workspaceLabels = {
-    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', kicker: 'Laboratório de imagem / 06 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
-    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', kicker: 'Laboratorio de imagen / 06 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
-    en: { input: 'Input', controls: 'Controls', output: 'Output', kicker: 'Image laboratory / 06 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
+    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', kicker: 'Laboratório de imagem / 03 engines', headline: 'Da imagem à intenção.', subline: 'Transforme evidência visual em prompts que parecem fotografias reais.' },
+    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', kicker: 'Laboratorio de imagen / 03 engines', headline: 'De la imagen a la intención.', subline: 'Convierte evidencia visual en prompts que parecen fotografías reales.' },
+    en: { input: 'Input', controls: 'Controls', output: 'Output', kicker: 'Image laboratory / 03 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
   }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   return (
     <div className={`app-shell min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
       {!hasChosenLanguage && <LanguageGate onChoose={handleChooseLanguage} />}
       <div className={hasChosenLanguage ? '' : 'language-gated-app'} aria-hidden={!hasChosenLanguage}>
-      <LithosRevealLayer />
-      <div className="ep-universe" aria-hidden="true">
-        <CosmicCanvas />
-        <span className="ep-universe-nebula ep-universe-nebula-a" />
-        <span className="ep-universe-nebula ep-universe-nebula-b" />
-        <span className="ep-universe-star ep-universe-star-a" />
-        <span className="ep-universe-star ep-universe-star-b" />
-        <span className="ep-universe-star ep-universe-star-c" />
-        <span className="ep-universe-star ep-universe-star-d" />
-        <span className="ep-universe-orbit ep-universe-orbit-a" />
-        <span className="ep-universe-orbit ep-universe-orbit-b" />
-        <span className="ep-universe-orbit ep-universe-orbit-c" />
-        <span className="ep-universe-core" />
-      </div>
-      
       {/* Application chrome */}
       <Header
         lang={lang}
+        onForceEnglishPrompts={() => {
+          setPromptLang('en');
+          localStorage.setItem('ep_prompt_lang', 'en');
+          showToast('success', 'Prompts will be generated in English.');
+        }}
         onOpenLanguageSheet={() => setIsLanguageSheetOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenPresets={() => setIsPresetsOpen(true)}
@@ -818,7 +803,7 @@ const App: React.FC = () => {
                 <div className="pane-heading">
                   <div>
                     <span className="pane-eyebrow">{workspaceLabels.output}</span>
-                    <p className="pane-description">V1 · V2 · V3 · V4 · V5 · V6</p>
+                    <p className="pane-description">V1 · V2 · V3</p>
                   </div>
                 </div>
                 <PromptDisplay

@@ -132,7 +132,7 @@ GLOBAL RAW PHONE COLOR / EXPOSURE POLICY — OVERRIDES GENERIC REALISM WORDING:
 The generated image must look like an ordinary phone file straight from the camera roll, not a cinematic interpretation. Treat RAW/casual as restrained sensor capture, not a polished commercial grade. Use neutral, slightly imperfect phone white balance and normal sRGB-like color: believable skin and fabric colors, modest saturation, no teal shadows, no orange highlights, no cyan sky, no neon separation, no dramatic color contrast and no artificial glow.
 HDR must be OFF or barely perceptible unless the user explicitly requests HDR. Never lift every shadow and never preserve a perfectly blue sky and perfectly bright subject at the same time. Let the sky clip or wash toward pale white near the sun when exposure demands it; allow darker foreground shadows, mild highlight clipping and one real exposure compromise. Do not create haloing around people, local-contrast outlines, hyper-clean clouds, glowing edges, tone-mapped surfaces or an evenly exposed postcard background.
 Use the simplest physically plausible exposure for the selected phone and scene. Daylight: flash off, ordinary auto exposure, realistic highlight roll-off, slightly compressed phone dynamic range, neutral color. Backlight: subject may be darker, sky may be brighter or partly clipped; do not invent fill light. Indoor/night: warm practical lights may remain warm, white areas may clip, shadows may carry visible chroma noise, and distant areas may be dark. Keep sharpening modest and allow slight softness, sensor noise and compression. Do not describe the result as cinematic, filmic, editorial, HDR, hyperreal, glossy, vibrant, dramatic or color-graded unless the user explicitly asks for that look.
-This policy applies to V1, V2, V3, V4, V5 and V6 and must be reflected in the final paste-ready prompt with concrete exposure and color behavior, not merely a negative list.
+This policy applies to V1, V2 and V3 and must be reflected in the final paste-ready prompt with concrete exposure and color behavior, not merely a negative list.
 `;
 
 // Helper to format settings guidance for prompt generation
@@ -382,7 +382,7 @@ Do not use cinematic, editorial, masterpiece, hyperrealistic, luxury campaign, p
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', serverTime: new Date().toISOString() });
 });
-// Generate All Prompts (V1, V2, V3, V4, V5 + Auto Detection)
+// Generate All Prompts (V1, V2, V3 + Auto Detection)
 app.post('/api/generate-prompts', async (req, res) => {
     try {
         const { mode, modality, selectedTypeId = modality, promptLanguage, ideaText, references, settings } = req.body;
@@ -400,8 +400,8 @@ app.post('/api/generate-prompts', async (req, res) => {
         const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
-Write V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected in ${requestedLanguageName}.
-Do not mix languages. V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected must use the requested output language.
+Write V1, V2, V3, and every natural-language value in autoDetected in ${requestedLanguageName}.
+Do not mix languages. V1, V2, V3, and every natural-language value in autoDetected must use the requested output language.
 LANGUAGE PURITY ENFORCEMENT: Translate every heading, label, opening sentence, field name, camera term, lighting term, clothing term, realism instruction and descriptive clause into ${requestedLanguageName}. Do not leave English template words in Portuguese or Spanish output, and do not leave Portuguese or Spanish template words in English output. The only allowed exceptions are exact brand names, product names, model names, user-supplied text, URLs and technical tokens such as 9:16, iPhone 16 Pro, ISO and f/1.8. Before returning JSON, silently rewrite any mixed-language phrase into ${requestedLanguageName}.
 
 FINAL PROMPT CLEANLINESS — ALL ENGINES:
@@ -409,13 +409,11 @@ Never output internal instructions, rule explanations, reference handoff notes, 
 
 REFERENCE IDENTITY / PHOTOGRAPHIC SURFACE SEPARATION — ALL ENGINES:
 No version may narrate facial identity traits in the text prompt. The opening handoff may refer to 100% of the supplied identity reference, and the final image model must use that reference for the person's face, hair, age, ethnicity, body identity and other recognizable traits. However, every version must describe photographic surface behavior and physical pose precisely when visible or required: skin response to the actual light and distance, pores only at resolvable scale, natural tonal variation, fine hairs, crease compression, shoulder asymmetry, joint angles, hand mechanics, clothing tension, contact shadows and material response. Preserve identity through the image reference, not invented adjectives; never reduce the prompt to "realistic skin" or "natural pose". This rule overrides only facial-identity narration, not forensic photographic detail.
-Your mission is to construct six (6) distinct, highly specialized prompt engines for an image or scene:
-- V1: SMART NATURAL SNAPSHOT (COMPACT, PHYSICALLY RESOLVED)
+Your mission is to construct exactly three (3) distinct, highly specialized prompt engines for an image or scene:
+- V1: LIVED-IN SMARTPHONE REALITY MASTER (the former V5, now the primary master prompt)
 - V2: STRUCTURED REALISM (CLASSIC MODULAR BLOCKS WITH {})
 - V3: FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT, EXTREME PHYSICAL SPECIFICITY)
-- V4: HUMAN IPHONE MOMENT RECONSTRUCTION (LONG-FORM REFERENCE-FAITHFUL PROMPT)
-- V5: LIVED-IN SMARTPHONE REALITY MASTER (LONG-FORM HUMAN SNAPSHOT SYNTHESIS)
-- V6: CALIBRATED REALITY RECONSTRUCTION (HIGHEST-FIDELITY PHYSICAL CAPTURE)
+Do not generate, name, reference or return V4, V5 or V6.
 
 ==================================================
 CENTRAL FOUNDATIONAL PRINCIPLE:
@@ -479,15 +477,10 @@ The target is an ordinary, physically possible smartphone photograph, not an ima
 - Before returning each version, perform a silent continuity check: could one person physically stand there and could one handheld phone capture all visible planes, shadows, reflections and objects from the stated position in one moment? If not, simplify the scene rather than inventing detail.
 
 ==================================================
-ENGINE 1: V1 — SMART NATURAL SNAPSHOT
+ENGINE 1: V1 — LIVED-IN SMARTPHONE REALITY MASTER
 ==================================================
-${V1_SMART_INSTRUCTION}
-
-V1 MUST BE DISTINCT FROM V2:
-- V1 is compact and high-signal: resolve only the details that materially change the picture.
-- V2 is more exhaustive and spatially explicit.
-- V1 must never collapse to a generic one-sentence description.
-- V1 must never reuse old fixed boilerplate that overrides the user's aspect ratio, flash state, camera choice, or output language.
+${V5_MASTER_ADAPTIVE_INSTRUCTION}
+This is the new V1. It inherits the former V5 master quality bar and must be the strongest long-form output. Never mention that it was formerly V5.
 
 ==================================================
 ENGINE 2: V2 — STRUCTURED PHOTOGRAPHIC RECONSTRUCTION
@@ -496,7 +489,7 @@ V2 is the precision middle engine: substantially more resolved than V1, but clea
 It must use direct natural-language clauses with adaptive {curly-brace} blocks and must be immediately paste-ready.
 
 V2 CORE DIFFERENCE:
-- V1 = compact smart reconstruction.
+- V1 = the lived-in master reconstruction with the highest practical prompt density.
 - V2 = structured photographic reconstruction with explicit geometry, biomechanics, object contact, optics, lighting, material response, and causal imperfections.
 - V3 = deepest scene-forensics engine.
 
@@ -877,11 +870,8 @@ Before returning V3, silently verify:
 Return ONLY the final V3 prompt text.
 
 ==================================================
-${V4_SCENE_LOCK_INSTRUCTION}
-${V5_MASTER_ADAPTIVE_INSTRUCTION}
-        ${REFERENCE_FIDELITY_LOCK}
+${REFERENCE_FIDELITY_LOCK}
         ${RAW_PHONE_COLOR_POLICY}
-${V6_CALIBRATED_REALITY_INSTRUCTION}
 ==================================================
 
 ==================================================
@@ -892,18 +882,21 @@ ${isSpanish
 - V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.
 - V2: Output 100% in Spanish using the structured adaptive curly-brace format.
 - V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do not add headings outside the required V3 mould; use the required translated mould labels.
-- V4, V5 and V6: Output 100% in Spanish as direct, paste-ready prompts using the V4/V5/V6 rules above.`
+- V1: Output 100% in Spanish as the long-form lived-in smartphone master prompt.
+- V2 and V3: Output 100% in Spanish as direct, paste-ready prompts using their rules above.`
             : isPortuguese
                 ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.
 - V2: Output 100% in Brazilian Portuguese using the structured adaptive curly-brace format.
 - V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do not add headings outside the required V3 mould; use the required translated mould labels.
-- V4, V5 and V6: Output 100% in Brazilian Portuguese as direct, paste-ready prompts using the V4/V5/V6 rules above.`
+- V1: Output 100% in Brazilian Portuguese as the long-form lived-in smartphone master prompt.
+- V2 and V3: Output 100% in Brazilian Portuguese as direct, paste-ready prompts using their rules above.`
                 : `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural English using the smart adaptive curly-brace format.
 - V2: Output 100% in English using the structured adaptive curly-brace format.
 - V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do not add headings outside the required V3 mould; use the required translated mould labels.
-- V4, V5 and V6: Output 100% in English as direct, paste-ready prompts using the V4/V5/V6 rules above.`}
+- V1: Output 100% in English as the long-form lived-in smartphone master prompt.
+- V2 and V3: Output 100% in English as direct, paste-ready prompts using their rules above.`}
 
 ==================================================
 AUTO DETECT EXTRACTION:
@@ -939,7 +932,7 @@ ${settingsContext}
 `;
         }
         contentsParts.push({
-            text: `OUTPUT LANGUAGE LOCK: Generate V1, V2, V3, V4, V5, V6, and every natural-language value in autoDetected entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.
+            text: `OUTPUT LANGUAGE LOCK: Generate V1, V2, V3, and every natural-language value in autoDetected entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.
 
 ${userTextDescription}`
         });
@@ -973,10 +966,7 @@ ${userTextDescription}`
                                 v1: { type: Type.STRING },
                                 v2: { type: Type.STRING },
                                 v3: { type: Type.STRING },
-                                v4: { type: Type.STRING },
-                                v5: { type: Type.STRING },
-                v6: { type: Type.STRING },
-                                autoDetected: {
+                                                                autoDetected: {
                                     type: Type.OBJECT,
                                     properties: {
                                         subjectCount: { type: Type.STRING },
@@ -997,7 +987,7 @@ ${userTextDescription}`
                                     }
                                 }
                             },
-                            required: ["v1", "v2", "v3", "v4", "v5", "v6", "autoDetected"]
+                            required: ["v1", "v2", "v3", "autoDetected"]
                         }
                     }
                 });
@@ -1006,70 +996,10 @@ ${userTextDescription}`
                     throw new Error("Empty response from model.");
                 const parsed = JSON.parse(responseText);
                 const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, beauty filter, cartoon, anime, illustration, oversaturated, vivid color grade, HDR halos, tone mapping, local contrast glow, sky replacement, artificial studio lighting, sunset color grading without a real sunset, teal-orange grade, shallow cinematic bokeh, cutout subject, halo edges, fake depth map, background wallpaper, generic AI background, impossible perspective, floating architecture, repeated windows, cloned trees, melted cars, warped horizon, disconnected shadows, inconsistent reflections, decorative light blobs, hyper-detailed distant background, glossy 8K clarity, perfect symmetry, posed fashion campaign, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, invented watermark, fake signature, misspelled text, random characters, melted lettering, warped logo geometry, mirrored writing, doubled glyphs, weird eyes, unnatural specular highlights";
-                                        // Dedicated long-form pass: V4/V5/V6 get their own output budget so the six-engine
-                        // response does not compress the human/phone realism requested by the user.
-                        let dedicatedV4 = parsed.v4?.trim() || "";
-                        let dedicatedV5 = parsed.v5?.trim() || "";
-                let dedicatedV6 = parsed.v6?.trim() || "";
-                        try {
-                          const longResponse = await ai.models.generateContent({
-                            model: currentModel,
-                            contents: contentsParts,
-                            config: {
-                              systemInstruction: `OUTPUT ONLY THREE LONG, DIRECT, PASTE-READY IMAGE PROMPTS IN ${requestedLanguageName} AS JSON FIELDS v4, v5 AND v6. The first sentence of each field must be the exact language-matched neutral opening defined by V4_OPENING_LANGUAGE_RULE, with no heading or preamble. Do not narrate facial identity traits or expose internal rules; each field must still describe pose biomechanics, skin response to light, clothing contact and physical camera behavior. Do not summarize and do not explain. V4 must follow the grounded HUMAN IPHONE MOMENT RECONSTRUCTION mold and normally use 500–750 words only when the visual evidence requires it. V5 must follow the LIVED-IN SMARTPHONE REALITY MASTER mold, and V6 must follow the CALIBRATED REALITY RECONSTRUCTION mold, use the supplied image for identity while preserving forensic photographic surface detail, and normally use 650–900 words for a complex scene. Prioritize exact visible text, logos, signs and product markings with correct spelling and geometry; if unreadable, keep them unreadable instead of inventing letters. Expand clothing, body mechanics, human micro-behavior, scene geometry, objects, photographer position, rear iPhone optics, skin, flash/light, shadows, reflections, materials, motion, compression, crop and causal imperfections without repeating facts. Keep the exact user facts and output language. Never make a cinematic advertisement, never add fake bokeh or beauty retouching, and never output headings or analysis.
-
-                ${V4_OPENING_LANGUAGE_RULE}
-                ${V4_SCENE_LOCK_INSTRUCTION}
-
-                ${V5_MASTER_ADAPTIVE_INSTRUCTION}
-        ${REFERENCE_FIDELITY_LOCK}
-        ${RAW_PHONE_COLOR_POLICY}
-
-        ${V6_CALIBRATED_REALITY_INSTRUCTION}`,
-                              temperature: 0.2,
-                              maxOutputTokens: 12000,
-                              responseMimeType: "application/json",
-                              responseSchema: {
-                                type: Type.OBJECT,
-                                properties: {
-                                  v4: { type: Type.STRING },
-                                  v5: { type: Type.STRING },
-                          v6: { type: Type.STRING }
-                                },
-                                required: ["v4", "v5", "v6"]
-                              }
-                            }
-                          });
-                          if (longResponse.text) {
-                            const longParsed = JSON.parse(longResponse.text);
-                            if (longParsed.v4?.trim()) dedicatedV4 = longParsed.v4.trim();
-                            if (longParsed.v5?.trim()) dedicatedV5 = longParsed.v5.trim();
-                    if (longParsed.v6?.trim()) dedicatedV6 = longParsed.v6.trim();
-                          }
-                        } catch (longErr) {
-                          console.warn(`Dedicated V4/V5/V6 pass failed; keeping primary result: ${longErr.message}`);
-                        }
-                    const localizedRealismTail = isSpanish
-                              ? `La escena debe conservar una escala humana y observacional: la postura no es simétrica ni ensayada, el peso cae de forma desigual y cada mano, dedo, rodilla, pie, prenda y objeto tiene una relación física clara con lo que toca. La camisa, los shorts y las sandalias deben responder al movimiento, la gravedad, la humedad y el viento del lugar con pliegues pequeños, tensión en las costuras, compresión en los puntos de apoyo y volumen irregular, nunca como ropa pegada o renderizada. La piel conserva poros, vello fino, variaciones de tono, pequeñas sombras y reflejos reales, sin suavizado de belleza. La cámara trasera de iPhone registra una perspectiva cotidiana de 24–26 mm, enfoque automático ligeramente imperfecto, HDR discreto, color automático no totalmente neutro, ruido digital proporcional a la exposición, compresión móvil y un encuadre apenas torcido. La luz y el flash solo afectan la distancia que físicamente pueden alcanzar; las sombras, reflejos y brillos siguen la dirección de la fuente y caen naturalmente hacia el fondo. Nada debe parecer una campaña, una sesión de moda, una imagen 3D o una composición demasiado perfecta.`
-                              : isPortuguese
-                              ? `A cena deve conservar escala humana e aparência observacional: a postura não é simétrica nem ensaiada, o peso cai de forma desigual e cada mão, dedo, joelho, pé, peça de roupa e objeto tem uma relação física clara com aquilo que toca. A camisa, o short e as sandálias devem responder ao movimento, à gravidade, à umidade e ao vento do local com pequenas dobras, tensão nas costuras, compressão nos pontos de apoio e volume irregular, nunca como roupa colada ou renderizada. A pele preserva poros, pelos finos, variações de tom, pequenas sombras e reflexos reais, sem suavização de beleza. A câmera traseira do iPhone registra uma perspectiva cotidiana de 24–26 mm, foco automático levemente imperfeito, HDR desligado ou quase imperceptível, nitidez moderada e cor automática neutra e imperfeita, ruído digital proporcional à exposição, compressão móvel e enquadramento um pouco torto. A luz e o flash só alcançam a distância que fisicamente conseguem alcançar; sombras, reflexos e brilhos seguem a direção da fonte e desaparecem naturalmente ao fundo. Nada deve parecer campanha, ensaio de moda, imagem 3D ou composição perfeita.`
-                              : `Keep the scene human-scaled and observational: the posture is not symmetrical or rehearsed, weight falls unevenly, and every hand, finger, knee, foot, garment and object has a clear physical relationship with whatever it touches. The shirt, shorts and sandals respond to movement, gravity, humidity and local wind through small folds, seam tension, compression at contact points and irregular volume, never as pasted-on or rendered clothing. Skin keeps pores, fine hair, tonal variation, small shadows and real highlights without beauty smoothing. The rear iPhone records an ordinary 24–26mm perspective with slightly imperfect autofocus, HDR off or barely perceptible, modest sharpening and imperfect neutral automatic color, exposure-proportional digital noise, mobile compression and a subtly crooked frame. Light and flash reach only as far as they physically can; shadows, reflections and highlights follow the source and fall away naturally into the background. Nothing should look like a campaign, fashion shoot, 3D render or overly perfect composition.`;
-                            const localizedV5Tail = isSpanish
-                              ? `Mantén además las pequeñas decisiones humanas que hacen creíble una fotografía accidental: la mirada puede quedar un instante fuera de sincronía con la acción, los hombros pueden estar a alturas distintas, los dedos pueden descansar sin posar, un objeto puede estar colocado de manera práctica y las personas del fondo pueden ocuparse de sus propias acciones sin mirar a cámara. Conserva la textura de la cubierta, las marcas de uso, el polvo, las huellas, la humedad, los reflejos deformados y las imperfecciones de fabricación solo cuando existan o sean compatibles con la evidencia. La profundidad de campo debe ser la de un teléfono normal, no un recorte artificial; si algo queda suave, debe ser por distancia, movimiento, enfoque o luz. Prioriza siempre una imagen verosímil, espontánea, ligeramente imperfecta y físicamente posible.`
-                              : isPortuguese
-                              ? `Mantenha também as pequenas decisões humanas que tornam uma fotografia acidental crível: o olhar pode ficar um instante fora de sincronia com a ação, os ombros podem estar em alturas diferentes, os dedos podem descansar sem posar, um objeto pode estar colocado de maneira prática e as pessoas ao fundo podem cuidar das próprias ações sem olhar para a câmera. Preserve a textura do convés, marcas de uso, poeira, marcas de dedo, umidade, reflexos deformados e imperfeições de fabricação apenas quando existirem ou forem compatíveis com a evidência. A profundidade de campo deve ser a de um telefone comum, não um recorte artificial; se algo ficar suave, deve ser por distância, movimento, foco ou luz. Priorize sempre uma imagem verossímil, espontânea, levemente imperfeita e fisicamente possível.`
-                              : `Also preserve the small human decisions that make an accidental photograph believable: the gaze may fall a fraction late to the action, shoulders may sit at different heights, fingers may rest without posing, an object may be placed practically, and background people may be absorbed in their own actions without looking at the camera. Keep deck texture, wear marks, dust, fingerprints, moisture, distorted reflections and manufacturing imperfections only when they exist or agree with the evidence. Depth of field must belong to a normal phone, never an artificial cutout; if something is soft, it is soft because of distance, movement, focus or light. Always prioritize a believable, spontaneous, slightly imperfect and physically possible image.`;
-                            if (dedicatedV4.length < 2800) dedicatedV4 = `${dedicatedV4} ${localizedRealismTail}`;
-                            if (dedicatedV5.length < 3700) dedicatedV5 = `${dedicatedV5} ${localizedRealismTail} ${localizedV5Tail}`;
-                  if (dedicatedV6.length < 4200) dedicatedV6 = `${dedicatedV6} ${localizedRealismTail} ${localizedV5Tail}`;
-                            
-return res.json({
+                return res.json({
                     v1: parsed.v1?.trim() || "",
                     v2: parsed.v2?.trim() || "",
                     v3: parsed.v3?.trim() || "",
-                    v4: dedicatedV4,
-                    v5: dedicatedV5,
-                    v6: dedicatedV6,
                     negativePrompt: defaultNegativePrompt,
                     autoDetected: parsed.autoDetected || {}
                 });

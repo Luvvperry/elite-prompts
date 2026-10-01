@@ -12,6 +12,7 @@ import {
 
 interface HeaderProps {
   lang: Language;
+  onForceEnglishPrompts: () => void;
   onOpenLanguageSheet: () => void;
   onOpenHistory: () => void;
   onOpenPresets: () => void;
@@ -23,6 +24,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   lang,
+  onForceEnglishPrompts,
   onOpenLanguageSheet,
   onOpenHistory,
   onOpenPresets,
@@ -73,6 +75,9 @@ const Header: React.FC<HeaderProps> = ({
             <Globe2 size={18} strokeWidth={1.65} />
             <span className="pro-nav-lang">{langLabel[lang]}</span>
           </button>
+          <button type="button" onClick={onForceEnglishPrompts} className={`${actionClass} pro-nav-english-prompts`} title="Force all prompts to English" aria-label="Force all prompts to English">
+            <span className="pro-nav-lang">EN PROMPTS</span>
+          </button>
         </nav>
 
         <div className="pro-rail-bottom">
@@ -108,6 +113,9 @@ const Header: React.FC<HeaderProps> = ({
             <button type="button" onClick={onOpenLanguageSheet} className="mobile-topbar-button mobile-lang-button" title={copy.language}>
               <Globe2 size={16} strokeWidth={1.65} />
               <span>{langLabel[lang]}</span>
+            </button>
+            <button type="button" onClick={onForceEnglishPrompts} className="mobile-topbar-button mobile-lang-button" title="Force all prompts to English" aria-label="Force all prompts to English">
+              <span>EN</span>
             </button>
             <button type="button" onClick={onOpenSettings} className="mobile-topbar-button" title={copy.settings}>
               <SettingsIcon size={17} strokeWidth={1.65} />

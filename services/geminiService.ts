@@ -20,9 +20,6 @@ export const generateAllPrompts = async (
   v1: string;
   v2: string;
   v3: string;
-  v4: string;
-  v5: string;
-  v6: string;
   negativePrompt?: string;
   autoDetected: AutoDetectedParams;
 }> => {
@@ -181,7 +178,7 @@ export const magicEnhanceIdea = async (
 
 // Refine Prompt with Specific Delta
 export const refinePrompt = async (
-  targetEngine: 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6',
+  targetEngine: 'v1' | 'v2' | 'v3',
   originalPrompt: string,
   refinementDirective: string
 ): Promise<string> => {
