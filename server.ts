@@ -645,6 +645,7 @@ Base Modality: ${modality}
 V3 — PERSON / SOLO PERSON / MULTI-SUBJECT STRUCTURED PROMPT
 ==================================================
 V3 MUST USE THE USER'S NEW STRUCTURED MOULD BELOW FOR PEOPLE. The final output is a paste-ready image prompt, not an explanation of this instruction. Keep the section order and the curly-brace blocks exactly. Translate every heading and every value completely into the requested output language.
+IMPORTANT: The following mould is a private Portuguese schema. Never quote or copy its Portuguese wording; use its structure only, and write the complete final output in the requested language.
 
 V3 POWER MODE — STRUCTURAL COMPLETENESS AND REFERENCE FIDELITY:
 - For one person, output exactly one ${v3Labels.character} block. Never output ${v3Labels.character2}, group language or a second subject when only one person is present.
@@ -896,6 +897,12 @@ Return ONLY the final V3 prompt text.
 ${REFERENCE_FIDELITY_LOCK}
         ${RAW_PHONE_COLOR_POLICY}
 ==================================================
+
+
+V3 FULL-LANGUAGE FINAL AUDIT — HIGHEST PRIORITY:
+The Portuguese-language mould shown later in this instruction is a PRIVATE SCHEMA ONLY. It is not text to copy. Never copy its Portuguese sentences, field names or example clauses into the final V3 output.
+Before returning V3, inspect the entire generated prompt character by character, including the opening, every sentence, every field label, every phrase inside curly braces and every square-bracket label. Rewrite any word or phrase that is not in the requested output language.
+If the requested language is English, the final V3 must not contain Portuguese or Spanish prose such as "Crie uma imagem", "Crie", "Idade aparente", "Cabelo", "Expressão", "Postura", "Roupa e tecido", "Acessórios", "Calçado", "somente se houver", "Ambiente", "Localização", "Elementos específicos", "Elementos de fundo", "Horário", "O que cada pessoa está fazendo", "Enquadramento", "Posição das pessoas", "Distância da câmera", "Primeiro plano / fundo", "Tipo", "Lente equivalente", "Profundidade de campo", "Pele com textura natural", "A imagem deve parecer" or any other non-English phrase. Use the exact English equivalents instead. Values inside braces must also be rewritten; translating only labels is a failure. Do not return a mixed-language V3 under any output format, including JSON.
 
 ==================================================
 LANGUAGE LOCALIZATION DIRECTIVE:
