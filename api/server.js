@@ -510,80 +510,91 @@ ${V5_MASTER_ADAPTIVE_INSTRUCTION}
 This is the new V1. It inherits the former V5 master quality bar and must be the strongest long-form output. Never mention that it was formerly V5.
 
 ==================================================
-ENGINE 2: V2 — STRUCTURED IDEA-TO-PROMPT RECONSTRUCTION
+ENGINE 2: V2 — EXACT STRUCTURED IDEA-TO-PROMPT OUTPUT
 ==================================================
-V2 is the structured IDEA TO PROMPT engine. It must interpret the user's written idea and turn it into one complete, specific, physically coherent smartphone-photo prompt. Do not return a loose narrative paragraph.
+V2 is IDEA TO PROMPT. Change only the final textual organization of V2. Keep the existing V2 input logic, idea interpretation, settings, variables, preferences, parameters, reference upload, selected options, modality, camera controls, wardrobe data, lighting data, aspect ratio, output language and output format exactly as they are.
 
-V2 SCOPE LOCK:
-- This change affects only the textual construction of V2. Keep all incoming settings, options, references, modality, camera choices, wardrobe data, lighting data, aspect ratio, output language and output format exactly as received.
-- The user's written idea is the authority for the scene, environment, action, camera intention and composition whenever the request is IDEA TO PROMPT.
-- When a user face/identity photo is attached in IDEA TO PROMPT, use that image only as the external identity reference for the person. Preserve recognizable facial identity, hair, skin tone and general appearance through the image-reference channel, without narrating facial traits as invented text.
-- Do not request, imply or invent a second composition reference. Never write phrases such as “use the second photo”, “recreate the original photo”, “maintain the second image composition”, “replace the face from the original image”, or equivalent wording.
-- Build the scene from the written idea and the existing settings. Do not add elements that change the user's intention merely to make the prompt more impressive.
-- Explicit user choices always override defaults: clothing, accessories, vehicle, location, time, action, camera, lens, flash, lighting, format, ratio and any structured/JSON details.
+V2 MUST NOT:
+- return a flowing narrative paragraph;
+- answer in a free-form format;
+- create a different template;
+- change V1, V3, any function, flow, upload behavior or input logic;
+- invent a second composition reference;
+- say “use the second photo”, “recreate the original photo”, “maintain the composition of the second image”, “replace the face from the original image”, or any equivalent phrase.
 
-V2 INTERNAL RESOLUTION — SILENT, NEVER OUTPUT AS ANALYSIS:
-1. Extract every locked fact from the idea and settings without simplifying long descriptions or structured data.
-2. Complete only missing details that are necessary for a coherent frame: spatial layout, body mechanics, camera position, light transport, material response and causal phone imperfections.
-3. Resolve exact subject count, frame placement, body orientation, head direction, gaze, expression, shoulder/torso rotation, hip and weight-bearing leg, knees, feet, hands and contact with every object or surface.
-4. Resolve the environment as a real place: foreground, subject plane, background, ground/walls/architecture, 3–6 ordinary visual anchors, scale, depth, occlusion and useful lived-in detail.
-5. Resolve wardrobe as physical material: exact requested garments, color, fabric, fit, closures, accessories, folds, bunching, tension and compression caused by the pose.
-6. Resolve smartphone capture: photographer position, height, distance, lateral offset, crop, selected device/lens/mode, focus, exposure, flash behavior and aspect ratio.
-7. Resolve light, shadows, reflections and imperfections as consequences of the chosen time, source, distance and motion. Never paste random camera settings or a generic defect list.
+V2 IDEA-TO-PROMPT REFERENCE RULE:
+The user's written idea is the source of the scene, environment, action, pose, camera intention and composition. When a user photo is attached, use it only as the external identity reference for the man who will appear in the generated image. Preserve identity through the image-reference channel: facial identity, facial structure, hair, skin tone, proportions and overall appearance, without artificial beautification, identity change or excessive smoothing. Do not use the attached face photo as a composition reference.
 
-V2 REQUIRED OUTPUT FORMAT:
-- Return one direct, paste-ready image-generation prompt built from the following blocks, in exactly this order.
-- Translate every block label and every description completely into the requested output language. Do not mix languages.
-- Keep the labels visible and keep the curly braces. Do not output the internal analysis, a checklist, JSON, markdown fences, explanations or instructions addressed to another AI.
-- Each block must contain concrete, image-changing information. Do not use vague filler such as “beautiful”, “natural pose”, “realistic scene” or “professional quality” without physical evidence.
-- If a block is not relevant to the selected modality, adapt it without adding unrelated content; never force portrait language onto an object/POV request.
+V2 SILENT DATA RESOLUTION:
+- Reuse every existing V2 setting and explicit user detail without summarizing or dropping details.
+- User-defined camera, lens, height, distance, framing, angle, lighting, flash, time, clothing, accessories, vehicle, action, aspect ratio and JSON details always have priority.
+- Complete only missing information needed to make one physically coherent photograph: body mechanics, spatial relationships, object contact, light transport, shadows, materials and causal smartphone imperfections.
+- Do not add unrelated luxury, landmarks, props, people, cinematic styling or invented brands/text.
 
-Use this language-matched structure:
-Use the attached face photo as the identity reference for the person, preserving recognizable facial identity and general appearance in the generated image without artificial beautification.
+V2 REQUIRED FINAL TEMPLATE:
+Return only the completed prompt with the following block order and visible curly braces. The opening sentence below is mandatory and must appear exactly as written in every V2 output, regardless of the selected output language:
 
-ANGLE AND CAMERA:
-{specific camera angle, photographer height and position, approximate distance, selected device, selected lens/mode, perspective, framing, crop and subject scale; preserve the user's camera settings when provided}
+faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele.
 
-SCENE:
-{the exact environment from the idea, including location, ground, walls, architecture, foreground, background, 3–6 coherent ordinary anchors, vehicles, furniture, vegetation and object placement; do not invent a second image composition}
+**ângulo e câmera:**
 
-POSE AND ACTION:
-{the exact photographed instant, body position, torso and head direction, shoulder and hip relation, weight distribution, legs and feet, arm and hand positions, gaze, expression and physical interaction with the environment or objects}
+{use the existing generator settings to describe the camera, lens, height, distance, framing, angle, camera position and aspect ratio; if the user defined any of these, it has priority; if a saved setting already exists, preserve it}
 
-CLOTHING:
-{the exact clothing, accessories, brands, models, fabrics, colors, fit, closures and structured/JSON details supplied by the user; preserve every relevant requested detail, including folds, bunching, tension and compression caused by the pose}
+**cenário:**
 
-EFFECTS:
-{the coherent light source, time of day, direction, intensity, exposure compromise, white balance, flash behavior when requested, phone processing and only causal smartphone imperfections such as slight digital noise, compression, minor focus miss or small handheld movement}
+{use the user's idea and the existing generator settings to describe the environment, background, objects, architecture, ground, furniture, vehicles, vegetation and coherent scene elements; do not invent another composition logic}
 
-SKIN:
-{unretouched skin surface rendered according to the actual light, distance and focus: natural tonal variation, pores only at resolvable scale, small blemishes, fine hairs and crease compression where visible; no plastic, wax, rubber, airbrushed or excessively smoothed skin}
+**pose e ação:**
 
-SHADOWS:
-{shadows attached to the correct body, objects and surfaces, with direction, softness, density, contact shadows and falloff matching the real light source; reflections must follow glass, metal, paint or water geometry}
+{use the user's idea and existing V2 settings to describe the exact pose, posture, weight distribution, arm and leg positions, head direction, gaze, expression and action}
 
-FACE:
-{when the attached identity photo exists, use it as the external identity reference and preserve face shape, facial identity, hair, skin tone and overall appearance without inventing a textual facial description or applying beauty changes}
+**roupa:**
 
-PHYSICAL REALISM:
-{real contact between body and objects, coherent body weight, natural hand and foot placement, correct fabric folds and tension, believable proportions, object support and gravity, consistent reflections, perspective, occlusion and interaction between every element}
+{use exactly the clothing provided by the user or existing V2 variables; preserve brands, colors, fabric, cut, footwear and accessories; if the user supplied detailed descriptions or JSON for clothing, glasses, watches or accessories, preserve the relevant characteristics here}
 
-FORMAT:
-{the user's selected aspect ratio/platform/crop exactly; if no new choice was supplied, use the existing generator setting rather than a fixed value}
+**efeitos:**
+
+{use the existing generator settings to describe lighting, light source, direction, intensity, flash, exposure and real smartphone-camera behavior}
+
+{also use the existing settings to describe natural smartphone imperfections such as slight digital noise, JPEG compression, slightly imperfect focus, small handheld shake, natural dynamic range and absence of artificial blur when those belong to the setting or idea}
+
+**pele:**
+
+{real skin, natural texture, visible pores only where resolvable, no plastic appearance and no excessive smoothing; keep skin tone coherent with the light and the user's identity photo}
+
+**sombra:**
+
+{describe shadows coherent with the light source and scene settings, respecting direction, intensity, hardness or softness, contact and falloff}
+
+**rosto:**
+
+{use 100% of the facial identity of the man in the attached photo, preserving identity, facial structure, hair, skin tone and overall appearance without artificial beautification}
+
+**física e realismo:**
+
+{ensure realistic physical contact between the body and scene objects, coherent body weight, natural posture, correct clothing tension, reflections compatible with the lighting, natural human proportions and convincing physical interaction}
+
+**formato:**
+
+{use the format defined by the user or by the existing V2 settings; never replace an existing configured format with a fixed value}
+
+V2 LANGUAGE RULE:
+- Always use the exact opening sentence shown above.
+- For English or Spanish output, preserve the exact same block order, meaning and curly-brace structure, translate the block labels and descriptions into the selected output language, and do not mix languages beyond the mandatory opening sentence.
 
 V2 MODALITY ADAPTATION:
-- For multiple people, keep separate identity references, position, clothing, action, hands, gaze and object ownership for each person before describing the shared scene.
-- For objects, vehicles, food, desks or POV scenes, replace PERSON/POSE/FACE/SKIN blocks with object identity, support/contact, material, orientation, camera POV and relevant environment details; do not invent a person or a face.
-- For person + vehicle, preserve the exact named vehicle and describe the real body-to-vehicle contact, door/window state, wheel/ground contact and camera position.
-- If the idea does not specify a camera, use a handheld rear smartphone main camera at 1x; if it does specify one, preserve it exactly. Do not introduce DSLR, full-frame, anamorphic, studio lighting or artificial portrait bokeh.
+- For multiple people, keep each person's position, clothing, action, hands, gaze and object ownership separate inside the same blocks.
+- For objects, vehicles, food, desks or POV scenes, adapt the blocks to object identity, support/contact, material, orientation, camera POV and environment; do not invent a man or face when the selected modality does not contain one.
+- For person plus vehicle, preserve the exact named vehicle and describe realistic body-to-vehicle contact, door/window state, wheel/ground contact and physically possible camera placement.
 
-V2 FINAL QUALITY GATE — silently fix before returning:
-- Every explicit fact, setting, clothing detail, JSON detail, camera choice and format survived unchanged.
-- The scene came from the written idea and existing settings, not from an invented second composition reference.
-- The person, pose, hands, feet, weight, object contact, shadows, perspective and camera position are physically possible.
-- The environment is specific and spatial, not a generic backdrop.
-- Skin reads as real phone-captured surface rather than a cartoon, render or beauty retouch.
-- The output contains only the translated structured prompt, with no mixed-language labels or meta-commentary.
+V2 FINAL QUALITY GATE — silently correct before returning:
+- The required opening and block order are present.
+- All existing V2 data, settings, user details, JSON details and format choices survived unchanged.
+- The scene was built from the user's idea, not from a second composition image.
+- The output is structured blocks, never a flowing paragraph or free-form response.
+- Pose, hands, feet, weight, objects, shadows, perspective, clothing and camera position are physically possible.
+- Skin and face identity are preserved without plastic retouching or identity changes.
+- No unrelated function, input, upload, flow, V1 or V3 behavior is changed.
 
 ==================================================
 ENGINE 3: V3 — FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT)
