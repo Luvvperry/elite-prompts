@@ -510,118 +510,80 @@ ${V5_MASTER_ADAPTIVE_INSTRUCTION}
 This is the new V1. It inherits the former V5 master quality bar and must be the strongest long-form output. Never mention that it was formerly V5.
 
 ==================================================
-ENGINE 2: V2 — STRUCTURED PHOTOGRAPHIC RECONSTRUCTION
+ENGINE 2: V2 — STRUCTURED IDEA-TO-PROMPT RECONSTRUCTION
 ==================================================
-V2 is the precision middle engine: substantially more resolved than V1, but cleaner and easier to read than V3.
-It must use direct natural-language clauses with adaptive {curly-brace} blocks and must be immediately paste-ready.
+V2 is the structured IDEA TO PROMPT engine. It must interpret the user's written idea and turn it into one complete, specific, physically coherent smartphone-photo prompt. Do not return a loose narrative paragraph.
 
-V2 CORE DIFFERENCE:
-- V1 = the lived-in master reconstruction with the highest practical prompt density.
-- V2 = structured photographic reconstruction with explicit geometry, biomechanics, object contact, optics, lighting, material response, and causal imperfections.
-- V3 = deepest scene-forensics engine.
+V2 SCOPE LOCK:
+- This change affects only the textual construction of V2. Keep all incoming settings, options, references, modality, camera choices, wardrobe data, lighting data, aspect ratio, output language and output format exactly as received.
+- The user's written idea is the authority for the scene, environment, action, camera intention and composition whenever the request is IDEA TO PROMPT.
+- When a user face/identity photo is attached in IDEA TO PROMPT, use that image only as the external identity reference for the person. Preserve recognizable facial identity, hair, skin tone and general appearance through the image-reference channel, without narrating facial traits as invented text.
+- Do not request, imply or invent a second composition reference. Never write phrases such as “use the second photo”, “recreate the original photo”, “maintain the second image composition”, “replace the face from the original image”, or equivalent wording.
+- Build the scene from the written idea and the existing settings. Do not add elements that change the user's intention merely to make the prompt more impressive.
+- Explicit user choices always override defaults: clothing, accessories, vehicle, location, time, action, camera, lens, flash, lighting, format, ratio and any structured/JSON details.
 
-V2 BEFORE WRITING — silently resolve, never show the analysis:
-1. SUBJECT MAP: count, reference assignment, frame side, scale in frame, body orientation, gaze, expression, action state.
-2. BODY MAP: head/chin, shoulder asymmetry, torso, pelvis, weight-bearing leg, relaxed/advancing leg, feet, arms, hands, and contact points.
-3. WARDROBE MAP: each visible layer, color, material, cut, closure, drape, tension, bunching, compression, footwear, accessories.
-4. SCENE MAP: foreground, subject plane, mid-ground, background, viewer-left/right anchors, floor/wall/architecture, useful clutter, vehicles/objects.
-5. OBJECT MAP: ownership, support surface, contact, orientation, scale, occlusion, grip, reflections, wear/grease/dust only when justified.
-6. CAMERA MAP: holder, rear/front camera, lens mode, distance, height, direction, tilt, orientation, crop, subject scale, perspective.
-7. LIGHT MAP: source(s), direction, hardness, falloff, cast shadows, reflected highlights, near/far exposure, flash reach.
-8. IMPERFECTION MAP: only flaws causally supported by movement, light, distance, focus, handheld behavior, or phone processing.
+V2 INTERNAL RESOLUTION — SILENT, NEVER OUTPUT AS ANALYSIS:
+1. Extract every locked fact from the idea and settings without simplifying long descriptions or structured data.
+2. Complete only missing details that are necessary for a coherent frame: spatial layout, body mechanics, camera position, light transport, material response and causal phone imperfections.
+3. Resolve exact subject count, frame placement, body orientation, head direction, gaze, expression, shoulder/torso rotation, hip and weight-bearing leg, knees, feet, hands and contact with every object or surface.
+4. Resolve the environment as a real place: foreground, subject plane, background, ground/walls/architecture, 3–6 ordinary visual anchors, scale, depth, occlusion and useful lived-in detail.
+5. Resolve wardrobe as physical material: exact requested garments, color, fabric, fit, closures, accessories, folds, bunching, tension and compression caused by the pose.
+6. Resolve smartphone capture: photographer position, height, distance, lateral offset, crop, selected device/lens/mode, focus, exposure, flash behavior and aspect ratio.
+7. Resolve light, shadows, reflections and imperfections as consequences of the chosen time, source, distance and motion. Never paste random camera settings or a generic defect list.
 
-V2 OUTPUT RULES:
-- Use the requested output language for EVERY block label and description.
-- Do not expose the maps above, numbered phases, JSON, checklists, or meta-instructions.
-- Do not use a rigid template when the scene type does not need it.
-- Every {} block must contain observable, image-changing information, not filler adjectives.
-- State each important fact once. Do not repeat camera/flash/realism in multiple blocks.
+V2 REQUIRED OUTPUT FORMAT:
+- Return one direct, paste-ready image-generation prompt built from the following blocks, in exactly this order.
+- Translate every block label and every description completely into the requested output language. Do not mix languages.
+- Keep the labels visible and keep the curly braces. Do not output the internal analysis, a checklist, JSON, markdown fences, explanations or instructions addressed to another AI.
+- Each block must contain concrete, image-changing information. Do not use vague filler such as “beautiful”, “natural pose”, “realistic scene” or “professional quality” without physical evidence.
+- If a block is not relevant to the selected modality, adapt it without adding unrelated content; never force portrait language onto an object/POV request.
 
-V2 — SOLO PERSON / PORTRAIT / LIFESTYLE, adapt and localize:
-PHOTO / SOLO PHOTO: create an image of the main person from the provided reference or specification.
-main person: {identity/reference fidelity when applicable, body scale in frame, physical build only when established}.
-wearing: {all relevant garments and accessories, exact color/material/fit/closure, natural folds, tension and compression caused by pose}.
-environment: {specific place and spatial organization, viewer-left/right anchors, foreground/background depth, floor/wall/architecture and restrained everyday details}.
-position in space: {where the person stands/sits relative to furniture, vehicle, wall, table, doorway, etc.; distance and occlusion where relevant}.
-action: {exact photographed instant, not merely a verb}.
-posture and body: {torso/head orientation, shoulders, hips, weight distribution, legs and feet, asymmetry}.
-hands and interaction: {which hand, which object/surface, grip/contact/orientation; omit when irrelevant}.
-gaze and expression: {where the eyes/head are directed and the expression actually requested/visible}.
-camera: {device, rear/front camera and selected lens/mode; smartphone-first if unspecified}.
-camera position and framing: {who holds it, approximate distance, height, lateral offset, front/side/3-quarter/rear relation, crop and subject scale}.
-light: {real source, direction, intensity relationship, flash behavior if present, background falloff}.
-shadows and reflections: {cast/contact shadows and only physically plausible glass/metal/paint highlights}.
-materials: {only scene-relevant material response visible at this distance}.
-photo imperfections: {only causal smartphone imperfections; no random defect dumping}.
-skin and focus: {skin detail proportional to distance, autofocus behavior, natural small-sensor depth, no plastic smoothing or fake portrait bokeh}.
-photo format: {requested aspect ratio/platform and crop intent}.
+Use this language-matched structure:
+Use the attached face photo as the identity reference for the person, preserving recognizable facial identity and general appearance in the generated image without artificial beautification.
 
-V2 — TWO PEOPLE / GROUPS:
-- Give each important subject a separate identity/position, wardrobe, action, hands, gaze, and object ownership description.
-- Explicitly map viewer-left/center/viewer-right or other useful spatial relation.
-- Never merge clothing, accessories, limbs, laptops, drinks, phones, tools, or actions between subjects.
-- Then describe shared environment, camera, light, imperfections, materials and format once.
+ANGLE AND CAMERA:
+{specific camera angle, photographer height and position, approximate distance, selected device, selected lens/mode, perspective, framing, crop and subject scale; preserve the user's camera settings when provided}
 
-V2 — OBJECT / POV / FOOD / DESK / TABLE:
-Do NOT use portrait language.
-POV / OBJECT PHOTO.
-main object: {exact object, make/model only if established, material, finish, condition, orientation, scale and position}.
-support surface: {surface material, curvature/level, exact contact patches, pressure/compression/contact shadow, spills/grease/sauce/water only when justified}.
-secondary objects: {limited scene-specific items, count, ownership, orientation and occlusion; no random décor}.
-environment: {garage/kitchen/car/desk/bedroom/etc., foreground/mid-ground/background and ordinary contextual anchors}.
-interaction: {hands only when visible/requested; which hand, finger placement, grip/use/contact and sleeve/watch only when established}.
-camera and POV: {rear smartphone camera, realistic chest/eye/waist/table height, distance, downward/upward tilt, 0.5x/1x/2x/3x behavior}.
-light: {real source(s), direction, falloff, highlight/contact-shadow behavior}.
-materials and reflections: {paint curvature, glass reflection/transmission, metal highlights, cardboard folds, food moisture/oil, wood/stone/plastic response only where present}.
-photo imperfections: {causal handheld/digital flaws only}.
-focus and format: {natural smartphone depth and requested ratio/platform}.
+SCENE:
+{the exact environment from the idea, including location, ground, walls, architecture, foreground, background, 3–6 coherent ordinary anchors, vehicles, furniture, vegetation and object placement; do not invent a second image composition}
 
-V2 — VEHICLE / PERSON + VEHICLE:
-- Preserve the exact named vehicle when established; never downgrade it to “luxury car”.
-- Resolve visible side/front/rear, door/window state, wheel/tire ground contact, roofline, interior visibility, and body-panel reflections when they matter.
-- If a person leans/sits/enters/exits, state the exact contact point and body mechanics.
-- In car interiors, the camera position must physically fit inside/outside the cabin; never place the camera through a seat, dashboard, door, or glass.
+POSE AND ACTION:
+{the exact photographed instant, body position, torso and head direction, shoulder and hip relation, weight distribution, legs and feet, arm and hand positions, gaze, expression and physical interaction with the environment or objects}
 
-V2 — SCENE / INTERIOR / ARCHITECTURE / PRODUCT:
-Use blocks such as:
-main scene/object: {exact physical content}.
-environment and geometry: {architecture, lines, distances, foreground/mid-ground/background, viewer-left/right anchors}.
-object relations: {support/contact/scale/orientation/occlusion}.
-camera and framing: {smartphone/device, position, distance, height, lens mode, crop}.
-light and shadows: {source, direction, falloff, reflections}.
-materials: {only visible material response}.
-photo imperfections: {causal only}.
-format: {requested ratio/platform}.
+CLOTHING:
+{the exact clothing, accessories, brands, models, fabrics, colors, fit, closures and structured/JSON details supplied by the user; preserve every relevant requested detail, including folds, bunching, tension and compression caused by the pose}
 
-V2 PHYSICAL RULES:
-- “Leaning” requires a real body-to-surface contact point and believable weight transfer.
-- “Sitting” requires seat compression, hip/knee/foot logic and clothing folds at waist/knees when visible.
-- “Walking” requires a real gait phase, arm counter-swing and possible slight motion blur only if justified.
-- “Holding/using” requires which hand, grip/contact and object orientation.
-- Food should look irregular and physically used, not automatically styled like advertising.
-- Objects on a car hood must follow hood curvature and stable contact; they cannot behave as if on a perfectly level table.
-- Reflections must follow glass/metal/paint geometry; do not invent impossible mirrored content.
+EFFECTS:
+{the coherent light source, time of day, direction, intensity, exposure compromise, white balance, flash behavior when requested, phone processing and only causal smartphone imperfections such as slight digital noise, compression, minor focus miss or small handheld movement}
 
-V2 SMARTPHONE RULES:
-- If camera is unspecified, default to rear iPhone/smartphone main camera at 1x, handheld.
-- Preserve any explicit 0.5x/1x/2x/3x/front-camera choice exactly.
-- No automatic 35mm/50mm/85mm professional-lens language, full-frame look, anamorphic language, studio lighting, or artificial portrait bokeh.
-- Day/bright exterior defaults to flash off unless explicitly requested or physically justified.
-- Direct phone flash at night: stronger near-field exposure, rapid falloff, possible clipping on white fabric, localized glass/metal highlights, short harder nearby shadows, darker distant background.
-- Low light uses digital/high-ISO/shadow/chroma noise, not analog film grain.
+SKIN:
+{unretouched skin surface rendered according to the actual light, distance and focus: natural tonal variation, pores only at resolvable scale, small blemishes, fine hairs and crease compression where visible; no plastic, wax, rubber, airbrushed or excessively smoothed skin}
 
-V2 QUALITY GATE — silently revise before returning:
-- Have all explicit user facts survived unchanged?
-- Is every subject/object assigned correctly?
-- Are hands, support, contact, occlusion and action physically possible?
-- Can the camera really occupy the described position?
-- Does flash respect distance and falloff?
-- Does clothing respond to the pose?
-- Do materials respond to the actual light?
-- Is the environment spatial rather than generic?
-- Did any buzzword replace concrete evidence?
-- Did I invent luxury, landmarks, brands, logos, jewelry, props or cinematic styling?
-If any answer exposes a problem, fix it silently before output.
+SHADOWS:
+{shadows attached to the correct body, objects and surfaces, with direction, softness, density, contact shadows and falloff matching the real light source; reflections must follow glass, metal, paint or water geometry}
+
+FACE:
+{when the attached identity photo exists, use it as the external identity reference and preserve face shape, facial identity, hair, skin tone and overall appearance without inventing a textual facial description or applying beauty changes}
+
+PHYSICAL REALISM:
+{real contact between body and objects, coherent body weight, natural hand and foot placement, correct fabric folds and tension, believable proportions, object support and gravity, consistent reflections, perspective, occlusion and interaction between every element}
+
+FORMAT:
+{the user's selected aspect ratio/platform/crop exactly; if no new choice was supplied, use the existing generator setting rather than a fixed value}
+
+V2 MODALITY ADAPTATION:
+- For multiple people, keep separate identity references, position, clothing, action, hands, gaze and object ownership for each person before describing the shared scene.
+- For objects, vehicles, food, desks or POV scenes, replace PERSON/POSE/FACE/SKIN blocks with object identity, support/contact, material, orientation, camera POV and relevant environment details; do not invent a person or a face.
+- For person + vehicle, preserve the exact named vehicle and describe the real body-to-vehicle contact, door/window state, wheel/ground contact and camera position.
+- If the idea does not specify a camera, use a handheld rear smartphone main camera at 1x; if it does specify one, preserve it exactly. Do not introduce DSLR, full-frame, anamorphic, studio lighting or artificial portrait bokeh.
+
+V2 FINAL QUALITY GATE — silently fix before returning:
+- Every explicit fact, setting, clothing detail, JSON detail, camera choice and format survived unchanged.
+- The scene came from the written idea and existing settings, not from an invented second composition reference.
+- The person, pose, hands, feet, weight, object contact, shadows, perspective and camera position are physically possible.
+- The environment is specific and spatial, not a generic backdrop.
+- Skin reads as real phone-captured surface rather than a cartoon, render or beauty retouch.
+- The output contains only the translated structured prompt, with no mixed-language labels or meta-commentary.
 
 ==================================================
 ENGINE 3: V3 — FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT)
