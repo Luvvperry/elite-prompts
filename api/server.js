@@ -74,6 +74,12 @@ light and shadows: {actual source, direction, flash behavior if present, near/fa
 photo imperfections: {only 1–4 causal flaws that fit the capture: minor shake, slight focus miss, digital shadow noise, flash clipping, WB mismatch, compression, crooked framing}.
 skin / focus / format: {natural skin appropriate to distance, natural smartphone depth, no fake bokeh, selected aspect ratio/platform when relevant}.
 
+V1 THE FACE VISUAL DESCRIPTION LOGIC:
+- For every person, separate clothing from action: describe each visible garment, brand only when readable, color, fabric, cut, footwear and accessories.
+- Describe the environment as a real place: name the location, 3–4 concrete elements, the time/atmosphere and the position of each relevant object.
+- Describe one exact action per person, then resolve body position, arms/hands, expression, gaze and contact with objects. Never replace this with “posing naturally”.
+- Keep the existing V1 compact structure, but use these visual relationships before adding camera adjectives or technical settings.
+
 V1 DUO / GROUP:
 - Keep each important person separate enough that wardrobe, hands, action, gaze, and ownership of objects cannot merge.
 - Give one shared environment/camera/light description after the subject-specific facts.
@@ -570,6 +576,10 @@ V2 SILENT DATA RESOLUTION:
 V2 REQUIRED FINAL TEMPLATE:
 Return only the completed prompt with the following block order and visible curly braces. The opening sentence below is mandatory and must appear exactly as written in every V2 output, regardless of the selected output language:
 
+V2 THE FACE VISUAL DESCRIPTION LOGIC:
+- Inside the existing blocks, resolve in this order: clothing per person; scenario and atmosphere; objects 1–4 with material, quantity and position; then each person's exact action, body position, arms/hands, expression and gaze.
+- Do not create a new template or copy a composition image. This is a filling rule for the existing V2 blocks.
+
 faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele.
 
 **ângulo e câmera:**
@@ -673,6 +683,10 @@ V3 POWER MODE — STRUCTURAL COMPLETENESS AND REFERENCE FIDELITY:
 - ${v3Labels.light} must identify the real source, direction, falloff, near/far exposure compromise, shadow attachment and surface reflections. Do not add cinematic light, artificial fill, HDR glow or color grading.
 - ${v3Labels.imperfections} must contain only one or two causal phone artifacts. ${v3Labels.skin} must describe unretouched surface behavior at the actual camera distance without inventing identity traits. ${v3Labels.realism} must reject CGI, beauty retouching, advertising polish and impossible anatomy. ${v3Labels.proportion} must default to 9:16.
 - The final V3 must be a complete paste-ready prompt in the requested language, with the mould labels translated consistently and the curly-brace structure preserved. Output no explanation, checklist or internal rule.
+
+V3 THE FACE VISUAL DESCRIPTION LOGIC:
+- Preserve the existing V3 block order, but fill it like a visual production sheet: separate clothing for every person; scenario with concrete anchors and atmosphere; objects numbered mentally from 1 to 4 and placed explicitly; one action per person; body position; arms/hands; expression; gaze; then composition and camera.
+- Use specific nouns and positions instead of stacked realism terminology. If an object is not visible or requested, omit it rather than inventing it.
 
 V3 REFERENCE HANDOFF:
 - Portuguese opening for one person: "Faça uma imagem do homem da foto enviada, seguindo 100% das características dele."
