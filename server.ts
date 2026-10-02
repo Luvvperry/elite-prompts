@@ -506,7 +506,7 @@ ${V5_MASTER_ADAPTIVE_INSTRUCTION}
 This is the new V1. It inherits the former V5 master quality bar and must be the strongest long-form output. Never mention that it was formerly V5.
 
 ==================================================
-ENGINE 2: V2 — EXACT STRUCTURED IDEA-TO-PROMPT OUTPUT
+ENGINE 2: V2 — IDEA-TO-PROMPT / NO COMPOSITION COPYING
 ==================================================
 V2 is IDEA TO PROMPT. Change only the final textual organization of V2. Keep the existing V2 input logic, idea interpretation, settings, variables, preferences, parameters, reference upload, selected options, modality, camera controls, wardrobe data, lighting data, aspect ratio, output language and output format exactly as they are.
 
@@ -519,7 +519,7 @@ V2 MUST NOT:
 - say “use the second photo”, “recreate the original photo”, “maintain the composition of the second image”, “replace the face from the original image”, or any equivalent phrase.
 
 V2 IDEA-TO-PROMPT REFERENCE RULE:
-The user's written idea is the source of the scene, environment, action, pose, camera intention and composition. When a user photo is attached, use it only as the external identity reference for the man who will appear in the generated image. Preserve identity through the image-reference channel: facial identity, facial structure, hair, skin tone, proportions and overall appearance, without artificial beautification, identity change or excessive smoothing. Do not use the attached face photo as a composition reference.
+The user's written idea is the only source for the scene, environment, action, pose, camera intention and composition. When a user identity photo is attached, use it only as the external identity reference for the man who will appear in the generated image. Preserve identity through the image-reference channel: facial identity, facial structure, hair, skin tone, proportions and overall appearance, without artificial beautification, identity change or excessive smoothing. Do not use any attached identity photo as a composition reference. Do not reproduce, trace or borrow the composition of another image.
 
 V2 SILENT DATA RESOLUTION:
 - Reuse every existing V2 setting and explicit user detail without summarizing or dropping details.
@@ -534,15 +534,15 @@ faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas del
 
 **ângulo e câmera:**
 
-{use the existing generator settings to describe the camera, lens, height, distance, framing, angle, camera position and aspect ratio; if the user defined any of these, it has priority; if a saved setting already exists, preserve it}
+{construct the camera from the user's idea and existing generator settings: camera, lens, height, distance, framing, angle, camera position and aspect ratio; if the user defined any of these, it has priority; do not copy camera geometry from another image}
 
 **cenário:**
 
-{use the user's idea and the existing generator settings to describe the environment, background, objects, architecture, ground, furniture, vehicles, vegetation and coherent scene elements; do not invent another composition logic}
+{create the environment from the user's written idea and existing generator settings: location, background, objects, architecture, ground, furniture, vehicles, vegetation and coherent scene elements; do not copy any other image's environment or composition}
 
 **pose e ação:**
 
-{use the user's idea and existing V2 settings to describe the exact pose, posture, weight distribution, arm and leg positions, head direction, gaze, expression and action}
+{create the exact pose and action from the user's written idea and existing V2 settings: posture, weight distribution, arm and leg positions, head direction, gaze, expression and interaction; do not copy a pose from another composition photo}
 
 **roupa:**
 
@@ -550,7 +550,7 @@ faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas del
 
 **efeitos:**
 
-{use the existing generator settings to describe lighting, light source, direction, intensity, flash, exposure and real smartphone-camera behavior}
+{construct lighting from the user's idea and existing generator settings: light source, direction, intensity, flash, exposure and real smartphone-camera behavior; do not imitate the lighting of an unrelated reference image}
 
 {also use the existing settings to describe natural smartphone imperfections such as slight digital noise, JPEG compression, slightly imperfect focus, small handheld shake, natural dynamic range and absence of artificial blur when those belong to the setting or idea}
 
@@ -560,11 +560,11 @@ faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas del
 
 **sombra:**
 
-{describe shadows coherent with the light source and scene settings, respecting direction, intensity, hardness or softness, contact and falloff}
+{create shadows from the selected scene light source and settings, respecting direction, intensity, hardness or softness, contact and falloff; do not copy shadows from another photo}
 
 **rosto:**
 
-{use 100% of the facial identity of the man in the attached photo, preserving identity, facial structure, hair, skin tone and overall appearance without artificial beautification}
+{use the attached identity photo only to preserve 100% of the man's facial identity, facial structure, hair, skin tone and overall appearance, without artificial beautification; do not use it to copy pose, clothing, environment, camera or composition}
 
 **física e realismo:**
 
@@ -586,6 +586,7 @@ V2 MODALITY ADAPTATION:
 V2 FINAL QUALITY GATE — silently correct before returning:
 - The required opening and block order are present.
 - All existing V2 data, settings, user details, JSON details and format choices survived unchanged.
+- The scene, pose, camera, lighting and composition were invented from the written idea and settings, not copied from another photograph.
 - The scene was built from the user's idea, not from a second composition image.
 - The output is structured blocks, never a flowing paragraph or free-form response.
 - Pose, hands, feet, weight, objects, shadows, perspective, clothing and camera position are physically possible.
