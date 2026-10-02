@@ -196,6 +196,20 @@ Use the simplest physically plausible exposure for the selected phone and scene.
 This policy applies to V1, V2 and V3 and must be reflected in the final paste-ready prompt with concrete exposure and color behavior, not merely a negative list.
 `;
 
+const ORDINARY_PHOTO_TRUTH_LOCK = `
+UNVARNISHED ORDINARY-PHONE REALITY LOCK — HIGHEST PRIORITY:
+Do not perform realism with adjectives. The target is an unremarkable photograph that could genuinely exist in a person's camera roll, not an image designed to prove that it is realistic. Remove words such as beautiful, flawless, gorgeous, perfect, ultra-realistic, hyperreal, cinematic, editorial, premium, dramatic and masterpiece unless the user explicitly requires them.
+
+CALIBRATION RULES:
+- One physical cause must explain every visible effect. Do not stack motion blur, focus error, noise, compression, lens smudges and flash blowout merely to signal imperfection. Choose at most two or three flaws that follow from the actual movement, light and distance.
+- Skin is a surface captured by a small phone sensor, not a texture showcase: no pore map, wax, plastic sheen, airbrushing, rubber highlights, uniform skin tone or exaggerated micro-detail. At normal phone distance, skin detail is restrained and partly resolved; at close distance, show believable tonal variation and small texture without beautifying or sharpening it.
+- Do not invent a model's body. Keep the supplied identity and requested body proportions; solve weight through the support foot, pelvis, shoulders, elbows, wrists, fingers, knees and clothing tension. Hands must have a clear purpose, correct contact and no posed finger display.
+- Do not make the person look like they are posing for the prompt. Allow an ordinary expression, slightly uneven shoulders, imperfect gaze timing, relaxed fingers and clothing compressed by the actual posture. These are consequences, not decorations.
+- Keep the background optically honest: real distance, partial occlusion, ordinary detail loss and darker or flatter areas where exposure requires it. Do not render every background object sharply, add a luxury backdrop, or create a clean AI wallpaper.
+- Camera settings are subordinate to physical coherence. Never paste ISO, shutter, aperture or lens values that contradict daylight, movement, distance or focus. If a detail is not needed to control pixels, omit it.
+- Final test: if the prompt sounds like an advertisement, a fashion brief, a 3D render specification or a list of realism buzzwords, rewrite it in plain observational language before returning it.
+`;
+
 // Helper to format settings guidance for prompt generation
 const formatSettingsContext = (settings: any): string => {
   if (!settings) return '';
@@ -883,6 +897,7 @@ Return ONLY the final V3 prompt text.
 ==================================================
 ${REFERENCE_FIDELITY_LOCK}
         ${RAW_PHONE_COLOR_POLICY}
+        ${ORDINARY_PHOTO_TRUTH_LOCK}
 ==================================================
 
 
