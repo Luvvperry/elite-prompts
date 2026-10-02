@@ -981,7 +981,7 @@ ${userTextDescription}`
                 }
             }
         }
-        const MODELS_CASCADE = ['gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+        const MODELS_CASCADE = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
         let lastError = null;
         const promptResponseSchema = wantsJson ? {
       type: Type.OBJECT,
@@ -1179,7 +1179,7 @@ OUTPUT:
 - Do not show analysis, headings like PASS 1/PASS 2, checklists, JSON, explanations, or commentary.
 `;
         // Prefer one stable fast model; keep a single fallback so a bad model response cannot create a long retry chain.
-        const magicModels = ['gemini-flash-latest', 'gemini-3.1-flash-lite'];
+        const magicModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest'];
         let lastError = null;
         for (let index = 0; index < magicModels.length; index++) {
             if (clientClosed || res.destroyed)
@@ -1190,7 +1190,7 @@ OUTPUT:
                     model,
                     contents: prompt,
                     config: { temperature: 0.18 }
-                }), 16000, 'MAGIC_MODEL_TIMEOUT');
+                }), 38000, 'MAGIC_MODEL_TIMEOUT');
                 const enhanced = result.text?.trim();
                 if (!enhanced)
                     throw new Error('EMPTY_ENHANCE_RESPONSE');
@@ -1245,7 +1245,7 @@ CRITICAL RULES:
    - If V3: Maintain the direct natural-language curly-brace {} format and the same scene-specific block order; never convert it into a blueprint or meta-prompt.
 4. Return ONLY the updated prompt text. No preamble or conversational filler.
 `;
-        const refineModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+        const refineModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
         let lastError = null;
         for (const model of refineModels) {
             try {
@@ -1292,7 +1292,7 @@ Request: "${text}"`
             }
         }
         const response = await ai.models.generateContent({
-            model: 'gemini-3.8-flash',
+            model: 'gemini-3.1-flash-lite',
             contents: contentsParts,
             config: {
                 responseMimeType: "application/json",

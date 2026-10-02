@@ -981,7 +981,7 @@ ${userTextDescription}`
       }
     }
 
-    const MODELS_CASCADE = ['gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+    const MODELS_CASCADE = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
     let lastError: any = null;
 
     const promptResponseSchema = wantsJson ? {
@@ -1185,7 +1185,7 @@ OUTPUT:
 `;
 
     // Prefer one stable fast model; keep a single fallback so a bad model response cannot create a long retry chain.
-    const magicModels = ['gemini-flash-latest', 'gemini-3.1-flash-lite'];
+    const magicModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest'];
     let lastError: any = null;
 
     for (let index = 0; index < magicModels.length; index++) {
@@ -1259,7 +1259,7 @@ CRITICAL RULES:
 4. Return ONLY the updated prompt text. No preamble or conversational filler.
 `;
 
-    const refineModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+    const refineModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
     let lastError: any = null;
     for (const model of refineModels) {
       try {
@@ -1307,7 +1307,7 @@ Request: "${text}"`
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: contentsParts,
       config: {
         responseMimeType: "application/json",
