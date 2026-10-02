@@ -147,6 +147,15 @@ CALIBRATION RULES:
 - Keep the background optically honest: real distance, partial occlusion, ordinary detail loss and darker or flatter areas where exposure requires it. Do not render every background object sharply, add a luxury backdrop, or create a clean AI wallpaper.
 - Camera settings are subordinate to physical coherence. Never paste ISO, shutter, aperture or lens values that contradict daylight, movement, distance or focus. If a detail is not needed to control pixels, omit it.
 - Final test: if the prompt sounds like an advertisement, a fashion brief, a 3D render specification or a list of realism buzzwords, rewrite it in plain observational language before returning it.
+
+ELORO BASELINE — KEEP THE EXISTING ENGINE MOULD, SIMPLIFY THE CONTENT:
+- Treat the prompt as practical scene direction, not a forensic report. Preserve the engine's required structure and labels, but fill them with the smallest set of concrete facts that controls the image.
+- Keep the natural order: reference/identity handoff, character or subject, environment, action, composition, camera, imperfections, skin only when relevant, realism, and aspect ratio. Do not create extra sections or repeat the same fact in multiple blocks.
+- A good scene normally needs 3–4 specific environmental anchors, one clear action linked to an object, one believable camera position, and 1–2 imperfections. Do not inflate a simple scene into a long technical specification.
+- Prefer the document's plain observational style: “slightly wrinkled shirt”, “looking at the laptop”, “camera at chest height”, “mild digital noise in the dark area”. Avoid stacked jargon such as sensor physics, light transport, forensic calibration, pore mapping or hyperreal detail.
+- Skin must be described briefly and proportionally: natural texture and tonal variation, no smoothing or plastic finish. Do not request visible pores as a universal texture effect, especially in medium or distant framing.
+- Reference images carry identity. Never use the written prompt to invent facial features, age, ethnicity, body measurements or a generic attractive appearance.
+- Keep the output paste-ready and human-readable. If removing a sentence does not change a visible pixel, remove it.
 `;
 
 // Helper to format settings guidance for prompt generation
