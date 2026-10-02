@@ -330,7 +330,8 @@ const App: React.FC = () => {
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isUsageGateOpen, setIsUsageGateOpen] = useState(false);
   const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
-  const [jsonMode, setJsonMode] = useState<boolean>(() => localStorage.getItem('ep_json_mode') === 'true');
+  // JSON is opt-in: every new app session starts in the normal text format.
+  const [jsonMode, setJsonMode] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastPayload>(null);
   const magicRequestIdRef = useRef(0);
   const magicControllerRef = useRef<AbortController | null>(null);
