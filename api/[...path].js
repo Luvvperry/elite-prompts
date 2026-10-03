@@ -553,6 +553,14 @@ REFLECTIVE SURFACE PHYSICS — ALL ENGINES:
 - State how objects resting on the surface affect the physical reading: pressure/contact shadow, reflected underside, blocked reflection, glare interruption, water displacement or subtle smudges only when supported by the scene.
 - Never invent mirror-like reflections on matte material, a perfect reflection on a rough surface, reflections of objects outside the visible geometry, or a reflection that contradicts the light direction. Apply this rule inside each version's existing format, without creating a new output template.
 
+GLOBAL MATERIAL, TIME AND CONTACT CHECK — ALL ENGINES:
+- Make each important material react differently to the same light: painted car metal has curved specular highlights; glass combines reflection with angle-dependent transparency; concrete has rough low reflection; fabric shows weave, folds and diffuse response; worn leather has softened irregular sheen; water reflects and disturbs according to its surface movement.
+- Make the time of day change the whole scene: sun height, shadow length, color temperature, exposure, window or street-light contribution and visible background must agree. Night scenes need a real light source; interiors must explain where light enters.
+- Treat named locations as physical places, not decorative labels. Add only context supported by the idea: compatible architecture, density, pavement, traffic, vegetation, signs or background activity. Do not turn ordinary neighborhoods into postcards or add stereotyped landmarks.
+- Every object and body part must have weight and support: feet meet the ground, trays rest on tables, hands press or grip surfaces, bodies compress seats, glasses sit on tables, chains rest on clothing, glasses sit on the nose and ears, and contact shadows or occlusion appear where appropriate.
+- Preserve identity through the reference channel without beautifying, reshaping, slimming, age-changing or smoothing the person. Build the scene, pose, camera, light and material physics independently instead of relying on the face reference to solve them.
+- Final internal test for every engine: could a real person have taken this single frame with the stated phone from the stated position? If not, choose the more plausible physical solution over the more beautiful one, then fill the existing engine format.
+
 STRICT BAN ON META-PROMPT JARGON:
 PROHIBITED: "Actúa como...", "Eres experto...", "Tu misión...", "Chain-of-thought...", "Cognitive framework...", "Phase 1...", "Phase 2...", "Self-evaluation...", "Checklist...", "Director of photography role...".
 Deliver pure, executable image generation prompts!
