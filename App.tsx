@@ -38,6 +38,7 @@ import ToastHost, { ToastPayload } from './components/ToastHost';
 import LanguageGate from './components/LanguageGate';
 import UpdateAnnouncementModal from './components/UpdateAnnouncementModal';
 import VisualReasoningPanel from './components/VisualReasoningPanel';
+import MobileMenuSheet from './components/MobileMenuSheet';
 
 
 const normalizeInterfaceLanguage = (value: string | null | undefined): Language => {
@@ -332,6 +333,7 @@ const App: React.FC = () => {
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isUsageGateOpen, setIsUsageGateOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
   // JSON is opt-in: every new app session starts in the normal text format.
   const [jsonMode, setJsonMode] = useState<boolean>(false);
@@ -689,6 +691,12 @@ const App: React.FC = () => {
     en: { input: 'Input', controls: 'Controls', output: 'Output', kicker: 'Image laboratory / 03 engines', headline: 'From image to intent.', subline: 'Turn visual evidence into prompts that feel like real photographs.' }
   }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
+  const v4Ui = {
+    pt: { eyebrow: 'MOTOR DE PROMPTS VISUAIS / V4', engines: '03 MOTORES', reasoning: 'RACIOCÍNIO VISUAL', identity: 'CONSISTÊNCIA DE IDENTIDADE', camera: 'MODELO DE CÂMERA', distance: '1,8 m de distância', light: 'FÍSICA DA LUZ', direction: 'ESQUERDA DA CÂMERA', falloff: 'queda suave', identityLocked: 'IDENTIDADE BLOQUEADA', cameraLocked: 'GEOMETRIA DA CÂMERA', lightPhysics: 'LUZ + FÍSICA', analyzing: 'ANALISANDO', locked: 'BLOQUEADO', capture: 'captura comum de smartphone', how: 'COMO PENSA', notFirst: 'não escreve primeiro.', first: 'entende primeiro.', pipeline: ['IDEIA', 'ANÁLISE DE REFERÊNCIA', 'GEOMETRIA DA CENA', 'LUZ + FÍSICA', 'VERIFICAÇÃO DE CONSISTÊNCIA'] },
+    es: { eyebrow: 'MOTOR DE PROMPTS VISUALES / V4', engines: '03 MOTORES', reasoning: 'RAZONAMIENTO VISUAL', identity: 'CONSISTENCIA DE IDENTIDAD', camera: 'MODELO DE CÁMARA', distance: '1,8 m de distancia', light: 'FÍSICA DE LA LUZ', direction: 'IZQUIERDA DE CÁMARA', falloff: 'caída suave', identityLocked: 'IDENTIDAD BLOQUEADA', cameraLocked: 'GEOMETRÍA DE CÁMARA', lightPhysics: 'LUZ + FÍSICA', analyzing: 'ANALIZANDO', locked: 'BLOQUEADO', capture: 'captura común de smartphone', how: 'CÓMO PIENSA', notFirst: 'no escribe primero.', first: 'entiende primero.', pipeline: ['IDEA', 'ANÁLISIS DE REFERENCIA', 'GEOMETRÍA DE ESCENA', 'LUZ + FÍSICA', 'COMPROBACIÓN DE CONSISTENCIA'] },
+    en: { eyebrow: 'VISUAL PROMPT ENGINE / V4', engines: '03 ENGINES', reasoning: 'VISUAL REASONING', identity: 'IDENTITY CONSISTENCY', camera: 'CAMERA MODEL', distance: '1.8m distance', light: 'LIGHT PHYSICS', direction: 'CAMERA-LEFT', falloff: 'soft falloff', identityLocked: 'IDENTITY LOCKED', cameraLocked: 'CAMERA GEOMETRY', lightPhysics: 'LIGHT + PHYSICS', analyzing: 'ANALYZING', locked: 'LOCKED', capture: 'ordinary smartphone capture', how: 'HOW IT THINKS', notFirst: "it doesn't write first.", first: 'it understands first.', pipeline: ['IDEA', 'REFERENCE ANALYSIS', 'SCENE GEOMETRY', 'LIGHT + PHYSICS', 'CONSISTENCY CHECK'] }
+  }[lang];
+
   return (
     <div className={`app-shell elite-v4-app min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
       {!hasChosenLanguage && <LanguageGate onChoose={handleChooseLanguage} />}
@@ -711,6 +719,7 @@ const App: React.FC = () => {
         onOpenPresets={() => setIsPresetsOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenUpdates={() => setIsUpdateOpen(true)}
+        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         onOpenCommand={() => setIsCommandOpen(true)}
         historyCount={history.length}
         presetsCount={presets.length}
@@ -734,18 +743,16 @@ const App: React.FC = () => {
 
               <section className="v4-hero" aria-labelledby="ep-masthead-title">
                 <div className="ep-masthead-copy">
-                  <span className="ep-masthead-kicker"><i />VISUAL PROMPT ENGINE / V4</span>
+                  <span className="ep-masthead-kicker"><i />{v4Ui.eyebrow}</span>
                   <h1 id="ep-masthead-title">{lang === 'pt' ? <>imagens não falham pela IA.<br/><em>falham por cenas mal entendidas.</em></> : lang === 'es' ? <>las imágenes no fallan por la ia.<br/><em>fallan por escenas mal entendidas.</em></> : <>images don't fail because of AI.<br/><em>they fail when the scene is misunderstood.</em></>}</h1>
                   <p>{lang === 'pt' ? 'Analise identidade, câmera, luz, física e ambiente antes de construir cada prompt.' : lang === 'es' ? 'Analiza identidad, cámara, luz, física y entorno antes de construir cada prompt.' : 'Analyze identity, camera, light, physics and environment before building each prompt.'}</p>
                   <div className="v4-hero-actions"><button className="v4-primary-button" onClick={() => scrollToSection('input')}>{lang === 'pt' ? 'Criar prompt' : lang === 'es' ? 'Crear prompt' : 'Create prompt'} <span>↗</span></button><button className="v4-ghost-button" onClick={() => document.getElementById('how-it-thinks')?.scrollIntoView({behavior:'smooth'})}>{lang === 'pt' ? 'Ver como pensa' : lang === 'es' ? 'Ver cómo piensa' : 'See how it thinks'}</button></div>
-                  <div className="v4-hero-meta"><span>03 ENGINES</span><i/> <span>VISUAL REASONING</span><i/> <span>IDENTITY CONSISTENCY</span></div>
+                  <div className="v4-hero-meta"><span>{v4Ui.engines}</span><i/> <span>{v4Ui.reasoning}</span><i/> <span>{v4Ui.identity}</span></div>
                 </div>
-                <div className="v4-hero-mockup" aria-hidden="true"><div className="mockup-back mockup-back-a">CAMERA MODEL<br/><b>24mm · 1X</b><br/>1.8m distance</div><div className="mockup-back mockup-back-b">LIGHT PHYSICS<br/><b>CAMERA-LEFT</b><br/>soft falloff</div><div className="mockup-window"><div className="mockup-top"><span><i/> VISUAL REASONING</span><small>V1 / V2 / V3</small></div><div className="mockup-body"><div className="mockup-thumb"><div className="mockup-photo-lines"/></div><div className="mockup-states"><span><b/> IDENTITY <em>LOCKED</em></span><span><b/> CAMERA GEOMETRY <em>LOCKED</em></span><span><b/> LIGHT + PHYSICS <em>ANALYZING</em></span><span><b/> CONSISTENCY CHECK</span></div></div><div className="mockup-footer">ordinary smartphone capture <span>9:16</span></div></div></div>
+                <div className="v4-hero-mockup" aria-hidden="true"><div className="mockup-back mockup-back-a">{v4Ui.camera}<br/><b>24mm · 1X</b><br/>{v4Ui.distance}</div><div className="mockup-back mockup-back-b">{v4Ui.light}<br/><b>{v4Ui.direction}</b><br/>{v4Ui.falloff}</div><div className="mockup-window"><div className="mockup-top"><span><i/> {v4Ui.reasoning}</span><small>V1 / V2 / V3</small></div><div className="mockup-body"><div className="mockup-thumb"><div className="mockup-photo-lines"/></div><div className="mockup-states"><span><b/> {v4Ui.identityLocked} <em>{v4Ui.locked}</em></span><span><b/> {v4Ui.cameraLocked} <em>{v4Ui.locked}</em></span><span><b/> {v4Ui.lightPhysics} <em>{v4Ui.analyzing}</em></span><span><b/> {lang === 'pt' ? 'VERIFICAÇÃO DE CONSISTÊNCIA' : lang === 'es' ? 'COMPROBACIÓN DE CONSISTENCIA' : 'CONSISTENCY CHECK'}</span></div></div><div className="mockup-footer">{v4Ui.capture} <span>9:16</span></div></div></div>
               </section>
 
-              <VisualReasoningPanel lang={lang} detected={detectedParams} referencesCount={references.length} isLoading={isLoading || isMagicEnhancing} />
-
-              <section id="how-it-thinks" className="v4-how-it-thinks"><span className="ep-masthead-kicker"><i />HOW IT THINKS</span><h2>{lang === 'pt' ? <>não escreve primeiro.<br/><em>entende primeiro.</em></> : lang === 'es' ? <>no escribe primero.<br/><em>entiende primero.</em></> : <>it doesn't write first.<br/><em>it understands first.</em></>}</h2><div className="v4-pipeline"><span>IDEA</span><i>↓</i><span>REFERENCE ANALYSIS</span><i>↓</i><span>SCENE GEOMETRY</span><i>↓</i><span>LIGHT + PHYSICS</span><i>↓</i><span>CONSISTENCY CHECK</span><i>↓</i><span className="pipeline-accent">V1 / V2 / V3</span></div></section>
+              <section id="how-it-thinks" className="v4-how-it-thinks"><span className="ep-masthead-kicker"><i />{v4Ui.how}</span><h2>{v4Ui.notFirst}<br/><em>{v4Ui.first}</em></h2><div className="v4-pipeline">{v4Ui.pipeline.map((step, index) => <React.Fragment key={step}><span>{step}</span>{index < v4Ui.pipeline.length - 1 && <i>↓</i>}</React.Fragment>)}<i>↓</i><span className="pipeline-accent">V1 / V2 / V3</span></div></section>
 
               <div className="studio-grid pro-studio-grid items-start">
               {/* Input pane */}
@@ -780,6 +787,8 @@ const App: React.FC = () => {
                   onSettingsChange={setSettings}
                 />
               </section>
+
+              <VisualReasoningPanel lang={lang} detected={detectedParams} referencesCount={references.length} isLoading={isLoading || isMagicEnhancing} />
 
               {/* Controls pane */}
               <section id="studio-settings" className="studio-settings-pane min-w-0 scroll-mt-24">
@@ -950,6 +959,8 @@ const App: React.FC = () => {
       />
 
       <UpdateAnnouncementModal open={isUpdateOpen} lang={lang} onClose={closeUpdate} onTry={() => { closeUpdate(); scrollToSection('input'); }} />
+
+      <MobileMenuSheet open={isMobileMenuOpen} lang={lang} onClose={() => setIsMobileMenuOpen(false)} onHistory={() => setIsHistoryOpen(true)} onPresets={() => setIsPresetsOpen(true)} onLanguage={() => setIsLanguageSheetOpen(true)} onSettings={() => setIsSettingsOpen(true)} onUpdates={() => setIsUpdateOpen(true)} onEnglish={() => { setPromptLang('en'); showToast('success', 'Prompts will be generated in English.'); }} onJson={() => setJsonMode(value => !value)} jsonMode={jsonMode} />
 
       <ToastHost toast={toast} lang={lang} onClose={() => setToast(null)} />
 

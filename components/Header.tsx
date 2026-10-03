@@ -8,7 +8,8 @@ import {
   Settings as SettingsIcon,
   Search,
   SlidersHorizontal,
-  Braces
+  Braces,
+  Menu
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -21,6 +22,7 @@ interface HeaderProps {
   onOpenPresets: () => void;
   onOpenSettings: () => void;
   onOpenUpdates: () => void;
+  onOpenMobileMenu: () => void;
   onOpenCommand: () => void;
   historyCount: number;
   presetsCount: number;
@@ -36,6 +38,7 @@ const Header: React.FC<HeaderProps> = ({
   onOpenPresets,
   onOpenSettings,
   onOpenUpdates,
+  onOpenMobileMenu,
   onOpenCommand,
   historyCount,
   presetsCount
@@ -95,48 +98,18 @@ const Header: React.FC<HeaderProps> = ({
           <button type="button" onClick={onOpenSettings} className={actionClass} title={copy.settings}>
             <SettingsIcon size={18} strokeWidth={1.65} />
           </button>
-          <button type="button" onClick={onOpenUpdates} className={actionClass} title="Novedades" aria-label="Novedades"><span className="pro-nav-news">V4</span></button>
+          <button type="button" onClick={onOpenUpdates} className={actionClass} title="Novedades" aria-label="Novedades"><span className="pro-nav-news">NEW</span></button>
         </div>
       </aside>
 
-      {/* Mobile — deliberately compact, app-like top bar. */}
+      {/* Mobile — intentionally separate composition: logo, language, menu. */}
       <header className="mobile-topbar lg:hidden">
         <div className="mobile-topbar-inner">
           <div className="elite-mobile-wordmark">ELITE PROMPTS</div>
-          <a className="instagram-top-link mobile-topbar-button" href="https://www.instagram.com/goatxav/" target="_blank" rel="noreferrer" aria-label="Open @goatxav on Instagram" title="@goatxav">
-            <svg className="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7">
-              <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
-              <circle cx="12" cy="12" r="4.1" />
-              <circle cx="17.4" cy="6.7" r=".9" fill="currentColor" stroke="none" />
-            </svg>
-          </a>
-          <button type="button" onClick={onOpenCommand} className="mobile-topbar-context" title={copy.command}>
-            <SlidersHorizontal size={16} strokeWidth={1.7} />
-            <span>{copy.create}</span>
-          </button>
-
-          <nav className="mobile-topbar-actions" aria-label={copy.actions}>
-            <button type="button" onClick={onOpenPresets} className="mobile-topbar-button" title={t.nav.presets}>
-              <Bookmark size={17} strokeWidth={1.65} />
-            </button>
-            <button type="button" onClick={onOpenHistory} className="mobile-topbar-button" title={t.nav.history}>
-              <History size={17} strokeWidth={1.65} />
-            </button>
-            <button type="button" onClick={onOpenLanguageSheet} className="mobile-topbar-button mobile-lang-button" title={copy.language}>
-              <Globe2 size={16} strokeWidth={1.65} />
-              <span>{langLabel[lang]}</span>
-            </button>
-            <button type="button" onClick={onForceEnglishPrompts} className="mobile-topbar-button mobile-lang-button" title="Force all prompts to English" aria-label="Force all prompts to English">
-              <span>EN</span>
-            </button>
-            <button type="button" onClick={onToggleJsonMode} className={`mobile-topbar-button mobile-lang-button ${jsonMode ? 'is-active' : ''}`} title={jsonMode ? 'Disable JSON format' : 'Enable JSON format'} aria-label={jsonMode ? 'Disable JSON format' : 'Enable JSON format'}>
-              <Braces size={16} strokeWidth={1.65} />
-            </button>
-            <button type="button" onClick={onOpenSettings} className="mobile-topbar-button" title={copy.settings}>
-              <SettingsIcon size={17} strokeWidth={1.65} />
-            </button>
-            <button type="button" onClick={onOpenUpdates} className="mobile-topbar-button mobile-lang-button" title="Novedades">V4</button>
-          </nav>
+          <div className="mobile-topbar-actions mobile-simple-actions" aria-label={copy.actions}>
+            <button type="button" onClick={onOpenLanguageSheet} className="mobile-topbar-button mobile-lang-button" title={copy.language}><Globe2 size={16} strokeWidth={1.65} /><span>{langLabel[lang]}</span></button>
+            <button type="button" onClick={onOpenMobileMenu} className="mobile-topbar-button mobile-menu-trigger" title="Menu" aria-label="Menu"><Menu size={19} strokeWidth={1.7} /></button>
+          </div>
         </div>
       </header>
     </>
