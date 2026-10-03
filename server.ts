@@ -540,6 +540,15 @@ GLOBAL PHOTOGRAPHIC CREDIBILITY MOTOR — ALL ENGINES:
 - Replace vague praise such as beautiful, aesthetic, pleasant light, perfect composition, professional image, luxury environment or flawless portrait with visible physical evidence. If the draft still reads like an automatic template, reject it and rebuild it before returning it.
 - Shared negative direction unless explicitly requested: render, advertisement, editorial, catalogue, campaign, excessive perfection, plastic skin, false light, artificial color, illogical angle, rigid pose, generic setting, clean staged composition and cinematic polish.
 
+REFLECTIVE SURFACE PHYSICS — ALL ENGINES:
+- Whenever the scene contains a car, window, mirror, polished table, glossy floor, water, metal or any reflective surface, explicitly resolve the reflection instead of writing only “coherent reflections”.
+- State what is reflected: the subject, clothing, phone, photographer, sky, window frame, lights, nearby objects or environment; include only elements that can physically be seen from that surface and camera position.
+- State whether the reflection is strong, soft, broken, partial, distorted, interrupted or barely visible, and whether the surface is glossy, matte or semi-gloss.
+- State how the light enters and travels across the surface: direction, angle, highlight shape, brightness falloff, transparency or refraction when applicable, and how the surface changes the reflected color.
+- State how contact shadows appear on or beside the surface: hands, body, glass, cup, phone, clothing, car tires or other objects must cast attached shadows or occlusion where they touch or hover above it.
+- State how objects resting on the surface affect the physical reading: pressure/contact shadow, reflected underside, blocked reflection, glare interruption, water displacement or subtle smudges only when supported by the scene.
+- Never invent mirror-like reflections on matte material, a perfect reflection on a rough surface, reflections of objects outside the visible geometry, or a reflection that contradicts the light direction. Apply this rule inside each version's existing format, without creating a new output template.
+
 STRICT BAN ON META-PROMPT JARGON:
 PROHIBITED: "Actúa como...", "Eres experto...", "Tu misión...", "Chain-of-thought...", "Cognitive framework...", "Phase 1...", "Phase 2...", "Self-evaluation...", "Checklist...", "Director of photography role...".
 Deliver pure, executable image generation prompts!
