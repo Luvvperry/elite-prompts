@@ -463,6 +463,14 @@ Your mission is to construct exactly three (3) distinct, highly specialized prom
 - V3: FORENSIC DEEP PROMPT (ADAPTIVE CURLY-BRACE FINAL PROMPT, EXTREME PHYSICAL SPECIFICITY)
 Do not generate, name, reference or return V4, V5 or V6.
 
+OUTPUT DEPTH CONTRACT — EXACTLY THREE DISTINCT ENGINES:
+Each engine must be long enough to be directly useful, but never padded with synonyms or empty adjectives. Aim for approximately 700–1100 words for V1, 900–1400 words for V2, and 1200–1800 words for V3 when the scene contains enough visual information. If the user provides a sparse idea, add only conservative functional details needed to make one physically coherent photograph; do not invent spectacle to reach a word count.
+V1 must be a complete lived-in smartphone prompt with balanced scene, subject, wardrobe, action, camera, light, materials, imperfections and negative constraints.
+V2 must preserve its existing structured curly-brace format while making every block concrete: exact camera geometry, body mechanics, contact points, spatial anchors, garment tension, light direction, shadows, reflections and causal smartphone flaws. V2 is not a list of generic fields.
+V3 must preserve its existing adaptive curly-brace structure while resolving the maximum amount of useful physical evidence: every relevant person/object relation, depth plane, surface response, optical limitation, exposure compromise and continuity constraint. V3 is not merely V2 with more adjectives.
+Before returning each engine, compare it against the other two and silently remove repeated wording that does not add a new visual consequence. Never shorten an engine into a summary just to finish faster.
+
+
 FORENSIC HUMAN SKIN AND POSTURE LOCK — ALL ENGINES:
 Do not let the image model invent a cartoon, doll, wax, rubber, airbrushed or painted person. Preserve the supplied identity through the image reference, while rendering the visible skin as a real sensor capture: uneven low-frequency tone, subtle pores only at the phone's resolving distance, fine vellus hair, tiny blemishes and crease shadows where visible, slight under-eye or neck shadow when supported, physically correct soft and hard highlights, and natural transition from lit to unlit planes. Do not add uniform pore grids, plastic smoothness, beauty-filter symmetry, makeup-like blur, over-sharpened skin or artificial skin grain. Skin must share the same exposure, white balance, noise and motion softness as nearby fabric and background; it must never look pasted on.
 For posture, preserve the actual reference geometry instead of inventing a model pose: head direction, chin angle, shoulder height, torso rotation, pelvis tilt, weight-bearing leg, knee bend, elbow angle, wrist orientation, finger placement and contact with surfaces must agree in one physically possible instant. No floating joints, mannequin stiffness, symmetrical limbs, impossible hand placement or generic standing pose. If the requested scene changes the pose, describe the new pose with explicit joint mechanics and weight transfer, not with vague words like natural or realistic.
@@ -1342,7 +1350,7 @@ CRITICAL RULES:
    - If V2: Maintain the structured {} brackets format.
    - If V3: Maintain the direct natural-language curly-brace {} format and the same scene-specific block order; never convert it into a blueprint or meta-prompt.
    - If V4: Preserve its scene-lock relational structure and repair only the requested delta.
-   - If V5: Preserve its adaptive master-prompt density and generator-ready direct style; repair only the requested delta.
+   - If V1: Preserve its adaptive master-prompt density and generator-ready direct style; repair only the requested delta.
 4. Return ONLY the updated prompt text. No preamble or conversational filler.
 `;
 

@@ -36,6 +36,8 @@ import CommandPalette from './components/CommandPalette';
 import MobileCommandDock from './components/MobileCommandDock';
 import ToastHost, { ToastPayload } from './components/ToastHost';
 import LanguageGate from './components/LanguageGate';
+import UpdateAnnouncementModal from './components/UpdateAnnouncementModal';
+import VisualReasoningPanel from './components/VisualReasoningPanel';
 
 
 const normalizeInterfaceLanguage = (value: string | null | undefined): Language => {
@@ -329,6 +331,7 @@ const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isUsageGateOpen, setIsUsageGateOpen] = useState(false);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
   // JSON is opt-in: every new app session starts in the normal text format.
   const [jsonMode, setJsonMode] = useState<boolean>(false);
@@ -396,6 +399,15 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('ep_json_mode', jsonMode ? 'true' : 'false');
   }, [jsonMode]);
+
+  useEffect(() => {
+    if (hasChosenLanguage && localStorage.getItem('elite_v4_announcement_seen') !== 'true') setIsUpdateOpen(true);
+  }, [hasChosenLanguage]);
+
+  const closeUpdate = useCallback(() => {
+    localStorage.setItem('elite_v4_announcement_seen', 'true');
+    setIsUpdateOpen(false);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -678,7 +690,7 @@ const App: React.FC = () => {
   }[lang === 'pt' || lang === 'es' || lang === 'en' ? lang : 'en'];
 
   return (
-    <div className={`app-shell min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
+    <div className={`app-shell elite-v4-app min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
       {!hasChosenLanguage && <LanguageGate onChoose={handleChooseLanguage} />}
       <div className={hasChosenLanguage ? '' : 'language-gated-app'} aria-hidden={!hasChosenLanguage}>
       {/* Application chrome */}
@@ -698,6 +710,7 @@ const App: React.FC = () => {
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenPresets={() => setIsPresetsOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenUpdates={() => setIsUpdateOpen(true)}
         onOpenCommand={() => setIsCommandOpen(true)}
         historyCount={history.length}
         presetsCount={presets.length}
@@ -719,13 +732,20 @@ const App: React.FC = () => {
                 onOpenCommand={() => setIsCommandOpen(true)}
               />
 
-              <section className="ep-masthead" aria-labelledby="ep-masthead-title">
+              <section className="v4-hero" aria-labelledby="ep-masthead-title">
                 <div className="ep-masthead-copy">
-                  <span className="ep-masthead-kicker"><i />{workspaceLabels.kicker}</span>
-                  <h1 id="ep-masthead-title">{workspaceLabels.headline}</h1>
-                  <p>{workspaceLabels.subline}</p>
+                  <span className="ep-masthead-kicker"><i />VISUAL PROMPT ENGINE / V4</span>
+                  <h1 id="ep-masthead-title">{lang === 'pt' ? <>imagens não falham pela IA.<br/><em>falham por cenas mal entendidas.</em></> : lang === 'es' ? <>las imágenes no fallan por la ia.<br/><em>fallan por escenas mal entendidas.</em></> : <>images don't fail because of AI.<br/><em>they fail when the scene is misunderstood.</em></>}</h1>
+                  <p>{lang === 'pt' ? 'Analise identidade, câmera, luz, física e ambiente antes de construir cada prompt.' : lang === 'es' ? 'Analiza identidad, cámara, luz, física y entorno antes de construir cada prompt.' : 'Analyze identity, camera, light, physics and environment before building each prompt.'}</p>
+                  <div className="v4-hero-actions"><button className="v4-primary-button" onClick={() => scrollToSection('input')}>{lang === 'pt' ? 'Criar prompt' : lang === 'es' ? 'Crear prompt' : 'Create prompt'} <span>↗</span></button><button className="v4-ghost-button" onClick={() => document.getElementById('how-it-thinks')?.scrollIntoView({behavior:'smooth'})}>{lang === 'pt' ? 'Ver como pensa' : lang === 'es' ? 'Ver cómo piensa' : 'See how it thinks'}</button></div>
+                  <div className="v4-hero-meta"><span>03 ENGINES</span><i/> <span>VISUAL REASONING</span><i/> <span>IDENTITY CONSISTENCY</span></div>
                 </div>
+                <div className="v4-hero-mockup" aria-hidden="true"><div className="mockup-back mockup-back-a">CAMERA MODEL<br/><b>24mm · 1X</b><br/>1.8m distance</div><div className="mockup-back mockup-back-b">LIGHT PHYSICS<br/><b>CAMERA-LEFT</b><br/>soft falloff</div><div className="mockup-window"><div className="mockup-top"><span><i/> VISUAL REASONING</span><small>V1 / V2 / V3</small></div><div className="mockup-body"><div className="mockup-thumb"><div className="mockup-photo-lines"/></div><div className="mockup-states"><span><b/> IDENTITY <em>LOCKED</em></span><span><b/> CAMERA GEOMETRY <em>LOCKED</em></span><span><b/> LIGHT + PHYSICS <em>ANALYZING</em></span><span><b/> CONSISTENCY CHECK</span></div></div><div className="mockup-footer">ordinary smartphone capture <span>9:16</span></div></div></div>
               </section>
+
+              <VisualReasoningPanel lang={lang} detected={detectedParams} referencesCount={references.length} isLoading={isLoading || isMagicEnhancing} />
+
+              <section id="how-it-thinks" className="v4-how-it-thinks"><span className="ep-masthead-kicker"><i />HOW IT THINKS</span><h2>{lang === 'pt' ? <>não escreve primeiro.<br/><em>entende primeiro.</em></> : lang === 'es' ? <>no escribe primero.<br/><em>entiende primero.</em></> : <>it doesn't write first.<br/><em>it understands first.</em></>}</h2><div className="v4-pipeline"><span>IDEA</span><i>↓</i><span>REFERENCE ANALYSIS</span><i>↓</i><span>SCENE GEOMETRY</span><i>↓</i><span>LIGHT + PHYSICS</span><i>↓</i><span>CONSISTENCY CHECK</span><i>↓</i><span className="pipeline-accent">V1 / V2 / V3</span></div></section>
 
               <div className="studio-grid pro-studio-grid items-start">
               {/* Input pane */}
@@ -928,6 +948,8 @@ const App: React.FC = () => {
         onClose={() => setIsUsageGateOpen(false)}
         onUnlocked={() => setUsage(getUsageState())}
       />
+
+      <UpdateAnnouncementModal open={isUpdateOpen} lang={lang} onClose={closeUpdate} onTry={() => { closeUpdate(); scrollToSection('input'); }} />
 
       <ToastHost toast={toast} lang={lang} onClose={() => setToast(null)} />
 

@@ -20,6 +20,7 @@ interface HeaderProps {
   onOpenHistory: () => void;
   onOpenPresets: () => void;
   onOpenSettings: () => void;
+  onOpenUpdates: () => void;
   onOpenCommand: () => void;
   historyCount: number;
   presetsCount: number;
@@ -34,6 +35,7 @@ const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenPresets,
   onOpenSettings,
+  onOpenUpdates,
   onOpenCommand,
   historyCount,
   presetsCount
@@ -93,6 +95,7 @@ const Header: React.FC<HeaderProps> = ({
           <button type="button" onClick={onOpenSettings} className={actionClass} title={copy.settings}>
             <SettingsIcon size={18} strokeWidth={1.65} />
           </button>
+          <button type="button" onClick={onOpenUpdates} className={actionClass} title="Novedades" aria-label="Novedades"><span className="pro-nav-news">V4</span></button>
         </div>
       </aside>
 
@@ -132,6 +135,7 @@ const Header: React.FC<HeaderProps> = ({
             <button type="button" onClick={onOpenSettings} className="mobile-topbar-button" title={copy.settings}>
               <SettingsIcon size={17} strokeWidth={1.65} />
             </button>
+            <button type="button" onClick={onOpenUpdates} className="mobile-topbar-button mobile-lang-button" title="Novedades">V4</button>
           </nav>
         </div>
       </header>
