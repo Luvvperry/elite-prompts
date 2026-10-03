@@ -587,6 +587,18 @@ V2 SILENT DATA RESOLUTION:
 - Complete only missing information needed to make one physically coherent photograph: body mechanics, spatial relationships, object contact, light transport, shadows, materials and causal smartphone imperfections.
 - Do not add unrelated luxury, landmarks, props, people, cinematic styling or invented brands/text.
 
+V2 MANDATORY PRE-WRITING SCENE INTERPRETATION:
+Before writing or filling any V2 block, silently complete these decisions in order. Do not expose the decisions as analysis or add them as a separate section in the output:
+1. Identify what would actually be visible in the requested scene, including foreground, subject plane, background anchors, objects, boundaries and occlusions.
+2. Decide where the photo was taken from and who could physically be holding the phone.
+3. Decide the real camera height and distance, and make them agree with the selected lens, perspective and situation.
+4. Decide how much of each body is inside the frame, including crop, subject scale and whether nearby elements are cut off.
+5. Decide the exact body position: support and weight, torso, shoulders, head, gaze, arms, hands, fingers, legs, feet and contact with objects or surfaces.
+6. Decide how one coherent light setup reaches the face, clothing, floor, walls and objects, including shadow direction, hardness, falloff and exposure differences.
+7. Select only the natural smartphone imperfections caused by this capture, such as slight tilt, focus miss, motion blur, digital noise, JPEG compression, uneven exposure or imperfect white balance.
+8. Only after these decisions, fill the existing V2 template blocks.
+If the draft is generic, uses vague adjectives instead of visible evidence, has an illogical capture position, disconnected light, unsupported objects or a pose that cannot physically happen, silently reject it and rebuild it before returning the final prompt.
+
 V2 REQUIRED FINAL TEMPLATE:
 Return only the completed prompt with the following block order and visible curly braces. The opening sentence below is mandatory and must appear exactly as written in every V2 output, regardless of the selected output language:
 
