@@ -11,7 +11,7 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 4173,
-    allowedHosts: ['4173-ijluvri84uxgfj6mh7wqf-66b39723.us1.manus.computer']
+    allowedHosts: ['4173-ijluvri84uxgfj6mh7wqf-66b39723.us1.manus.computer', '4174-ijluvri84uxgfj6mh7wqf-66b39723.us1.manus.computer']
   },
   plugins: [react()],
   resolve: {

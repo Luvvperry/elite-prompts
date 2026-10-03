@@ -39,6 +39,7 @@ import LanguageGate from './components/LanguageGate';
 import UpdateAnnouncementModal from './components/UpdateAnnouncementModal';
 import VisualReasoningPanel from './components/VisualReasoningPanel';
 import MobileMenuSheet from './components/MobileMenuSheet';
+import ProductReconstruction from './components/ProductReconstruction';
 
 
 const normalizeInterfaceLanguage = (value: string | null | undefined): Language => {
@@ -698,173 +699,33 @@ const App: React.FC = () => {
   }[lang];
 
   return (
-    <div className={`app-shell elite-v4-app min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
+    <div className={`app-shell elite-reconstruction-app min-h-screen ${focusMode ? 'is-focus-mode' : ''}`}>
       {!hasChosenLanguage && <LanguageGate onChoose={handleChooseLanguage} />}
       <div className={hasChosenLanguage ? '' : 'language-gated-app'} aria-hidden={!hasChosenLanguage}>
-      {/* Application chrome */}
-      <Header
-        lang={lang}
-        onForceEnglishPrompts={() => {
-          setPromptLang('en');
-          localStorage.setItem('ep_prompt_lang', 'en');
-          showToast('success', 'Prompts will be generated in English.');
-        }}
-        jsonMode={jsonMode}
-        onToggleJsonMode={() => {
-          setJsonMode(value => !value);
-          showToast('success', jsonMode ? 'JSON format disabled.' : 'JSON format enabled.');
-        }}
-        onOpenLanguageSheet={() => setIsLanguageSheetOpen(true)}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenPresets={() => setIsPresetsOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenUpdates={() => setIsUpdateOpen(true)}
-        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-        onOpenCommand={() => setIsCommandOpen(true)}
-        historyCount={history.length}
-        presetsCount={presets.length}
-      />
-
-      {(isLoading || isMagicEnhancing) && <div className="generation-progress" aria-hidden="true"><span /></div>}
-
-      <div className="pro-shell lg:pl-[64px]">
-        <main className="studio-main flex-grow w-full relative z-10 pb-28 lg:pb-8">
-            <div className="studio-frame">
-              <StudioStatusRail
-              lang={lang}
-              mode={mode}
-              selectedTypeId={selectedTypeId}
-              settings={settings}
-              referencesCount={references.length}
-              focusMode={focusMode}
-              onToggleFocus={() => setFocusMode(v => !v)}
-                onOpenCommand={() => setIsCommandOpen(true)}
-              />
-
-              <section className="v4-hero" aria-labelledby="ep-masthead-title">
-                <div className="ep-masthead-copy">
-                  <span className="ep-masthead-kicker"><i />{v4Ui.eyebrow}</span>
-                  <h1 id="ep-masthead-title">{lang === 'pt' ? <>imagens não falham pela IA.<br/><em>falham por cenas mal entendidas.</em></> : lang === 'es' ? <>las imágenes no fallan por la ia.<br/><em>fallan por escenas mal entendidas.</em></> : <>images don't fail because of AI.<br/><em>they fail when the scene is misunderstood.</em></>}</h1>
-                  <p>{lang === 'pt' ? 'Analise identidade, câmera, luz, física e ambiente antes de construir cada prompt.' : lang === 'es' ? 'Analiza identidad, cámara, luz, física y entorno antes de construir cada prompt.' : 'Analyze identity, camera, light, physics and environment before building each prompt.'}</p>
-                  <div className="v4-hero-actions"><button className="v4-primary-button" onClick={() => scrollToSection('input')}>{lang === 'pt' ? 'Criar prompt' : lang === 'es' ? 'Crear prompt' : 'Create prompt'} <span>↗</span></button><button className="v4-ghost-button" onClick={() => document.getElementById('how-it-thinks')?.scrollIntoView({behavior:'smooth'})}>{lang === 'pt' ? 'Ver como pensa' : lang === 'es' ? 'Ver cómo piensa' : 'See how it thinks'}</button></div>
-                  <div className="v4-hero-meta"><span>{v4Ui.engines}</span><i/> <span>{v4Ui.reasoning}</span><i/> <span>{v4Ui.identity}</span></div>
-                </div>
-                <div className="v4-hero-mockup" aria-hidden="true"><div className="mockup-back mockup-back-a">{v4Ui.camera}<br/><b>24mm · 1X</b><br/>{v4Ui.distance}</div><div className="mockup-back mockup-back-b">{v4Ui.light}<br/><b>{v4Ui.direction}</b><br/>{v4Ui.falloff}</div><div className="mockup-window"><div className="mockup-top"><span><i/> {v4Ui.reasoning}</span><small>V1 / V2 / V3</small></div><div className="mockup-body"><div className="mockup-thumb"><div className="mockup-photo-lines"/></div><div className="mockup-states"><span><b/> {v4Ui.identityLocked} <em>{v4Ui.locked}</em></span><span><b/> {v4Ui.cameraLocked} <em>{v4Ui.locked}</em></span><span><b/> {v4Ui.lightPhysics} <em>{v4Ui.analyzing}</em></span><span><b/> {lang === 'pt' ? 'VERIFICAÇÃO DE CONSISTÊNCIA' : lang === 'es' ? 'COMPROBACIÓN DE CONSISTENCIA' : 'CONSISTENCY CHECK'}</span></div></div><div className="mockup-footer">{v4Ui.capture} <span>9:16</span></div></div></div>
-              </section>
-
-              <section id="how-it-thinks" className="v4-how-it-thinks"><span className="ep-masthead-kicker"><i />{v4Ui.how}</span><h2>{v4Ui.notFirst}<br/><em>{v4Ui.first}</em></h2><div className="v4-pipeline">{v4Ui.pipeline.map((step, index) => <React.Fragment key={step}><span>{step}</span>{index < v4Ui.pipeline.length - 1 && <i>↓</i>}</React.Fragment>)}<i>↓</i><span className="pipeline-accent">V1 / V2 / V3</span></div></section>
-
-              <div className="studio-grid pro-studio-grid items-start">
-              {/* Input pane */}
-              <section id="studio-input" className="studio-input-pane min-w-0 scroll-mt-24">
-                <div className="pane-heading">
-                  <div>
-                    <span className="pane-eyebrow">{workspaceLabels.input}</span>
-                    <p className="pane-description">{mode === 'image' ? translations[lang].nav.fromImage : translations[lang].nav.fromIdea}</p>
-                  </div>
-                </div>
-
-                <InputZone
-                  lang={lang}
-                  mode={mode}
-                  onModeChange={setMode}
-                  modality={modality}
-                  onModalityChange={handleModalityChange}
-                  selectedTypeId={selectedTypeId}
-                  ideaText={ideaText}
-                  onIdeaChange={handleIdeaChange}
-                  references={references}
-                  onAddReferences={handleAddReferences}
-                  onRemoveReference={handleRemoveReference}
-                  onUpdateReferenceRole={handleUpdateReferenceRole}
-                  onUpdateSubjectAssignment={handleUpdateSubjectAssignment}
-                  onMagicEnhance={handleMagicEnhance}
-                  isMagicEnhancing={isMagicEnhancing}
-                  camera={settings.device}
-                  cameraMode={settings.cameraMode}
-                  captureProfile={settings.captureProfile}
-                  settings={settings}
-                  onSettingsChange={setSettings}
-                />
-              </section>
-
-              <VisualReasoningPanel lang={lang} detected={detectedParams} referencesCount={references.length} isLoading={isLoading || isMagicEnhancing} />
-
-              {/* Controls pane */}
-              <section id="studio-settings" className="studio-settings-pane min-w-0 scroll-mt-24">
-                <div className="pane-heading pane-heading-controls">
-                  <div>
-                    <span className="pane-eyebrow">{workspaceLabels.controls}</span>
-                    <p className="pane-description">{viewMode === 'simple' ? translations[lang].simple.modeHint : translations[lang].advanced.modeHint}</p>
-                  </div>
-
-                  <div className="mode-switch" role="tablist" aria-label={translations[lang].nav.simpleMode}>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('simple')}
-                      className={viewMode === 'simple' ? 'is-active' : ''}
-                    >
-                      {translations[lang].nav.simpleMode}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('advanced')}
-                      className={viewMode === 'advanced' ? 'is-active' : ''}
-                    >
-                      {translations[lang].nav.advancedMode}
-                    </button>
-                  </div>
-                </div>
-
-                {viewMode === 'simple' ? (
-                  <div className="workspace-panel controls-panel p-4 sm:p-5">
-                    <SimpleControls
-                      lang={lang}
-                      settings={settings}
-                      onChange={setSettings}
-                      onGenerate={handleGenerate}
-                      isLoading={isLoading}
-                      canGenerate={canGenerate}
-                    />
-                  </div>
-                ) : (
-                  <div className="advanced-panel-shell">
-                    <AdvancedControls
-                      lang={lang}
-                      settings={settings}
-                      onChange={setSettings}
-                      onGenerate={handleGenerate}
-                      isLoading={isLoading}
-                      canGenerate={canGenerate}
-                      detectedParams={detectedParams}
-                      modality={modality}
-                      selectedTypeId={selectedTypeId}
-                    />
-                  </div>
-                )}
-              </section>
-
-              {/* Output pane */}
-              <section id="studio-output" className="studio-output-pane min-w-0 scroll-mt-24">
-                <div className="pane-heading">
-                  <div>
-                    <span className="pane-eyebrow">{workspaceLabels.output}</span>
-                    <p className="pane-description">V1 · V2 · V3</p>
-                  </div>
-                </div>
-                <PromptDisplay
-                  lang={lang}
-                  generation={generation}
-                  isLoading={isLoading}
-                  jsonMode={jsonMode}
-                  onRefinePrompt={handleRefinePrompt}
-                  onSaveToPresets={handleSaveCurrentPreset}
-                />
-              </section>
-            </div>
-          </div>
-        </main>
-      </div>
+        <Header
+          lang={lang}
+          onForceEnglishPrompts={() => { setPromptLang('en'); localStorage.setItem('ep_prompt_lang', 'en'); showToast('success', 'Prompts will be generated in English.'); }}
+          jsonMode={jsonMode}
+          onToggleJsonMode={() => { setJsonMode(value => !value); showToast('success', jsonMode ? 'JSON format disabled.' : 'JSON format enabled.'); }}
+          onOpenLanguageSheet={() => setIsLanguageSheetOpen(true)}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          onOpenPresets={() => setIsPresetsOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenUpdates={() => setIsUpdateOpen(true)}
+          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+          onOpenCommand={() => setIsCommandOpen(true)}
+          historyCount={history.length}
+          presetsCount={presets.length}
+        />
+        <ProductReconstruction
+          lang={lang} mode={mode} onModeChange={setMode} modality={modality} onModalityChange={handleModalityChange}
+          selectedTypeId={selectedTypeId} ideaText={ideaText} onIdeaChange={handleIdeaChange} references={references}
+          onAddReferences={handleAddReferences} onRemoveReference={handleRemoveReference} onUpdateReferenceRole={handleUpdateReferenceRole}
+          onUpdateSubjectAssignment={handleUpdateSubjectAssignment} onMagicEnhance={handleMagicEnhance} isMagicEnhancing={isMagicEnhancing}
+          settings={settings} onSettingsChange={setSettings} viewMode={viewMode} onViewMode={setViewMode} onGenerate={handleGenerate}
+          canGenerate={canGenerate} isLoading={isLoading} generation={generation} jsonMode={jsonMode} onRefinePrompt={handleRefinePrompt}
+          onSavePreset={handleSaveCurrentPreset} detected={detectedParams} onOpenHow={() => document.getElementById('new-workspace')?.scrollIntoView({ behavior: 'smooth' })}
+        />
 
       {/* 4. Presets Modal */}
       <PresetsModal
@@ -940,16 +801,6 @@ const App: React.FC = () => {
         onJump={scrollToSection}
       />
 
-      <MobileCommandDock
-        lang={lang}
-        viewMode={viewMode}
-        onSetViewMode={setViewMode}
-        onGenerate={handleGenerate}
-        onScrollOutput={() => scrollToSection('output')}
-        canGenerate={canGenerate}
-        isLoading={isLoading}
-        hasOutput={Boolean(generation)}
-      />
 
       <UsageGateModal
         open={isUsageGateOpen}

@@ -1028,6 +1028,20 @@ ${isSpanish
 - V2 and V3: Output 100% in English as direct, paste-ready prompts using their rules above.`}
 
 ==================================================
+
+
+==================================================
+ADAPTIVE SCENE MODEL — HIGHEST PRIORITY OUTPUT CONTRACT:
+==================================================
+The generator works in two silent phases. PHASE A: construct an internal sceneModel before writing. Resolve intent, visible subjects, identity sources versus scene sources, camera position/height/distance/orientation/focal/projection/framing, foreground/subject plane/background/occlusion, body center of mass/support points/joint relations/hand state/gaze, clothing materials/gravity/compression/tension, light sources/direction/intensity/softness/temperature/bounce, cast and contact shadows, materials, reflections, environment, capture character (focus, motion, noise, compression, HDR, exposure), constraints, unknowns and conservative inferences. This object is internal and must never be printed.
+PHASE B: compose a direct paste-ready image prompt from that sceneModel. Do not fill a fixed checklist and do not force the same section sequence into every scene. Let the scene determine the order and density: vehicles may need cabin geometry and paint reflections; interiors may need window light and contact shadows; beaches may need water, wind and horizon; selfies may need arm distance, wide-angle perspective and screen-side framing. Write relationships as cause → effect, not disconnected labels.
+CAMERA-FIRST RULE: decide where the camera is before deciding what the frame contains. Link sensor/device class, focal length, camera height, distance, pitch, crop and perspective. Never invent false precision; use plausible intervals such as approximately 2.5–3m when evidence cannot justify an exact number.
+BODY-PHYSICS RULE: replace vague phrases such as natural pose with visible mechanics: center of mass, dominant/supporting leg, pelvis and torso rotation, shoulder line, neck/head direction, elbow/wrist/hand state, finger contact and object support. Include only what changes the visible image.
+LIGHT-CAUSALITY RULE: describe source direction and the resulting exposure, shadow edge, bounce and background level. For reflective surfaces explicitly state what is reflected, whether the reflection is strong/soft/broken, the finish, how light enters, contact shadows and how supported objects affect the surface.
+IDENTITY-OPTICS RULE: identity references control recognizable identity only; scene references control pose, camera, focus, light, processing and composition. Do not transfer facial-reference sharpness into a softer scene. If the camera cannot resolve pores or individual hairs, do not invent them.
+ENGINE DIFFERENTIATION: V1 is clean lived-in realism with enough evidence to remove ambiguity; V2 is physical realism with linked geometry, biomechanics, contacts, materials, shadows, reflections, fabric and optics; V3 is scene reconstruction, substantially denser and more complete, but still a direct image prompt rather than a technical report. They must not be the same prompt with additional fields.
+ADAPTIVE FORMAT OVERRIDE: do not expose fixed headings, mandatory block checklists, educational schemas or a repeated template merely because an older instruction requested them. Curly braces may be used when they improve a direct prompt, but their order and count must adapt to the scene. Never output the internal sceneModel, reasoning transcript, phases, checklist or meta-commentary.
+
 AUTO DETECT EXTRACTION:
 ==================================================
 Return key detected parameters (subjectCount, pose, behavior, gaze, expression, camera, lens, distance, framing, flash, time, environment, vehicle, activity, lighting) in the language requested.
