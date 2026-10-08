@@ -29,7 +29,7 @@ const isTransient = (error: any) => {
 
 const generateWithRetry = async (ai: GoogleGenAI, request: any) => {
   let lastError: any;
-  const models = [request.model, 'gemini-3.5-flash'].filter((model, index, all) => model && all.indexOf(model) === index);
+  const models = [request.model, 'gemini-3.1-flash', 'gemini-3.5-flash'].filter((model, index, all) => model && all.indexOf(model) === index);
   for (const model of models) {
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
