@@ -228,6 +228,34 @@ const fallbackLifestyleResult = (language: string) => {
   };
 };
 
+const buildLifestyleFinalInstruction = (language: string, sceneModel: any) => `${REALISM_ENGINE}
+
+LIFESTYLE ENGINE — DISTINCT OUTPUT FORMAT:
+You are not generating a person prompt and you are not copying the reference composition. The uploaded image is an aesthetic and environmental reference only. Preserve its visual world, materials, palette and atmosphere, then invent five different publishable lifestyle scenes with no people.
+
+INTERNAL SCENE MODEL ALREADY RECONSTRUCTED:
+${JSON.stringify(sceneModel)}
+
+Before writing the final values, silently verify each proposal in this order:
+1) every visible object belongs to the chosen environment;
+2) the camera position, height, distance, lens and crop could physically produce the frame;
+3) the main non-human subject has a stable support surface and believable scale;
+4) light direction, exposure, shadows and color temperature agree with the time and place;
+5) glass, water, paint, metal, stone, fabric or polished surfaces specify their actual reflection and contact behavior;
+6) imperfections are sparse and caused by the capture, never decorative effects;
+7) no people, faces, body parts, invented brands or readable text appear.
+
+Do not reveal the Scene Model, analysis, chain of thought or intermediate decisions. Return only valid JSON in ${language} with exactly these keys:
+{
+  "aestheticSummary": "...",
+  "colorPalette": ["...", "...", "..."],
+  "proposals": [
+    {"id":"...", "purpose":"...", "cameraZoom":"0.5x|1x|2x", "positive":"...", "negative":"..."}
+  ]
+}
+
+Create exactly five proposals. They must be genuinely different in camera placement, distance, crop, object emphasis and moment, while remaining in the same visual world. Each positive value must be 250-450 words in ${language} and include: concrete environment and objects; foreground, middle distance and background; camera height and distance; phone lens and focus plane; light path and falloff; contact shadows; material response; explicit reflection content and strength where relevant; subtle smartphone imperfections; vertical 9:16 framing; and a final statement that the image is a normal real smartphone photograph, not CGI, 3D or a cinematic advertisement. Keep every label and prose string in ${language}. Negative values must be scene-specific and begin with the translated equivalent of [NEGATIVE PROMPT].`;
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const route = new URL(req.url || '/', 'https://local').pathname;
@@ -276,13 +304,19 @@ export default async function handler(req: any, res: any) {
     if (route.endsWith('/generate-lifestyle-prompts')) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = body.language === 'en' ? 'English' : 'Spanish';
-      const prompt = `${REALISM_ENGINE}\nStudy this reference only for palette, place and atmosphere, never copy its composition or person. Generate exactly five different lifestyle prompt proposals in ${language}, with no people, readable text or commercial logos. Resolve physical camera placement, ordinary phone imperfections and material/reflection behavior whenever relevant. Return JSON with aestheticSummary, colorPalette array and proposals array containing id, purpose, cameraZoom, positive and negative.`;
+      const scenePrompt = `${REALISM_ENGINE}
+LIFESTYLE SCENE RECONSTRUCTION — INTERNAL STEP ONLY:
+Inspect the uploaded image as an environment and object reference, not as a composition to copy. Do not describe or preserve any person because the final scenes must contain no people. Build a compact factual scene model in ${language} with exactly these keys: visible_subjects, environment, foreground, middle_distance, background, camera_inferred, light_and_shadows, materials_and_reflections, palette_and_atmosphere, safe_variation_boundaries. Include only observable details. For camera_inferred, estimate height, distance, viewing side, lens field of view and crop. For materials_and_reflections, state what is reflected, surface finish, reflection strength, incoming light and contact-shadow behavior. Do not write prompts, do not invent brands or text, and do not reveal chain of thought; return only valid JSON.`;
       try {
-        const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-        return res.status(200).json(parseJson(r.text));
+        const sceneResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: scenePrompt }] }, config: { temperature: 0.15, maxOutputTokens: 3500, responseMimeType: 'application/json' } });
+        const sceneModel = parseJson(sceneResponse.text);
+        const finalPrompt = buildLifestyleFinalInstruction(language, sceneModel);
+        const finalResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: finalPrompt, config: { temperature: 0.3, maxOutputTokens: 12000, responseMimeType: 'application/json' } });
+        const parsed = parseJson(finalResponse.text);
+        if (!Array.isArray(parsed.proposals) || parsed.proposals.length < 5) throw new Error('Lifestyle engine returned fewer than five proposals.');
+        return res.status(200).json({ ...parsed, proposals: parsed.proposals.slice(0, 5) });
       } catch (error: any) {
-        // Lifestyle is intentionally non-blocking: preserve the uploaded reference
-        // and return five usable directions while the model is under load.
+        // Keep the UI usable during a provider outage, without changing the normal two-step brain.
         return res.status(200).json(fallbackLifestyleResult(language));
       }
     }
