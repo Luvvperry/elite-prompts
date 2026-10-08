@@ -1036,7 +1036,7 @@ Use this evidence to write the selected engine now. Expand each relevant block w
             contents: [{
               text: `
 PRIVATE REWRITE PASS. The following ${expansionKey.toUpperCase()} prompt is too compressed and must be expanded before delivery.
-Rewrite it in ${requestedLanguageName}, preserving every fact, structure, opening sentence, curly-brace style and language lock. Do not invent new brands, people, landmarks or decorative props. Add only physically implied evidence: exact camera height/distance/crop, body mechanics, hand and object contact, garment tension and folds, spatial ordering, light falloff, shadow edges, material response, reflections when present, and causal smartphone imperfections. Do not repeat facts just to increase length. Return only JSON in this exact shape: {"expanded":"..."}.
+Rewrite it in ${requestedLanguageName}, preserving every fact, structure, opening sentence, curly-brace style and language lock. Do not invent new brands, people, landmarks or decorative props. Add only physically implied evidence: exact camera height/distance/crop, body mechanics, hand and object contact, garment tension and folds, spatial ordering, light falloff, shadow edges, material response, reflections when present, and causal smartphone imperfections. Do not repeat facts just to increase length. Return only the expanded prompt text, with no JSON wrapper, markdown fence or explanation.
 
 PROMPT TO EXPAND:
 ${parsed[expansionKey]}`
@@ -1044,24 +1044,15 @@ ${parsed[expansionKey]}`
             config: {
               temperature: 0.18,
               maxOutputTokens: isTargetV3 ? 7600 : 6000,
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: { expanded: { type: Type.STRING } },
-                required: ["expanded"]
-              }
+              responseMimeType: "text/plain"
             }
           });
-          const expansionText = expansionResponse.text?.trim() || "";
-          if (expansionText) {
-            try {
-              const expanded = JSON.parse(expansionText);
-              if (typeof expanded.expanded === 'string' && expanded.expanded.trim().length > parsed[expansionKey].trim().length) {
-                parsed[expansionKey] = expanded.expanded.trim();
-              }
-            } catch (expansionError) {
-              console.warn('[GENERATE] Expansion pass returned invalid JSON; keeping original prompt.');
-            }
+          const expansionText = (expansionResponse.text?.trim() || '')
+            .replace(/^```(?:text|markdown)?\s*/i, '')
+            .replace(/\s*```$/i, '')
+            .trim();
+          if (expansionText.length > parsed[expansionKey].trim().length) {
+            parsed[expansionKey] = expansionText;
           }
         }
 
