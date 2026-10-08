@@ -197,6 +197,37 @@ const fallbackIdeaResult = (body: any, language: string) => {
   };
 };
 
+const fallbackLifestyleResult = (language: string) => {
+  const english = language === 'English';
+  const prefix = english ? 'Lifestyle variation' : 'Propuesta lifestyle';
+  const prompts = english
+    ? [
+        'A casual vertical smartphone photograph of the main vehicle or object from the uploaded reference in the same broad environment and color atmosphere, photographed at normal standing height with the rear 1x camera. Keep the scene lived-in, preserve ordinary surface wear, natural shadows and realistic reflections. No people, no staged advertising, no CGI.',
+        'A close but non-macro smartphone detail of the most visually important material from the uploaded reference, keeping its real texture, small imperfections and surrounding context. Use soft available light, a slightly imperfect crop and natural phone sharpening. No people, no artificial bokeh, no cinematic grading.',
+        'A wider vertical smartphone snapshot inspired by the uploaded reference environment, showing the main subject with believable foreground, middle distance and background layers. Keep the original atmosphere and palette without copying an exact composition. Use natural exposure, ordinary clutter and physically correct reflections. No people or readable logos.',
+        'A low but realistic phone-camera viewpoint of the main non-human subject suggested by the uploaded reference, with the camera close to ground level but not distorted. Preserve material response, contact shadows, edge wear and light falloff. The result must look like a spontaneous phone photo, not a commercial campaign.',
+        'A quiet everyday smartphone photograph based on the uploaded reference mood, showing a plausible alternate moment in the same visual world. Keep colors restrained, surfaces imperfect, reflections soft or broken according to each material, and the vertical frame slightly unprecise. No people, no CGI, no studio polish.'
+      ]
+    : [
+        'Una fotografía vertical casual de smartphone del vehículo u objeto principal de la referencia subida, dentro del mismo tipo de entorno y atmósfera cromática. Cámara trasera 1x a altura normal, desgaste real, sombras naturales y reflejos físicamente correctos. Sin personas, publicidad ni CGI.',
+        'Un detalle cercano pero no macro del material visualmente más importante de la referencia subida, conservando su textura real, pequeñas imperfecciones y contexto. Luz disponible suave, recorte ligeramente imperfecto y nitidez natural de móvil. Sin personas, bokeh artificial ni gradación cinematográfica.',
+        'Una toma vertical más amplia inspirada en el entorno de la referencia subida, con capas creíbles de primer plano, plano medio y fondo. Mantén la atmósfera y la paleta sin copiar la composición exacta. Exposición natural, objetos cotidianos y reflejos físicamente correctos. Sin personas ni logotipos legibles.',
+        'Un punto de vista bajo pero realista de cámara de móvil sobre el sujeto no humano sugerido por la referencia, cerca del suelo pero sin distorsión exagerada. Conserva materiales, sombras de contacto, desgaste y caída de luz. Debe parecer una foto espontánea, no una campaña comercial.',
+        'Una fotografía cotidiana y tranquila de smartphone basada en el ambiente de la referencia subida, mostrando un momento alternativo plausible del mismo mundo visual. Colores contenidos, superficies imperfectas, reflejos suaves o quebrados según el material y encuadre vertical ligeramente imperfecto. Sin personas, CGI ni acabado de estudio.'
+      ];
+  return {
+    aestheticSummary: english ? 'Fallback active: the AI service is busy, so five safe, non-human lifestyle directions were prepared from the uploaded reference mood.' : 'Fallback activo: el servicio de IA está ocupado, así que se prepararon cinco direcciones lifestyle seguras y sin personas a partir del ambiente de la referencia subida.',
+    colorPalette: english ? ['reference colors', 'natural daylight', 'material neutrals'] : ['colores de la referencia', 'luz natural', 'neutros materiales'],
+    proposals: prompts.map((positive, index) => ({
+      id: `lifestyle-fallback-${index + 1}`,
+      purpose: `${prefix} ${index + 1}`,
+      cameraZoom: (['1x', '2x', '0.5x', '1x', '2x'] as const)[index],
+      positive: `${positive} Vertical 9:16 composition.`,
+      negative: english ? '[NEGATIVE PROMPT]\n\npeople, human figures, readable logos, CGI, 3D render, artificial bokeh, excessive HDR, fake reflections, studio lighting, perfect surfaces' : '[PROMPT NEGATIVO]\n\npersonas, figuras humanas, logotipos legibles, CGI, render 3D, bokeh artificial, HDR excesivo, reflejos falsos, iluminación de estudio, superficies perfectas'
+    }))
+  };
+};
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const route = new URL(req.url || '/', 'https://local').pathname;
@@ -246,8 +277,14 @@ export default async function handler(req: any, res: any) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = body.language === 'en' ? 'English' : 'Spanish';
       const prompt = `${REALISM_ENGINE}\nStudy this reference only for palette, place and atmosphere, never copy its composition or person. Generate exactly five different lifestyle prompt proposals in ${language}, with no people, readable text or commercial logos. Resolve physical camera placement, ordinary phone imperfections and material/reflection behavior whenever relevant. Return JSON with aestheticSummary, colorPalette array and proposals array containing id, purpose, cameraZoom, positive and negative.`;
-      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-      return res.status(200).json(parseJson(r.text));
+      try {
+        const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+        return res.status(200).json(parseJson(r.text));
+      } catch (error: any) {
+        // Lifestyle is intentionally non-blocking: preserve the uploaded reference
+        // and return five usable directions while the model is under load.
+        return res.status(200).json(fallbackLifestyleResult(language));
+      }
     }
 
     return res.status(404).json({ error: 'Unknown API route' });
