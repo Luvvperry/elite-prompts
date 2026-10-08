@@ -44,6 +44,22 @@ const generateWithRetry = async (ai: GoogleGenAI, request: any) => {
   throw lastError || new Error('AI request failed.');
 };
 
+const sceneModelInstruction = (language: string, context: string) => `${REALISM_ENGINE}
+
+SHARED SCENE MODEL — INTERNAL PREPARATION ONLY:
+${context}
+Return only a compact JSON object with these keys: visible_subjects, environment, foreground, middle_distance, background, camera_inferred, body_mechanics, light_and_shadows, materials_and_reflections, phone_capture, safe_boundaries. Use only observable or directly inferable facts. Decide camera height, distance, crop, support points, light path, contact shadows and reflection behavior before any final writing. Do not write the final prompt, do not expose chain of thought, do not describe identity traits, and keep every value in ${language}.
+`;
+
+const getSceneModel = async (ai: GoogleGenAI, language: string, contents: any, context: string) => {
+  const response = await generateWithRetry(ai, {
+    model: 'gemini-3.8-flash',
+    contents: typeof contents === 'string' ? `${sceneModelInstruction(language, context)}\n${contents}` : { parts: [...contents.parts, { text: sceneModelInstruction(language, context) }] },
+    config: { temperature: 0.12, maxOutputTokens: 3000, responseMimeType: 'application/json' },
+  });
+  return parseJson(response.text);
+};
+
 // Shared photographic realism contract. It is deliberately explicit because vague
 // instructions produce attractive-looking renders instead of believable phone photos.
 const REALISM_ENGINE = `
@@ -266,15 +282,28 @@ export default async function handler(req: any, res: any) {
     if (route.endsWith('/analyze-image')) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = languageName(body.language);
-      const prompt = `${REALISM_ENGINE}\nAnalyze the supplied scene reference as a director of an ordinary real phone photo. Generate one positive prompt and one negative prompt in ${language}. Start the positive prompt directly with the subject/environment description. Include concrete wardrobe, environment, action, composition, camera, light, imperfections, skin/material physics, reflective-surface behavior when relevant, and 9:16. Never copy the reference person's face or physical identity. Return JSON with keys positive, negative, detectedSummary, analysis, detectedTargets.`;
-      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      const imageContents = { parts: [imagePart(text(body.base64Image), text(body.mimeType))] };
+      let sceneModel: any;
+      try {
+        sceneModel = await getSceneModel(ai, language, imageContents, 'Analyze the supplied scene reference as a real smartphone capture. Separate visible scene facts from identity.');
+      } catch {
+        sceneModel = { fallback: 'Inspect the supplied image directly and resolve the complete physical scene before writing.' };
+      }
+      const prompt = `${REALISM_ENGINE}\nINTERNAL SCENE MODEL:\n${JSON.stringify(sceneModel)}\n\nUse this model as a decision layer, not as text to copy. Generate one positive prompt and one negative prompt in ${language}. Start the positive prompt directly with the subject/environment description. Include concrete wardrobe, environment, action, composition, camera, light, imperfections, skin/material physics, reflective-surface behavior when relevant, and 9:16. Never copy the reference person's face or physical identity. Return JSON with keys positive, negative, detectedSummary, analysis, detectedTargets.`;
+      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [...imageContents.parts, { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
       return res.status(200).json(parseJson(r.text));
     }
 
     if (route.endsWith('/generate-idea-prompt')) {
       if (!body.ideaText) return res.status(400).json({ error: 'ideaText is required' });
       const language = languageName(body.language);
-      const prompt = buildIdeaInstruction(body, language);
+      let sceneModel: any;
+      try {
+        sceneModel = await getSceneModel(ai, language, `${text(body.ideaText)}\nGesture: ${text(body.gestureOption)}\nMood: ${text(body.moodOption)}`, 'Convert the user idea into a physically solvable smartphone scene. Resolve what will be visible before writing, without inventing identity traits.');
+      } catch {
+        sceneModel = { fallback: 'Resolve the complete physical scene internally before writing the final prompt.' };
+      }
+      const prompt = `${buildIdeaInstruction(body, language)}\n\nINTERNAL SCENE MODEL ALREADY RESOLVED:\n${JSON.stringify(sceneModel)}\nUse it as the decision layer. Do not reveal or repeat this JSON as analysis; use its facts to write the final prompt.`;
       try {
         const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
         const parsed = parseJson(r.text);
@@ -289,7 +318,13 @@ export default async function handler(req: any, res: any) {
       if (!body.idea) return res.status(400).json({ error: 'idea is required' });
       const count = Math.max(1, Math.min(12, Number(body.count) || 1));
       const language = languageName(body.language);
-      const prompt = `${REALISM_ENGINE}\nCreate exactly ${count} distinct prompt objects in ${language} from this idea: ${text(body.idea)}. Vary location, action, framing and ordinary imperfections while keeping identity external. Each positive prompt must resolve camera height, distance, crop, body mechanics, light path, contact shadows and material/reflection behavior when relevant. Return JSON array under key items; each item must have id, positive, negative, title.`;
+      let sceneModel: any;
+      try {
+        sceneModel = await getSceneModel(ai, language, text(body.idea), `Resolve the central idea for a batch of ${count} variations. Identify stable physical facts and safe variation boundaries; do not write final prompts yet.`);
+      } catch {
+        sceneModel = { fallback: 'Resolve the physical scene and safe variation boundaries before writing each batch item.' };
+      }
+      const prompt = `${REALISM_ENGINE}\nINTERNAL SCENE MODEL:\n${JSON.stringify(sceneModel)}\n\nUse this shared decision layer without exposing it. Create exactly ${count} distinct prompt objects in ${language} from this idea: ${text(body.idea)}. Vary location, action, framing and ordinary imperfections while keeping identity external. Each positive prompt must resolve camera height, distance, crop, body mechanics, light path, contact shadows and material/reflection behavior when relevant. Return JSON array under key items; each item must have id, positive, negative, title.`;
       try {
         const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
         const parsed = parseJson(r.text);
@@ -310,8 +345,7 @@ Inspect the uploaded image as an environment and object reference, not as a comp
       try {
         let sceneModel: any;
         try {
-          const sceneResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: scenePrompt }] }, config: { temperature: 0.15, maxOutputTokens: 3500, responseMimeType: 'application/json' } });
-          sceneModel = parseJson(sceneResponse.text);
+          sceneModel = await getSceneModel(ai, language, { parts: [imagePart(text(body.base64Image), text(body.mimeType))] }, scenePrompt);
         } catch {
           // If the analysis call is busy, let the final writer inspect the image itself.
           sceneModel = { fallback: 'Inspect the uploaded image directly before writing. Reconstruct visible objects, camera, crop, light, materials and reflections internally.' };
