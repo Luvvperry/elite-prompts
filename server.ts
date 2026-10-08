@@ -938,6 +938,7 @@ Do not use phrases such as “realistic”, “natural”, “coherent” or “
           ],
           config: {
             temperature: 0.05,
+            maxOutputTokens: 1800,
             responseMimeType: "application/json",
             responseSchema: {
               type: Type.OBJECT,
@@ -985,7 +986,7 @@ Use this evidence to write the selected engine now. Expand each relevant block w
           config: {
             systemInstruction: systemPrompt,
             temperature: 0.2,
-            maxOutputTokens: 12000,
+            maxOutputTokens: isTargetV3 ? 7600 : 12000,
             responseMimeType: "application/json",
             responseSchema: {
               type: Type.OBJECT,
