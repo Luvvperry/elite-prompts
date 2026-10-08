@@ -437,4 +437,5 @@ async function start() {
 export { app };
 export default app;
 
-if (!process.env.VERCEL) start().catch(console.error);
+// In production this module is loaded by Vercel as a serverless handler.
+// The local listener is intentionally not started on import.
