@@ -421,6 +421,27 @@ Before composing V2 and V3, extract the exact physical reality:
 - optics & light: camera class, focal behavior, light direction, Kelvin temperature, shadow penumbra, specular glints on metal/glass/skin.
 - locks: image-specific visual invariants that cannot shift.
 
+MANDATORY PRIVATE SCENE MODEL — DO THIS BEFORE WRITING ANY ENGINE:
+Do not jump from the user's idea directly to adjectives or a finished prompt. First reconstruct one physically possible photographic instant in this exact mental order:
+1. Identify only what would actually be visible inside the frame; separate foreground, subject plane, background, occlusions, and negative space.
+2. Decide where the photographer is standing, the camera side, camera height, distance, tilt, horizon, and the exact body crop.
+3. Resolve the subject's geometry: torso rotation, shoulder asymmetry, head turn, gaze vector, elbow angles, hand/finger contact, hip alignment, knees, feet, and which leg bears weight.
+4. Resolve every contact and support: feet on ground, back against surface, hand on object, fabric compressed by joints, objects resting on surfaces, and contact shadows.
+5. Trace the light physically from source to subject to background: direction, falloff with distance, shadow edge, color shift, exposure relationship, and highlight behavior.
+6. For every reflective material that is visible (glass, water, metal, paint, mirror, polished table, glossy floor), state what it reflects, whether the reflection is sharp/broken/soft, the finish, how light enters it, where contact shadows sit, and how supported objects interrupt the reflection.
+7. Choose only imperfections caused by this exact capture: movement, focus distance, low light, flash, white balance, compression, sensor noise, or a slightly crooked hand-held frame. Never add a random checklist of flaws.
+8. Only after all of that, write the requested engine template. Every sentence must be the visible consequence of a resolved physical decision.
+
+DEPTH CONTRACT — NEVER DELIVER A THIN PROMPT:
+- V1: normally 550–850 words when the scene contains a person or several objects; every sentence must add usable visual evidence.
+- V2: normally 750–1150 words. Each populated block must contain concrete geometry, material behavior, spatial relations, and causal details, not a label followed by one generic sentence.
+- V3: normally 1100–1700 words for a complex person/vehicle/interior scene; use fewer words only when the requested scene is genuinely simple.
+- If the scene model cannot support a detail, omit it instead of inventing decorative props. Do not shorten by replacing decisions with “realistic”, “natural”, “coherent”, “authentic”, “beautiful”, or “high quality”.
+- The output prompt must be directly usable by an image model. Never expose this private scene model or mention that you reasoned about it.
+
+GLOBAL REFLECTION RULE:
+Whenever a reflective surface is present, the final prompt must explicitly connect the reflection to nearby geometry and light. “Coherent reflections” by itself is forbidden. Describe the reflected sky/room/people/objects that are actually visible, the surface finish, reflection breakup, incoming light direction, contact shadow, and occlusion from anything resting on or near the surface.
+
 DO NOT INVENT WHAT IS NOT VISIBLE:
 If a brand is not readable, describe the physical silhouette and color. Do not guess city or watch model unless explicitly stated.
 Hierarchy of Truth:
@@ -527,6 +548,10 @@ REGRAS OBRIGATÓRIAS PARA A V2:
 12. A foto enviada é SEMPRE a foto do usuário para referência da identidade do rosto.
 13. NÃO adicionar introduções, explicações, saudações ou conclusões fora do molde.
 14. O prompt da v2 deve ser gerado pronto para copiar e colar.
+15. A V2 não pode entregar blocos com uma única frase vaga. Em cada bloco relevante, escreva várias frases concretas conectadas à cena: relações esquerda/direita, distância, escala, contato, material, luz e consequência fotográfica.
+16. Antes de escrever, resolva silenciosamente o private scene model na ordem obrigatória do sistema. Não preencha o molde por associação de palavras.
+17. Para uma cena humana comum, a V2 deve ficar substancialmente longa (aproximadamente 750–1150 palavras), sem repetir a mesma informação entre blocos. Uma saída curta, genérica ou sem biomecânica deve ser refeita internamente antes de retornar.
+18. Se houver carro, vidro, espelho, água, metal, mesa polida ou piso brilhante, o bloco de física deve explicar exatamente o que é refletido, a intensidade e quebra do reflexo, o acabamento, a entrada da luz e as sombras de contato.
 ` : ''}
 
 ${isTargetAll || isTargetV3 ? `
