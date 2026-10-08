@@ -31,13 +31,13 @@ const generateWithRetry = async (ai: GoogleGenAI, request: any) => {
   let lastError: any;
   const models = [request.model, 'gemini-3.1-flash', 'gemini-3.5-flash'].filter((model, index, all) => model && all.indexOf(model) === index);
   for (const model of models) {
-    for (let attempt = 0; attempt < 2; attempt += 1) {
+    for (let attempt = 0; attempt < 1; attempt += 1) {
       try {
         return await ai.models.generateContent({ ...request, model });
       } catch (error: any) {
         lastError = error;
-        if (!isTransient(error) || attempt === 1) break;
-        await new Promise((resolve) => setTimeout(resolve, 700));
+        if (!isTransient(error)) break;
+        await new Promise((resolve) => setTimeout(resolve, 250));
       }
     }
   }
@@ -177,6 +177,26 @@ const hasLanguageLeak = (result: any, language: string) => {
   return /\b(sujeito|ambiente|iluminação|primer plano|fondo|vestindo|sentado|em pé|fotografia casual|prompt negativo)\b/i.test(all);
 };
 
+const fallbackIdeaResult = (body: any, language: string) => {
+  const idea = text(body.ideaText).trim();
+  const ratio = body.aspectRatio && body.aspectRatio !== 'auto' ? body.aspectRatio : '9:16';
+  if (language === 'English') return {
+    positive: `Subject A: Create a real, ordinary smartphone photograph based on this user concept: ${idea}. Resolve the scene as a physically possible everyday moment, not a poster or advertisement. Keep the requested action concrete and connected to a visible object. Use natural body mechanics, believable weight distribution, relaxed shoulders, correctly supported elbows and hands, and feet that touch the ground. Describe the requested clothing with real fabric weight, seams, gravity, compression, small wrinkles and uneven folds. Describe a specific lived-in environment with foreground, middle distance and background elements that belong there. Use a rear smartphone main camera at 1x, approximately 24mm equivalent, with a concrete camera height and distance, an ordinary autofocus plane and a vertical ${ratio} crop. Use only plausible available light, with a clear direction, falloff, exposure behavior and contact shadows. If glass, metal, water, a car, a mirror or polished material appears, show what is reflected, whether it is soft or broken, how light enters the surface and how touching or supported objects interrupt the reflection. Preserve ordinary phone behavior: mild sharpening, slight noise only in darker areas, modest compression and imperfect auto-exposure. Use the user's separate personal reference image for identity only; do not describe or copy another person's face or body. The result must look like an unremarkable real smartphone photo, not CGI, a 3D render or a cinematic advertisement.`,
+    negative: '[NEGATIVE PROMPT] extra people, duplicate subjects, fused limbs, impossible hand-object contact, floating objects, incorrect perspective, plastic skin, beauty retouching, CGI, 3D render, cinematic grading, excessive HDR, artificial portrait bokeh, studio polish, perfect symmetry, fake reflections, clothing without folds',
+    detectedSummary: `Fallback local: concept received; vertical ${ratio}; real rear smartphone camera at 1x; identity remains external.`
+  };
+  if (language === 'Brazilian Portuguese') return {
+    positive: `Sujeito A: Crie uma fotografia real e comum de smartphone baseada neste conceito do usuário: ${idea}. Resolva a cena como um momento cotidiano fisicamente possível, não como pôster ou anúncio. Mantenha a ação solicitada concreta e ligada a um objeto visível. Use mecânica corporal natural, distribuição de peso crível, ombros relaxados, cotovelos e mãos apoiados corretamente e pés em contato com o chão. Descreva a roupa solicitada com peso real do tecido, costuras, gravidade, compressão, pequenos amassados e dobras irregulares. Descreva um ambiente vivido com elementos de primeiro plano, plano intermediário e fundo. Use câmera traseira principal de smartphone em 1x, equivalente a aproximadamente 24 mm, com altura e distância concretas, foco automático comum e enquadramento vertical ${ratio}. Use somente luz disponível plausível, com direção, queda, exposição e sombras de contato claras. Se aparecer vidro, metal, água, carro, espelho ou material polido, mostre o que é refletido, se o reflexo é suave ou quebrado, como a luz entra na superfície e como objetos apoiados interrompem o reflexo. Preserve o comportamento comum do celular: nitidez moderada, ruído discreto apenas em áreas escuras, compressão leve e exposição automática imperfeita. Use a foto pessoal separada do usuário somente para a identidade; não descreva nem copie o rosto ou corpo de outra pessoa. O resultado deve parecer uma foto comum real de smartphone, não CGI, render 3D ou anúncio cinematográfico.`,
+    negative: '[PROMPT NEGATIVO] pessoas extras, sujeitos duplicados, membros fundidos, contato impossível entre mão e objeto, objetos flutuando, perspectiva incorreta, pele plástica, retoque de beleza, CGI, render 3D, gradação cinematográfica, HDR excessivo, bokeh artificial de retrato, acabamento de estúdio, simetria perfeita, reflexos falsos, roupas sem dobras',
+    detectedSummary: `Fallback local: conceito recebido; vertical ${ratio}; câmera traseira real em 1x; identidade permanece externa.`
+  };
+  return {
+    positive: `Sujeto A: Crea una fotografía real y cotidiana de smartphone basada en este concepto del usuario: ${idea}. Resuelve la escena como un momento físicamente posible, no como un póster ni un anuncio. Mantén la acción concreta y conectada con un objeto visible. Usa mecánica corporal natural, distribución de peso creíble, hombros relajados, manos y codos apoyados correctamente y pies en contacto con el suelo. Describe la ropa con peso real del tejido, costuras, gravedad, compresión, pequeñas arrugas y pliegues irregulares. Describe un entorno vivido con primer plano, plano medio y fondo. Usa la cámara trasera principal de un smartphone a 1x, equivalente a unos 24 mm, con altura y distancia concretas, enfoque automático común y encuadre vertical ${ratio}. Usa luz disponible plausible con dirección, caída, exposición y sombras de contacto claras. Si aparece vidrio, metal, agua, coche, espejo o material pulido, especifica qué se refleja, si el reflejo es suave o quebrado, cómo entra la luz y cómo los objetos interrumpen el reflejo. Mantén el comportamiento normal del teléfono: nitidez moderada, ruido discreto solo en sombras, compresión ligera y exposición automática imperfecta. Usa la foto personal separada del usuario solo para la identidad; no describas ni copies el rostro o cuerpo de otra persona. El resultado debe parecer una foto real común de smartphone, no CGI, render 3D ni anuncio cinematográfico.`,
+    negative: '[PROMPT NEGATIVO] personas extra, sujetos duplicados, extremidades fusionadas, contacto imposible entre mano y objeto, objetos flotantes, perspectiva incorrecta, piel plástica, retoque de belleza, CGI, render 3D, gradación cinematográfica, HDR excesivo, bokeh artificial, acabado de estudio, simetría perfecta, reflejos falsos, ropa sin arrugas',
+    detectedSummary: `Fallback local: concepto recibido; vertical ${ratio}; cámara trasera real a 1x; identidad externa.`
+  };
+};
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const route = new URL(req.url || '/', 'https://local').pathname;
@@ -196,9 +216,14 @@ export default async function handler(req: any, res: any) {
       if (!body.ideaText) return res.status(400).json({ error: 'ideaText is required' });
       const language = languageName(body.language);
       const prompt = buildIdeaInstruction(body, language);
-      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
-      const parsed = parseJson(r.text);
-      return res.status(200).json(normalizeIdeaResult(parsed, language));
+      try {
+        const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
+        const parsed = parseJson(r.text);
+        return res.status(200).json(normalizeIdeaResult(parsed, language));
+      } catch (error: any) {
+        if (isTransient(error)) return res.status(200).json(fallbackIdeaResult(body, language));
+        throw error;
+      }
     }
 
     if (route.endsWith('/generate-prompt-batch')) {
