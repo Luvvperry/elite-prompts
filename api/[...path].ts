@@ -308,10 +308,19 @@ export default async function handler(req: any, res: any) {
 LIFESTYLE SCENE RECONSTRUCTION — INTERNAL STEP ONLY:
 Inspect the uploaded image as an environment and object reference, not as a composition to copy. Do not describe or preserve any person because the final scenes must contain no people. Build a compact factual scene model in ${language} with exactly these keys: visible_subjects, environment, foreground, middle_distance, background, camera_inferred, light_and_shadows, materials_and_reflections, palette_and_atmosphere, safe_variation_boundaries. Include only observable details. For camera_inferred, estimate height, distance, viewing side, lens field of view and crop. For materials_and_reflections, state what is reflected, surface finish, reflection strength, incoming light and contact-shadow behavior. Do not write prompts, do not invent brands or text, and do not reveal chain of thought; return only valid JSON.`;
       try {
-        const sceneResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: scenePrompt }] }, config: { temperature: 0.15, maxOutputTokens: 3500, responseMimeType: 'application/json' } });
-        const sceneModel = parseJson(sceneResponse.text);
+        let sceneModel: any;
+        try {
+          const sceneResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: scenePrompt }] }, config: { temperature: 0.15, maxOutputTokens: 3500, responseMimeType: 'application/json' } });
+          sceneModel = parseJson(sceneResponse.text);
+        } catch {
+          // If the analysis call is busy, let the final writer inspect the image itself.
+          sceneModel = { fallback: 'Inspect the uploaded image directly before writing. Reconstruct visible objects, camera, crop, light, materials and reflections internally.' };
+        }
         const finalPrompt = buildLifestyleFinalInstruction(language, sceneModel);
-        const finalResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: finalPrompt, config: { temperature: 0.3, maxOutputTokens: 12000, responseMimeType: 'application/json' } });
+        const finalContents = sceneModel?.fallback
+          ? { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: finalPrompt }] }
+          : finalPrompt;
+        const finalResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: finalContents, config: { temperature: 0.3, maxOutputTokens: 12000, responseMimeType: 'application/json' } });
         const parsed = parseJson(finalResponse.text);
         if (!Array.isArray(parsed.proposals) || parsed.proposals.length < 5) throw new Error('Lifestyle engine returned fewer than five proposals.');
         return res.status(200).json({ ...parsed, proposals: parsed.proposals.slice(0, 5) });
