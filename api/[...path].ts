@@ -137,6 +137,13 @@ const normalizeIdeaResult = (parsed: any, language: string) => {
   return { positive, negative, detectedSummary: text(parsed?.detectedSummary).trim() };
 };
 
+const hasLanguageLeak = (result: any, language: string) => {
+  const all = `${text(result?.positive)} ${text(result?.negative)} ${text(result?.detectedSummary)}`;
+  if (language === 'Brazilian Portuguese') return /\b(half body|full body|subject|environment|lighting|foreground|background|wearing|standing|sitting|shot on|negative prompt)\b/i.test(all);
+  if (language === 'Spanish') return /\b(half body|full body|subject|environment|lighting|foreground|background|wearing|standing|sitting|shot on|negative prompt)\b/i.test(all);
+  return /\b(sujeito|ambiente|iluminação|primer plano|fondo|vestindo|sentado|em pé|fotografia casual|prompt negativo)\b/i.test(all);
+};
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const route = new URL(req.url || '/', 'https://local').pathname;
@@ -163,6 +170,11 @@ export default async function handler(req: any, res: any) {
         const repairPrompt = `${prompt}\n\nREWRITE PASS REQUIRED: The previous draft was only ${draftWords} words and is not acceptable. Rewrite the positive prompt from scratch with at least 700 words. Make every section concrete: camera height and meters of distance, crop, support points of the body, exact hand-object contact, fabric tension and wrinkles, foreground/middle/background, light direction and falloff, contact shadows, phone autofocus/exposure behavior, and explicit reflection physics for every reflective surface. Do not summarize or shorten. Return only the same JSON object.`;
         const repaired = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: repairPrompt, config: { temperature: 0.2, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
         parsed = JSON.parse(repaired.text || '{}');
+      }
+      if (hasLanguageLeak(parsed, language)) {
+        const purityPrompt = `${prompt}\n\nCURRENT JSON TO PURIFY:\n${JSON.stringify(parsed)}\n\nLANGUAGE PURITY FINAL PASS: Rewrite the current JSON values in ${language} only. Translate every section label and descriptive phrase, including terms such as half body, full body, subject, environment, lighting, foreground and background. Keep technical device names, measurements, 9:16, 24mm, 1x, HDR and iPhone unchanged when technically necessary. Do not shorten the positive prompt; preserve all concrete physical details. Return only the same JSON object.`;
+        const purified = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: purityPrompt, config: { temperature: 0.15, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
+        parsed = JSON.parse(purified.text || '{}');
       }
       return res.status(200).json(normalizeIdeaResult(parsed, language));
     }
