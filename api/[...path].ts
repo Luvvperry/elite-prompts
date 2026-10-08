@@ -231,9 +231,15 @@ export default async function handler(req: any, res: any) {
       const count = Math.max(1, Math.min(12, Number(body.count) || 1));
       const language = languageName(body.language);
       const prompt = `${REALISM_ENGINE}\nCreate exactly ${count} distinct prompt objects in ${language} from this idea: ${text(body.idea)}. Vary location, action, framing and ordinary imperfections while keeping identity external. Each positive prompt must resolve camera height, distance, crop, body mechanics, light path, contact shadows and material/reflection behavior when relevant. Return JSON array under key items; each item must have id, positive, negative, title.`;
-      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-      const parsed = parseJson(r.text);
-      return res.status(200).json({ items: Array.isArray(parsed.items) ? parsed.items : [] });
+      try {
+        const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+        const parsed = parseJson(r.text);
+        return res.status(200).json({ items: Array.isArray(parsed.items) ? parsed.items : [] });
+      } catch (error: any) {
+        if (!isTransient(error)) throw error;
+        const fallback = fallbackIdeaResult({ ideaText: body.idea, aspectRatio: '9:16' }, language);
+        return res.status(200).json({ items: Array.from({ length: count }, (_, index) => ({ id: `fallback-${index + 1}`, title: `${language === 'Brazilian Portuguese' ? 'Variação' : language === 'Spanish' ? 'Variación' : 'Variation'} ${index + 1}`, positive: `${fallback.positive}\n\n${language === 'English' ? `Variation ${index + 1}: change the camera distance and ordinary background details while preserving the same physical action.` : language === 'Brazilian Portuguese' ? `Variação ${index + 1}: altere a distância da câmera e os detalhes comuns do fundo, mantendo a mesma ação física.` : `Variación ${index + 1}: cambia la distancia de cámara y los detalles cotidianos del fondo, manteniendo la misma acción física.`}`, negative: fallback.negative })) });
+      }
     }
 
     if (route.endsWith('/generate-lifestyle-prompts')) {
