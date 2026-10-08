@@ -1030,13 +1030,15 @@ Use this evidence to write the selected engine now. Expand each relevant block w
         // requested engine when it falls below its evidence threshold.
         const expansionKey = isTargetV3 ? 'v3' : isTargetV2 ? 'v2' : isTargetV1 ? 'v1' : '';
         const expansionMinimum = isTargetV3 ? 5200 : isTargetV2 ? 3600 : isTargetV1 ? 2600 : 0;
-        if (expansionKey && typeof parsed[expansionKey] === 'string' && parsed[expansionKey].trim().length < expansionMinimum) {
+        let expansionAttempt = 0;
+        while (expansionKey && expansionAttempt < 2 && typeof parsed[expansionKey] === 'string' && parsed[expansionKey].trim().length < expansionMinimum) {
+          expansionAttempt += 1;
           const expansionResponse = await ai.models.generateContent({
             model: currentModel,
             contents: [{
               text: `
 PRIVATE REWRITE PASS. The following ${expansionKey.toUpperCase()} prompt is too compressed and must be expanded before delivery.
-Rewrite it in ${requestedLanguageName}, preserving every fact, structure, opening sentence, curly-brace style and language lock. Do not invent new brands, people, landmarks or decorative props. Add only physically implied evidence: exact camera height/distance/crop, body mechanics, hand and object contact, garment tension and folds, spatial ordering, light falloff, shadow edges, material response, reflections when present, and causal smartphone imperfections. Do not repeat facts just to increase length. Return only the expanded prompt text, with no JSON wrapper, markdown fence or explanation.
+Rewrite it in ${requestedLanguageName}, preserving every fact, structure, opening sentence, curly-brace style and language lock. Do not invent new brands, people, landmarks or decorative props. Add only physically implied evidence: exact camera height/distance/crop, body mechanics, hand and object contact, garment tension and folds, spatial ordering, light falloff, shadow edges, material response, reflections when present, and causal smartphone imperfections. Do not repeat facts just to increase length. The result must be at least ${isTargetV3 ? '900' : isTargetV2 ? '650' : '450'} words unless the scene genuinely lacks enough visible information. Return only the expanded prompt text, with no JSON wrapper, markdown fence or explanation.
 
 PROMPT TO EXPAND:
 ${parsed[expansionKey]}`
