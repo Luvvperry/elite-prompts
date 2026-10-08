@@ -906,7 +906,9 @@ ${userTextDescription}`
       requiredProperties.push("autoDetected");
     }
 
-    const MODELS_CASCADE = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+    // Quality first: the lite model is retained only as a recovery path because
+    // it tends to satisfy the template while compressing the physical evidence.
+    const MODELS_CASCADE = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
     let lastError: any = null;
 
     for (let attempt = 0; attempt < MODELS_CASCADE.length; attempt++) {
