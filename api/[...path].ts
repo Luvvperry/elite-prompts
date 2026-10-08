@@ -99,6 +99,44 @@ DETECTED SUMMARY CONTRACT:
 `;
 };
 
+const normalizeIdeaResult = (parsed: any, language: string) => {
+  let positive = text(parsed?.positive).trim();
+  let negative = text(parsed?.negative).trim();
+  const isEnglish = language === 'English';
+  const isPortuguese = language === 'Brazilian Portuguese';
+  const ratioLine = isEnglish
+    ? 'Frame: vertical 9:16, with the crop and camera distance kept physically consistent.'
+    : isPortuguese
+      ? 'Enquadramento: vertical 9:16, mantendo o recorte e a distância da câmera fisicamente consistentes.'
+      : 'Encuadre: vertical 9:16, manteniendo el recorte y la distancia de cámara físicamente consistentes.';
+  const cameraLine = isEnglish
+    ? 'Capture behavior: rear smartphone main camera, 24mm equivalent at 1x, ordinary autofocus, natural sharpening, mild sensor noise only where the exposure requires it, and no artificial portrait blur.'
+    : isPortuguese
+      ? 'Comportamento da captura: câmera traseira principal de smartphone, equivalente a 24 mm em 1x, foco automático comum, nitidez natural, ruído discreto apenas onde a exposição exigir e nenhum desfoque artificial de retrato.'
+      : 'Comportamiento de captura: cámara trasera principal de smartphone, equivalente a 24 mm en 1x, enfoque automático común, nitidez natural, ruido discreto solo donde lo requiera la exposición y ningún desenfoque artificial de retrato.';
+  const identityLine = isEnglish
+    ? 'Identity instruction: use the user\'s separate personal reference image for identity only; do not describe, copy or transfer another reference person\'s face, hair, skin tone or body.'
+    : isPortuguese
+      ? 'Instrução de identidade: use a foto pessoal separada do usuário somente para a identidade; não descreva, copie ou transfira o rosto, cabelo, tom de pele ou corpo de outra pessoa de referência.'
+      : 'Instrucción de identidad: usa la foto personal separada del usuario solo para la identidad; no describas, copies ni transfieras el rostro, cabello, tono de piel o cuerpo de otra persona de referencia.';
+  const authenticityLine = isEnglish
+    ? 'It must read as an unremarkable real smartphone photo taken by a person, not CGI, not a 3D render and not a cinematic advertisement.'
+    : isPortuguese
+      ? 'A imagem deve parecer uma foto comum real feita por uma pessoa com smartphone, não CGI, render 3D ou anúncio cinematográfico.'
+      : 'La imagen debe sentirse como una foto común real tomada por una persona con smartphone, no CGI, render 3D ni anuncio cinematográfico.';
+
+  if (!positive) positive = authenticityLine;
+  if (!/9:16/.test(positive)) positive += `\n\n${ratioLine}`;
+  if (!/24\s*mm|24mm|1x/i.test(positive)) positive += `\n\n${cameraLine}`;
+  if (!/separate personal reference|foto personal separada|foto personal del usuario|foto personal/i.test(positive)) positive += `\n\n${identityLine}`;
+  if (!/CGI|render 3D|cinematic|cinematográfica|cinematográfico/i.test(positive)) positive += `\n\n${authenticityLine}`;
+
+  const negativeHeader = isEnglish ? '[NEGATIVE PROMPT]' : '[PROMPT NEGATIVO]';
+  if (!negative) negative = negativeHeader;
+  if (!negative.startsWith(negativeHeader)) negative = `${negativeHeader}\n\n${negative}`;
+  return { positive, negative, detectedSummary: text(parsed?.detectedSummary).trim() };
+};
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const route = new URL(req.url || '/', 'https://local').pathname;
@@ -119,12 +157,14 @@ export default async function handler(req: any, res: any) {
       const language = languageName(body.language);
       const prompt = buildIdeaInstruction(body, language);
       const r = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-      const parsed = JSON.parse(r.text || '{}');
-      return res.status(200).json({
-        positive: text(parsed.positive),
-        negative: text(parsed.negative),
-        detectedSummary: text(parsed.detectedSummary),
-      });
+      let parsed = JSON.parse(r.text || '{}');
+      const draftWords = text(parsed.positive).trim().split(/\s+/).filter(Boolean).length;
+      if (draftWords < 500) {
+        const repairPrompt = `${prompt}\n\nREWRITE PASS REQUIRED: The previous draft was only ${draftWords} words and is not acceptable. Rewrite the positive prompt from scratch with at least 700 words. Make every section concrete: camera height and meters of distance, crop, support points of the body, exact hand-object contact, fabric tension and wrinkles, foreground/middle/background, light direction and falloff, contact shadows, phone autofocus/exposure behavior, and explicit reflection physics for every reflective surface. Do not summarize or shorten. Return only the same JSON object.`;
+        const repaired = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: repairPrompt, config: { temperature: 0.2, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
+        parsed = JSON.parse(repaired.text || '{}');
+      }
+      return res.status(200).json(normalizeIdeaResult(parsed, language));
     }
 
     if (route.endsWith('/generate-prompt-batch')) {
