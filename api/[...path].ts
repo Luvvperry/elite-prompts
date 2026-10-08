@@ -282,28 +282,15 @@ export default async function handler(req: any, res: any) {
     if (route.endsWith('/analyze-image')) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = languageName(body.language);
-      const imageContents = { parts: [imagePart(text(body.base64Image), text(body.mimeType))] };
-      let sceneModel: any;
-      try {
-        sceneModel = await getSceneModel(ai, language, imageContents, 'Analyze the supplied scene reference as a real smartphone capture. Separate visible scene facts from identity.');
-      } catch {
-        sceneModel = { fallback: 'Inspect the supplied image directly and resolve the complete physical scene before writing.' };
-      }
-      const prompt = `${REALISM_ENGINE}\nINTERNAL SCENE MODEL:\n${JSON.stringify(sceneModel)}\n\nUse this model as a decision layer, not as text to copy. Generate one positive prompt and one negative prompt in ${language}. Start the positive prompt directly with the subject/environment description. Include concrete wardrobe, environment, action, composition, camera, light, imperfections, skin/material physics, reflective-surface behavior when relevant, and 9:16. Never copy the reference person's face or physical identity. Return JSON with keys positive, negative, detectedSummary, analysis, detectedTargets.`;
-      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [...imageContents.parts, { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      const prompt = `${REALISM_ENGINE}\n\nONE-PASS EXECUTION: Perform the complete Scene Model silently before writing, then write the final result in this same call. Do not output the intermediate model. Generate one positive prompt and one negative prompt in ${language}. Start the positive prompt directly with the subject/environment description. Include concrete wardrobe, environment, action, composition, camera, light, imperfections, skin/material physics, reflective-surface behavior when relevant, and 9:16. Never copy the reference person's face or physical identity. Return JSON with keys positive, negative, detectedSummary, analysis, detectedTargets.`;
+      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 6500, responseMimeType: 'application/json' } });
       return res.status(200).json(parseJson(r.text));
     }
 
     if (route.endsWith('/generate-idea-prompt')) {
       if (!body.ideaText) return res.status(400).json({ error: 'ideaText is required' });
       const language = languageName(body.language);
-      let sceneModel: any;
-      try {
-        sceneModel = await getSceneModel(ai, language, `${text(body.ideaText)}\nGesture: ${text(body.gestureOption)}\nMood: ${text(body.moodOption)}`, 'Convert the user idea into a physically solvable smartphone scene. Resolve what will be visible before writing, without inventing identity traits.');
-      } catch {
-        sceneModel = { fallback: 'Resolve the complete physical scene internally before writing the final prompt.' };
-      }
-      const prompt = `${buildIdeaInstruction(body, language)}\n\nINTERNAL SCENE MODEL ALREADY RESOLVED:\n${JSON.stringify(sceneModel)}\nUse it as the decision layer. Do not reveal or repeat this JSON as analysis; use its facts to write the final prompt.`;
+      const prompt = `${buildIdeaInstruction(body, language)}\n\nONE-PASS EXECUTION: Resolve the complete Scene Model silently in the exact order defined above, then write the final prompt in this same call. Do not reveal the intermediate reasoning or summarize it separately.`;
       try {
         const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
         const parsed = parseJson(r.text);
@@ -318,13 +305,7 @@ export default async function handler(req: any, res: any) {
       if (!body.idea) return res.status(400).json({ error: 'idea is required' });
       const count = Math.max(1, Math.min(12, Number(body.count) || 1));
       const language = languageName(body.language);
-      let sceneModel: any;
-      try {
-        sceneModel = await getSceneModel(ai, language, text(body.idea), `Resolve the central idea for a batch of ${count} variations. Identify stable physical facts and safe variation boundaries; do not write final prompts yet.`);
-      } catch {
-        sceneModel = { fallback: 'Resolve the physical scene and safe variation boundaries before writing each batch item.' };
-      }
-      const prompt = `${REALISM_ENGINE}\nINTERNAL SCENE MODEL:\n${JSON.stringify(sceneModel)}\n\nUse this shared decision layer without exposing it. Create exactly ${count} distinct prompt objects in ${language} from this idea: ${text(body.idea)}. Vary location, action, framing and ordinary imperfections while keeping identity external. Each positive prompt must resolve camera height, distance, crop, body mechanics, light path, contact shadows and material/reflection behavior when relevant. Return JSON array under key items; each item must have id, positive, negative, title.`;
+      const prompt = `${REALISM_ENGINE}\n\nONE-PASS EXECUTION: First resolve one stable Scene Model silently, then create exactly ${count} distinct prompt objects in ${language} in this same call. Keep shared physical facts coherent while varying location, action, framing and ordinary imperfections. Never output the intermediate model. Each positive prompt must resolve camera height, distance, crop, body mechanics, light path, contact shadows and material/reflection behavior when relevant. Return JSON array under key items; each item must have id, positive, negative, title.`;
       try {
         const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
         const parsed = parseJson(r.text);
@@ -340,21 +321,10 @@ export default async function handler(req: any, res: any) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = body.language === 'en' ? 'English' : 'Spanish';
       const scenePrompt = `${REALISM_ENGINE}
-LIFESTYLE SCENE RECONSTRUCTION — INTERNAL STEP ONLY:
-Inspect the uploaded image as an environment and object reference, not as a composition to copy. Do not describe or preserve any person because the final scenes must contain no people. Build a compact factual scene model in ${language} with exactly these keys: visible_subjects, environment, foreground, middle_distance, background, camera_inferred, light_and_shadows, materials_and_reflections, palette_and_atmosphere, safe_variation_boundaries. Include only observable details. For camera_inferred, estimate height, distance, viewing side, lens field of view and crop. For materials_and_reflections, state what is reflected, surface finish, reflection strength, incoming light and contact-shadow behavior. Do not write prompts, do not invent brands or text, and do not reveal chain of thought; return only valid JSON.`;
+LIFESTYLE ENGINE — ONE-PASS EXECUTION:
+Inspect the uploaded image internally as an environment and object reference, not as a composition to copy. Resolve visible subjects, environment, foreground, middle distance, background, camera height and distance, crop, light path, contact shadows, materials, reflections and safe variation boundaries before writing. Do not describe or preserve any person because the final scenes must contain no people. Do not reveal the intermediate Scene Model. Generate exactly five different lifestyle proposals in ${language}, preserving the visual world but varying camera placement, distance, crop and object emphasis. Return only the final JSON with aestheticSummary, colorPalette array and proposals containing id, purpose, cameraZoom, positive and negative.`;
       try {
-        let sceneModel: any;
-        try {
-          sceneModel = await getSceneModel(ai, language, { parts: [imagePart(text(body.base64Image), text(body.mimeType))] }, scenePrompt);
-        } catch {
-          // If the analysis call is busy, let the final writer inspect the image itself.
-          sceneModel = { fallback: 'Inspect the uploaded image directly before writing. Reconstruct visible objects, camera, crop, light, materials and reflections internally.' };
-        }
-        const finalPrompt = buildLifestyleFinalInstruction(language, sceneModel);
-        const finalContents = sceneModel?.fallback
-          ? { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: finalPrompt }] }
-          : finalPrompt;
-        const finalResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: finalContents, config: { temperature: 0.3, maxOutputTokens: 12000, responseMimeType: 'application/json' } });
+        const finalResponse = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: `${scenePrompt}\n\n${buildLifestyleFinalInstruction(language, { instruction: 'Keep all scene reasoning internal and return only the five final proposals.' })}` }] }, config: { temperature: 0.3, maxOutputTokens: 9500, responseMimeType: 'application/json' } });
         const parsed = parseJson(finalResponse.text);
         if (!Array.isArray(parsed.proposals) || parsed.proposals.length < 5) throw new Error('Lifestyle engine returned fewer than five proposals.');
         return res.status(200).json({ ...parsed, proposals: parsed.proposals.slice(0, 5) });
