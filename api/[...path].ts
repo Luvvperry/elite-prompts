@@ -11,6 +11,36 @@ const imagePart = (data: string, mimeType: string) => ({ inlineData: { mimeType,
 
 const languageName = (value: unknown) => value === 'en' ? 'English' : value === 'pt' ? 'Brazilian Portuguese' : 'Spanish';
 
+const parseJson = (value: unknown) => {
+  const raw = text(value).trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  if (!raw) throw new Error('The AI returned an empty response.');
+  try { return JSON.parse(raw); } catch {
+    const start = raw.indexOf('{');
+    const end = raw.lastIndexOf('}');
+    if (start >= 0 && end > start) return JSON.parse(raw.slice(start, end + 1));
+    throw new Error('The AI returned invalid JSON.');
+  }
+};
+
+const isTransient = (error: any) => {
+  const message = String(error?.message || error || '').toLowerCase();
+  return error?.status === 429 || error?.status === 503 || /429|503|unavailable|high demand|resource exhausted|temporar|timeout|deadline/i.test(message);
+};
+
+const generateWithRetry = async (ai: GoogleGenAI, request: any) => {
+  let lastError: any;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await ai.models.generateContent(request);
+    } catch (error: any) {
+      lastError = error;
+      if (!isTransient(error) || attempt === 1) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 900));
+    }
+  }
+  throw lastError || new Error('AI request failed.');
+};
+
 // Shared photographic realism contract. It is deliberately explicit because vague
 // instructions produce attractive-looking renders instead of believable phone photos.
 const REALISM_ENGINE = `
@@ -155,27 +185,16 @@ export default async function handler(req: any, res: any) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = languageName(body.language);
       const prompt = `${REALISM_ENGINE}\nAnalyze the supplied scene reference as a director of an ordinary real phone photo. Generate one positive prompt and one negative prompt in ${language}. Start the positive prompt directly with the subject/environment description. Include concrete wardrobe, environment, action, composition, camera, light, imperfections, skin/material physics, reflective-surface behavior when relevant, and 9:16. Never copy the reference person's face or physical identity. Return JSON with keys positive, negative, detectedSummary, analysis, detectedTargets.`;
-      const r = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-      return res.status(200).json(JSON.parse(r.text || '{}'));
+      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      return res.status(200).json(parseJson(r.text));
     }
 
     if (route.endsWith('/generate-idea-prompt')) {
       if (!body.ideaText) return res.status(400).json({ error: 'ideaText is required' });
       const language = languageName(body.language);
       const prompt = buildIdeaInstruction(body, language);
-      const r = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-      let parsed = JSON.parse(r.text || '{}');
-      const draftWords = text(parsed.positive).trim().split(/\s+/).filter(Boolean).length;
-      if (draftWords < 500) {
-        const repairPrompt = `${prompt}\n\nREWRITE PASS REQUIRED: The previous draft was only ${draftWords} words and is not acceptable. Rewrite the positive prompt from scratch with at least 700 words. Make every section concrete: camera height and meters of distance, crop, support points of the body, exact hand-object contact, fabric tension and wrinkles, foreground/middle/background, light direction and falloff, contact shadows, phone autofocus/exposure behavior, and explicit reflection physics for every reflective surface. Do not summarize or shorten. Return only the same JSON object.`;
-        const repaired = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: repairPrompt, config: { temperature: 0.2, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
-        parsed = JSON.parse(repaired.text || '{}');
-      }
-      if (hasLanguageLeak(parsed, language)) {
-        const purityPrompt = `${prompt}\n\nCURRENT JSON TO PURIFY:\n${JSON.stringify(parsed)}\n\nLANGUAGE PURITY FINAL PASS: Rewrite the current JSON values in ${language} only. Translate every section label and descriptive phrase, including terms such as half body, full body, subject, environment, lighting, foreground and background. Keep technical device names, measurements, 9:16, 24mm, 1x, HDR and iPhone unchanged when technically necessary. Do not shorten the positive prompt; preserve all concrete physical details. Return only the same JSON object.`;
-        const purified = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: purityPrompt, config: { temperature: 0.15, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
-        parsed = JSON.parse(purified.text || '{}');
-      }
+      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
+      const parsed = parseJson(r.text);
       return res.status(200).json(normalizeIdeaResult(parsed, language));
     }
 
@@ -184,8 +203,8 @@ export default async function handler(req: any, res: any) {
       const count = Math.max(1, Math.min(12, Number(body.count) || 1));
       const language = languageName(body.language);
       const prompt = `${REALISM_ENGINE}\nCreate exactly ${count} distinct prompt objects in ${language} from this idea: ${text(body.idea)}. Vary location, action, framing and ordinary imperfections while keeping identity external. Each positive prompt must resolve camera height, distance, crop, body mechanics, light path, contact shadows and material/reflection behavior when relevant. Return JSON array under key items; each item must have id, positive, negative, title.`;
-      const r = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-      const parsed = JSON.parse(r.text || '{}');
+      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      const parsed = parseJson(r.text);
       return res.status(200).json({ items: Array.isArray(parsed.items) ? parsed.items : [] });
     }
 
@@ -193,13 +212,17 @@ export default async function handler(req: any, res: any) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = body.language === 'en' ? 'English' : 'Spanish';
       const prompt = `${REALISM_ENGINE}\nStudy this reference only for palette, place and atmosphere, never copy its composition or person. Generate exactly five different lifestyle prompt proposals in ${language}, with no people, readable text or commercial logos. Resolve physical camera placement, ordinary phone imperfections and material/reflection behavior whenever relevant. Return JSON with aestheticSummary, colorPalette array and proposals array containing id, purpose, cameraZoom, positive and negative.`;
-      const r = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
-      return res.status(200).json(JSON.parse(r.text || '{}'));
+      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      return res.status(200).json(parseJson(r.text));
     }
 
     return res.status(404).json({ error: 'Unknown API route' });
   } catch (error: any) {
     console.error('API error', error);
-    return res.status(500).json({ error: error?.message || 'Server error' });
+    const transient = isTransient(error);
+    return res.status(transient ? 503 : 500).json({
+      error: transient ? 'The AI service is temporarily busy. Please try again in a few seconds.' : (error?.message || 'Server error'),
+      retryable: transient,
+    });
   }
 }

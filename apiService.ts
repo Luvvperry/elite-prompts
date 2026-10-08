@@ -33,16 +33,21 @@ export interface LifestyleAnalysisResult {
 }
 
 async function post<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload?.error || `Request failed (${response.status})`);
+  let response: Response | null = null;
+  let payload: any = {};
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    payload = await response.json().catch(() => ({}));
+    if (response.ok) return payload as T;
+    const retryable = response.status === 429 || response.status === 503 || payload?.retryable === true;
+    if (!retryable || attempt === 1) break;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  return payload as T;
+  throw new Error(payload?.error || `Request failed (${response?.status || 'network error'})`);
 }
 
 export const analyzeImage = (
