@@ -912,12 +912,80 @@ ${userTextDescription}`
     for (let attempt = 0; attempt < MODELS_CASCADE.length; attempt++) {
       const currentModel = MODELS_CASCADE[attempt];
       try {
+        // Pass 1: build a private, structured scene model. This is deliberately
+        // separate from the final prose so the model cannot skip geometry and
+        // jump straight to generic adjectives or template labels.
+        const sceneModelResponse = await ai.models.generateContent({
+          model: currentModel,
+          contents: [
+            ...contentsParts,
+            {
+              text: `
+PRIVATE SCENE MODEL PASS — DO NOT WRITE THE FINAL PROMPT YET.
+Analyze the user's idea and any attached references as a real camera capture. Return only JSON for an internal handoff, never prose for the user. Resolve these fields with concrete scene evidence, not adjectives:
+frame_geometry (orientation, crop, horizon, camera side, height, distance, tilt, subject scale, left/right negative space),
+visible_subjects (count and only visible identity/wardrobe facts),
+biomechanics (torso rotation, shoulders, head, gaze, elbows, hands, hips, knees, feet, weight-bearing leg and object contact),
+wardrobe_materials (garments, weave/finish, fit, tension, folds, compression and contact),
+spatial_layout (foreground, subject plane, background, occlusion, scale and vanishing lines),
+light_transport (source, direction, intensity, falloff, color, exposure relation and shadow edges),
+reflections (for every glass, water, metal, paint, mirror or polished surface: what is reflected, finish, clarity/breakup, incoming light, contact shadows and occlusion),
+capture_artifacts (only causal smartphone flaws),
+identity_and_scene_locks (facts that must not drift),
+missing_information (what must be omitted rather than invented).
+Do not use phrases such as “realistic”, “natural”, “coherent” or “authentic” as a substitute for evidence.`
+            }
+          ],
+          config: {
+            temperature: 0.05,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                frame_geometry: { type: Type.STRING },
+                visible_subjects: { type: Type.STRING },
+                biomechanics: { type: Type.STRING },
+                wardrobe_materials: { type: Type.STRING },
+                spatial_layout: { type: Type.STRING },
+                light_transport: { type: Type.STRING },
+                reflections: { type: Type.STRING },
+                capture_artifacts: { type: Type.STRING },
+                identity_and_scene_locks: { type: Type.STRING },
+                missing_information: { type: Type.STRING }
+              },
+              required: [
+                "frame_geometry", "visible_subjects", "biomechanics", "wardrobe_materials",
+                "spatial_layout", "light_transport", "reflections", "capture_artifacts",
+                "identity_and_scene_locks", "missing_information"
+              ]
+            }
+          }
+        });
+
+        const sceneModelText = sceneModelResponse.text?.trim() || "";
+        if (!sceneModelText) throw new Error("Empty private scene model.");
+
+        // Pass 2: write only the requested paste-ready engine, using the private
+        // reconstruction as evidence. The model never returns the scene model.
+        const finalContentsParts = [
+          ...contentsParts,
+          {
+            text: `
+PRIVATE SCENE MODEL (INTERNAL EVIDENCE — DO NOT COPY, QUOTE, LABEL, OR EXPOSE):
+${sceneModelText}
+
+FINAL WRITING RULE:
+Use this evidence to write the selected engine now. Expand each relevant block with concrete geometry, body mechanics, object contact, spatial relations, material response and causal capture artifacts. Do not summarize the model. Do not mention this pass. If a detail is not supported by the model or user input, omit it rather than inventing it.`
+          }
+        ];
+
         const response = await ai.models.generateContent({
           model: currentModel,
-          contents: contentsParts,
+          contents: finalContentsParts,
           config: {
             systemInstruction: systemPrompt,
-            temperature: 0.15,
+            temperature: 0.2,
+            maxOutputTokens: 12000,
             responseMimeType: "application/json",
             responseSchema: {
               type: Type.OBJECT,
