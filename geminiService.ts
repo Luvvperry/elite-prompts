@@ -433,7 +433,7 @@ ${closingTagInstruction}`;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.8-flash',
       contents: {
         parts: promptParts
       },
@@ -744,7 +744,7 @@ Genera un objeto JSON con las claves exactas "positive", "negative" y "detectedS
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.8-flash',
       contents: {
         parts: [
           { text: promptInstruction }
@@ -1021,7 +1021,7 @@ INSTRUCCIONES ESTRICTAS DE CONTEO Y FORMATO DE SUJETO (REGLAS FIJAS DE LOTES):
 `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.8-flash',
       contents: {
         parts: [{ text: chunkPrompt }]
       },
@@ -1394,7 +1394,7 @@ export const generateLifestylePrompts = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.8-flash',
       contents: {
         parts: [imagePart, { text: promptInstruction }],
       },

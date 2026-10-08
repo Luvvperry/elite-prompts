@@ -29,7 +29,7 @@ const isTransient = (error: any) => {
 
 const generateWithRetry = async (ai: GoogleGenAI, request: any) => {
   let lastError: any;
-  const models = [request.model, 'gemini-2.5-flash'].filter((model, index, all) => model && all.indexOf(model) === index);
+  const models = [request.model, 'gemini-3.5-flash'].filter((model, index, all) => model && all.indexOf(model) === index);
   for (const model of models) {
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
@@ -188,7 +188,7 @@ export default async function handler(req: any, res: any) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = languageName(body.language);
       const prompt = `${REALISM_ENGINE}\nAnalyze the supplied scene reference as a director of an ordinary real phone photo. Generate one positive prompt and one negative prompt in ${language}. Start the positive prompt directly with the subject/environment description. Include concrete wardrobe, environment, action, composition, camera, light, imperfections, skin/material physics, reflective-surface behavior when relevant, and 9:16. Never copy the reference person's face or physical identity. Return JSON with keys positive, negative, detectedSummary, analysis, detectedTargets.`;
-      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.3, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
       return res.status(200).json(parseJson(r.text));
     }
 
@@ -196,7 +196,7 @@ export default async function handler(req: any, res: any) {
       if (!body.ideaText) return res.status(400).json({ error: 'ideaText is required' });
       const language = languageName(body.language);
       const prompt = buildIdeaInstruction(body, language);
-      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
+      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.3, maxOutputTokens: 9000, responseMimeType: 'application/json' } });
       const parsed = parseJson(r.text);
       return res.status(200).json(normalizeIdeaResult(parsed, language));
     }
@@ -206,7 +206,7 @@ export default async function handler(req: any, res: any) {
       const count = Math.max(1, Math.min(12, Number(body.count) || 1));
       const language = languageName(body.language);
       const prompt = `${REALISM_ENGINE}\nCreate exactly ${count} distinct prompt objects in ${language} from this idea: ${text(body.idea)}. Vary location, action, framing and ordinary imperfections while keeping identity external. Each positive prompt must resolve camera height, distance, crop, body mechanics, light path, contact shadows and material/reflection behavior when relevant. Return JSON array under key items; each item must have id, positive, negative, title.`;
-      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: prompt, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
       const parsed = parseJson(r.text);
       return res.status(200).json({ items: Array.isArray(parsed.items) ? parsed.items : [] });
     }
@@ -215,7 +215,7 @@ export default async function handler(req: any, res: any) {
       if (!body.base64Image || !body.mimeType) return res.status(400).json({ error: 'base64Image and mimeType are required' });
       const language = body.language === 'en' ? 'English' : 'Spanish';
       const prompt = `${REALISM_ENGINE}\nStudy this reference only for palette, place and atmosphere, never copy its composition or person. Generate exactly five different lifestyle prompt proposals in ${language}, with no people, readable text or commercial logos. Resolve physical camera placement, ordinary phone imperfections and material/reflection behavior whenever relevant. Return JSON with aestheticSummary, colorPalette array and proposals array containing id, purpose, cameraZoom, positive and negative.`;
-      const r = await generateWithRetry(ai, { model: 'gemini-3.5-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
+      const r = await generateWithRetry(ai, { model: 'gemini-3.8-flash', contents: { parts: [imagePart(text(body.base64Image), text(body.mimeType)), { text: prompt }] }, config: { temperature: 0.35, maxOutputTokens: 7000, responseMimeType: 'application/json' } });
       return res.status(200).json(parseJson(r.text));
     }
 
