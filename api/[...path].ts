@@ -29,13 +29,16 @@ const isTransient = (error: any) => {
 
 const generateWithRetry = async (ai: GoogleGenAI, request: any) => {
   let lastError: any;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    try {
-      return await ai.models.generateContent(request);
-    } catch (error: any) {
-      lastError = error;
-      if (!isTransient(error) || attempt === 1) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 900));
+  const models = [request.model, 'gemini-2.5-flash'].filter((model, index, all) => model && all.indexOf(model) === index);
+  for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        return await ai.models.generateContent({ ...request, model });
+      } catch (error: any) {
+        lastError = error;
+        if (!isTransient(error) || attempt === 1) break;
+        await new Promise((resolve) => setTimeout(resolve, 700));
+      }
     }
   }
   throw lastError || new Error('AI request failed.');
