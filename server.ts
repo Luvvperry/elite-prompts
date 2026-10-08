@@ -1025,6 +1025,46 @@ Use this evidence to write the selected engine now. Expand each relevant block w
           }
         }
 
+        // Quality gate: models sometimes satisfy the template while silently
+        // collapsing the scene into a few generic sentences. Expand only the
+        // requested engine when it falls below its evidence threshold.
+        const expansionKey = isTargetV3 ? 'v3' : isTargetV2 ? 'v2' : isTargetV1 ? 'v1' : '';
+        const expansionMinimum = isTargetV3 ? 5200 : isTargetV2 ? 3600 : isTargetV1 ? 2600 : 0;
+        if (expansionKey && typeof parsed[expansionKey] === 'string' && parsed[expansionKey].trim().length < expansionMinimum) {
+          const expansionResponse = await ai.models.generateContent({
+            model: currentModel,
+            contents: [{
+              text: `
+PRIVATE REWRITE PASS. The following ${expansionKey.toUpperCase()} prompt is too compressed and must be expanded before delivery.
+Rewrite it in ${requestedLanguageName}, preserving every fact, structure, opening sentence, curly-brace style and language lock. Do not invent new brands, people, landmarks or decorative props. Add only physically implied evidence: exact camera height/distance/crop, body mechanics, hand and object contact, garment tension and folds, spatial ordering, light falloff, shadow edges, material response, reflections when present, and causal smartphone imperfections. Do not repeat facts just to increase length. Return only JSON in this exact shape: {"expanded":"..."}.
+
+PROMPT TO EXPAND:
+${parsed[expansionKey]}`
+            }],
+            config: {
+              temperature: 0.18,
+              maxOutputTokens: isTargetV3 ? 7600 : 6000,
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: { expanded: { type: Type.STRING } },
+                required: ["expanded"]
+              }
+            }
+          });
+          const expansionText = expansionResponse.text?.trim() || "";
+          if (expansionText) {
+            try {
+              const expanded = JSON.parse(expansionText);
+              if (typeof expanded.expanded === 'string' && expanded.expanded.trim().length > parsed[expansionKey].trim().length) {
+                parsed[expansionKey] = expanded.expanded.trim();
+              }
+            } catch (expansionError) {
+              console.warn('[GENERATE] Expansion pass returned invalid JSON; keeping original prompt.');
+            }
+          }
+        }
+
         const defaultNegativePrompt = isPortuguese
           ? "aparência de IA, CGI, renderização 3D, pele plástica e lisa, pele aerografada, cartoon, anime, ilustração, cores saturadas demais, iluminação artificial de estúdio, bokeh cinematográfico raso, desfoque falso exagerado, dedos extras, mãos deformadas, anatomia distorcida, membros ausentes, objetos flutuando, marca d'água, assinatura, artefatos de texto, olhos estranhos, brilhos especulares artificiais"
           : isSpanish
