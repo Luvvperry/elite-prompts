@@ -1,713 +1,947 @@
-import React, { useState, useEffect } from 'react';
-import TrxStudioNav from './components/TrxStudioNav';
-import TrxInspectorPanel from './components/TrxInspectorPanel';
-import Uploader from './components/Uploader';
-import ResultCard from './components/ResultCard';
-import HistoryPanel from './components/HistoryPanel';
-import ExamplesModal from './components/ExamplesModal';
-import InspirationModal from './components/InspirationModal';
-import IdeaBuilderSection from './components/IdeaBuilderSection';
-import PromptBatchSection from './components/PromptBatchSection';
-import LifestyleSection from './components/LifestyleSection';
-import ProjectTrxBackground from './components/ProjectTrxBackground';
-import IntroSplash from './components/IntroSplash';
-import AmbientHalo from './components/AmbientHalo';
-import ChampagneCapsuleButton from './components/ChampagneCapsuleButton';
-import TrxLogo from './components/TrxLogo';
-import { analyzeImage } from './apiService';
-import { AppStatus, PromptResult, ExifData, DEFAULT_USER_SETTINGS, BatchPromptResult, LifestyleResult } from './types';
-import { TrxStudioView } from './components/TrxStudioNav';
-import { getStoredSettings, saveStoredSettings, clearStoredSettings, hasCustomSettings } from './settingsService';
-import { useLanguage } from './LanguageContext';
-import { useTheme } from './ThemeContext';
-import exifr from 'exifr';
-import { saveHistoryToStorage, loadHistoryFromStorage, createThumbnail } from './historyStorage';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  FullSettings,
+  GenerationOutput,
+  InputMode,
+  ModalityType,
+  Language,
+  PromptLanguage,
+  ReferenceImage,
+  ReferenceRole,
+  PresetItem,
+  AutoDetectedParams,
+  ViewMode
+} from './types';
+import {
+  generateAllPrompts,
+  magicEnhanceIdea,
+  refinePrompt
+} from './services/geminiService';
+import { optimizeReferenceImage } from './services/imageUtils';
+import { translations } from './translations';
+import { auditTranslations } from './services/i18nAudit';
+import Header from './components/Header';
+import InputZone from './components/InputZone';
+import SimpleControls from './components/SimpleControls';
+import AdvancedControls from './components/AdvancedControls';
+import PromptDisplay from './components/PromptDisplay';
+import PresetsModal from './components/PresetsModal';
+import HistoryDrawer from './components/HistoryDrawer';
+import { LanguageBottomSheet } from './components/LanguageBottomSheet';
+import { SettingsSheet } from './components/SettingsSheet';
+import StudioStatusRail from './components/StudioStatusRail';
+import CommandPalette from './components/CommandPalette';
+import MobileCommandDock from './components/MobileCommandDock';
+import ToastHost, { ToastPayload } from './components/ToastHost';
+
+
+const normalizeInterfaceLanguage = (value: string | null | undefined): Language => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'es' || normalized.startsWith('es-') || normalized.includes('span') || normalized.includes('españ')) return 'es';
+  if (normalized === 'pt' || normalized === 'pt-br' || normalized === 'pt_br' || normalized === 'ptbr' || normalized.includes('portugu')) return 'pt';
+  return 'en';
+};
+
+const normalizePromptLanguage = (value: string | null | undefined): PromptLanguage => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'auto') return 'auto';
+  return normalizeInterfaceLanguage(normalized);
+};
+
+const defaultSettings: FullSettings = {
+  // Legacy Basic
+  strictRealism: true,
+  device: 'iPhone 16 Pro',
+  look: 'RAW',
+  sharpness: 'Natural',
+  hdr: 'Natural',
+
+  // Simple Controls
+  outputModel: 'gemini-3.1-pro-preview',
+  aspectRatio: '3:4',
+  photographicStyle: 'casual_smartphone',
+  captureProfile: 'auto',
+  realismLevel: 95,
+
+  // Independent Camera Controls
+  cameraMode: 'auto',
+  cameraFeel: 'auto',
+
+  // Advanced Sliders
+  imperfectionLevel: 45,
+  cinematicLevel: 10,
+  stylizationLevel: 0,
+  backgroundDetailLevel: 80,
+  blurLevel: 5,
+
+  // Advanced Subject
+  subjectCount: 'auto',
+  subjectHeight: '',
+  bodyPosition: 'auto',
+  orientation: 'auto',
+  weightDistribution: 'auto',
+  posture: 'auto',
+  customPosture: '',
+  expression: 'auto',
+  customExpression: '',
+  gaze: 'auto',
+  actionDescription: '',
+
+  // Advanced Camera
+  cameraDevice: 'auto',
+  cameraLens: 'auto',
+  cameraDistance: 'auto',
+  cameraHeight: 'auto',
+  cameraAngle: 'auto',
+  cameraFraming: 'auto',
+
+  // Advanced Light
+  lightTime: 'auto',
+  lightSource: 'auto',
+  flashMode: 'auto',
+  flashBehavior: 'normal',
+
+  // Imperfections Toggles
+  imperfections: {
+    motionBlur: false,
+    slightFocusMiss: true,
+    digitalNoise: true,
+    flashBlowout: false,
+    whiteBalanceShift: false,
+    compression: false,
+    lensSmudge: false,
+    minorCameraShake: true
+  },
+
+  // Wardrobe
+  wardrobe: {
+    top: '',
+    bottom: '',
+    shoes: '',
+    outerwear: '',
+    accessories: '',
+    headwear: '',
+    jewelryWatch: '',
+    customDetails: '',
+    referenceLock: true
+  },
+
+  // Vehicle
+  vehicle: {
+    customVehicle: '',
+    modelLock: true,
+    exteriorColor: '',
+    interiorColor: '',
+    driverPassenger: 'auto',
+    doorState: 'auto',
+    subjectRelation: 'leaning_against'
+  },
+
+  // Environment
+  environment: {
+    location: '',
+    setting: '',
+    background: '',
+    timeOfDay: '',
+    weather: '',
+    crowd: '',
+    naturalClutter: true,
+    mood: 'ordinary',
+    avoidPostcard: true,
+    avoidGenericLuxury: true
+  },
+
+  // Reference Priority
+  referencePriority: 'absolute',
+
+  // Fine Control
+  fineControl: {
+    subject: '',
+    action: '',
+    location: '',
+    environment: '',
+    background: '',
+    atmosphere: '',
+    imperfections: '',
+    purpose: '',
+    referenceUse: '',
+    textInsideImage: '',
+    avoid: '',
+    additionalInstructions: ''
+  },
+
+  // Auto Detect
+  autoDetect: true,
+
+  // POV
+  pov: {
+    handVisibility: 'auto',
+    gripType: 'auto',
+    heldObject: '',
+    pointOfViewHeight: 'auto'
+  }
+};
+
+const defaultPresets: PresetItem[] = [
+  {
+    id: 'raw-iphone',
+    name: 'RAW iPhone Snapshot',
+    isDefault: true,
+    description: 'Ultra-authentic handheld smartphone capture with natural flaws.',
+    settings: {
+      device: 'iPhone 16 Pro',
+      look: 'RAW',
+      sharpness: 'Natural',
+      photographicStyle: 'casual_smartphone',
+      realismLevel: 98,
+      imperfectionLevel: 55,
+      cinematicLevel: 0,
+      blurLevel: 0,
+      cameraDevice: 'iphone_rear',
+      cameraLens: '1x'
+    }
+  },
+  {
+    id: 'night-flash',
+    name: 'Night Direct Flash',
+    isDefault: true,
+    description: 'Direct on-camera phone flash at night, fast falloff and dark background.',
+    settings: {
+      photographicStyle: 'night_photography',
+      lightTime: 'night',
+      lightSource: 'phone_flash',
+      flashMode: 'on',
+      flashBehavior: 'hard_direct',
+      realismLevel: 95,
+      imperfectionLevel: 50
+    }
+  },
+  {
+    id: 'casual-candid',
+    name: 'Casual Candid',
+    isDefault: true,
+    description: 'Unposed everyday moment, neutral grading, unstaged geometry.',
+    settings: {
+      photographicStyle: 'candid',
+      posture: 'distracted',
+      gaze: 'away_from_camera',
+      realismLevel: 95,
+      cinematicLevel: 5
+    }
+  },
+  {
+    id: 'deep-dof',
+    name: 'Deep Depth of Field',
+    isDefault: true,
+    description: 'Sharp foreground to background, no artificial blur or portrait cutout.',
+    settings: {
+      photographicStyle: 'street_photography',
+      blurLevel: 0,
+      cameraFraming: 'wide_environmental',
+      realismLevel: 95
+    }
+  },
+  {
+    id: 'pov',
+    name: 'First-Person POV',
+    isDefault: true,
+    description: 'Over-the-shoulder or hands visible, direct realistic interaction.',
+    settings: {
+      photographicStyle: 'pov',
+      cameraHeight: 'chest',
+      cameraDistance: 'close'
+    }
+  },
+  {
+    id: 'automotive',
+    name: 'Automotive Forensic',
+    isDefault: true,
+    description: 'High fidelity car geometry, accurate reflections and textures.',
+    settings: {
+      photographicStyle: 'automotive',
+      realismLevel: 95,
+      vehicle: {
+        customVehicle: '',
+        modelLock: true,
+        exteriorColor: '',
+        interiorColor: '',
+        driverPassenger: 'auto',
+        doorState: 'auto',
+        subjectRelation: 'leaning_against'
+      }
+    }
+  }
+];
 
 const App: React.FC = () => {
-  // Intro splash: 2.8s gentle reveal
-  const [showIntro, setShowIntro] = useState<boolean>(() => {
-    try {
-      return !sessionStorage.getItem('project_trx_intro_seen_v3');
-    } catch (e) {
-      return true;
-    }
+  // Theme & Language states
+  const [lang, setLang] = useState<Language>(() => {
+    const stored = localStorage.getItem('ep_lang');
+    return stored ? normalizeInterfaceLanguage(stored) : 'pt';
   });
 
-  // Direct workspace view: 'analyzer' | 'ideaBuilder' | 'promptBatches' | 'lifestyle'
-  const [currentView, setCurrentView] = useState<TrxStudioView>('analyzer');
-  const [activeBatch, setActiveBatch] = useState<BatchPromptResult | null>(null);
-  const [activeLifestyle, setActiveLifestyle] = useState<LifestyleResult | null>(null);
+  const [promptLang, setPromptLang] = useState<PromptLanguage>(() => {
+    const stored = localStorage.getItem('ep_prompt_lang');
+    return stored ? normalizePromptLanguage(stored) : 'auto';
+  });
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [identityFile, setIdentityFile] = useState<File | null>(null);
-  const [identityPreviewUrl, setIdentityPreviewUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
-  const [generatedPrompt, setGeneratedPrompt] = useState<{
-    positive: string;
-    negative: string;
-    detectedSummary?: string;
-    analysis?: any;
-  } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    const stored = localStorage.getItem('ep_theme');
+    return stored ? stored === 'dark' : true;
+  });
 
-  // Mobile bottom sheet inspector drawer state
-  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState<boolean>(false);
+  // App Workflow States
+  const [mode, setMode] = useState<InputMode>('image');
+  const [viewMode, setViewMode] = useState<ViewMode>('simple');
+  const [modality, setModality] = useState<ModalityType>('person');
+  const [selectedTypeId, setSelectedTypeId] = useState<string>('person');
 
-  // Modals state
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isExamplesOpen, setIsExamplesOpen] = useState(false);
-  const [isInspirationOpen, setIsInspirationOpen] = useState(false);
-  const [history, setHistory] = useState<PromptResult[]>(() => loadHistoryFromStorage());
-
-  // Optical & photographic controls state initialized from stored settings
-  const initialSettings = getStoredSettings();
-  const [lensType, setLensType] = useState<string>(initialSettings.lensType || 'auto');
-  const [aspectRatio, setAspectRatio] = useState<string>(initialSettings.aspectRatio || 'auto');
-  const [heightCm, setHeightCm] = useState<string>(initialSettings.heightCm || '');
-  const [weightKg, setWeightKg] = useState<string>(initialSettings.weightKg || '');
-  const [detailLevel, setDetailLevel] = useState<number>(initialSettings.detailLevel ?? 3);
-  const [addNoise, setAddNoise] = useState<boolean>(initialSettings.addNoise ?? false);
-  const [keepExactWardrobe, setKeepExactWardrobe] = useState<boolean>(initialSettings.keepExactWardrobe ?? true);
-  const [manualBrand, setManualBrand] = useState<string>(initialSettings.manualBrand || '');
-  const [customInstructions, setCustomInstructions] = useState<string>(initialSettings.customInstructions || '');
-  const [exifData, setExifData] = useState<ExifData | null>(null);
-
-  // Settings persistence states
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState<boolean>(!!initialSettings.autoSaveEnabled);
-  const [hasSavedSettings, setHasSavedSettings] = useState<boolean>(() => hasCustomSettings());
-  const [savedNotification, setSavedNotification] = useState<string | null>(null);
-
-  const { t, language, setLanguage } = useLanguage();
-  const { isDark, toggleTheme } = useTheme();
-
-  // Guardar ajustes actuales como predeterminados
-  const handleSaveSettings = () => {
-    saveStoredSettings({
-      lensType,
-      aspectRatio,
-      heightCm,
-      weightKg,
-      detailLevel,
-      addNoise,
-      keepExactWardrobe,
-      manualBrand,
-      customInstructions,
-      autoSaveEnabled,
-    });
-    setHasSavedSettings(true);
-    setSavedNotification(t('settingsSavedToast'));
-    setTimeout(() => setSavedNotification(null), 3500);
-  };
-
-  // Cargar ajustes guardados previamente
-  const handleLoadSavedSettings = () => {
-    const saved = getStoredSettings();
-    setLensType(saved.lensType || 'auto');
-    setAspectRatio(saved.aspectRatio || 'auto');
-    setHeightCm(saved.heightCm || '');
-    setWeightKg(saved.weightKg || '');
-    setDetailLevel(saved.detailLevel ?? 3);
-    setAddNoise(saved.addNoise ?? false);
-    setKeepExactWardrobe(saved.keepExactWardrobe ?? true);
-    setManualBrand(saved.manualBrand || '');
-    setCustomInstructions(saved.customInstructions || '');
-    setSavedNotification(language === 'es' ? 'Ajustes guardados cargados' : 'Saved settings loaded');
-    setTimeout(() => setSavedNotification(null), 3000);
-  };
-
-  // Restablecer a los valores predeterminados de fábrica
-  const handleResetSettings = () => {
-    clearStoredSettings();
-    setLensType(DEFAULT_USER_SETTINGS.lensType);
-    setAspectRatio(DEFAULT_USER_SETTINGS.aspectRatio);
-    setHeightCm(DEFAULT_USER_SETTINGS.heightCm);
-    setWeightKg(DEFAULT_USER_SETTINGS.weightKg);
-    setDetailLevel(DEFAULT_USER_SETTINGS.detailLevel);
-    setAddNoise(DEFAULT_USER_SETTINGS.addNoise);
-    setKeepExactWardrobe(DEFAULT_USER_SETTINGS.keepExactWardrobe);
-    setManualBrand(DEFAULT_USER_SETTINGS.manualBrand);
-    setCustomInstructions(DEFAULT_USER_SETTINGS.customInstructions);
-    setHasSavedSettings(false);
-    setSavedNotification(t('resetDefaultsToast'));
-    setTimeout(() => setSavedNotification(null), 3000);
-  };
-
-  // Alternar guardado automático
-  const handleToggleAutoSave = (enabled: boolean) => {
-    setAutoSaveEnabled(enabled);
-    saveStoredSettings({
-      lensType,
-      aspectRatio,
-      heightCm,
-      weightKg,
-      detailLevel,
-      addNoise,
-      keepExactWardrobe,
-      manualBrand,
-      customInstructions,
-      autoSaveEnabled: enabled,
-    });
-    if (enabled) {
-      setHasSavedSettings(true);
-      setSavedNotification(language === 'es' ? 'Auto-guardado activo' : 'Auto-save active');
-    } else {
-      setSavedNotification(language === 'es' ? 'Auto-guardado inactivo' : 'Auto-save inactive');
-    }
-    setTimeout(() => setSavedNotification(null), 3000);
-  };
-
-  // Sincronizar automáticamente si autoSaveEnabled está activo
-  useEffect(() => {
-    if (autoSaveEnabled) {
-      saveStoredSettings({
-        lensType,
-        aspectRatio,
-        heightCm,
-        weightKg,
-        detailLevel,
-        addNoise,
-        keepExactWardrobe,
-        manualBrand,
-        customInstructions,
-        autoSaveEnabled: true,
-      });
-      setHasSavedSettings(true);
-    }
-  }, [
-    autoSaveEnabled,
-    lensType,
-    aspectRatio,
-    heightCm,
-    weightKg,
-    detailLevel,
-    addNoise,
-    keepExactWardrobe,
-    manualBrand,
-    customInstructions,
-  ]);
-
-  const handleIntroComplete = () => {
-    try {
-      sessionStorage.setItem('project_trx_intro_seen_v3', 'true');
-    } catch (e) {}
-    setShowIntro(false);
-  };
-
-  useEffect(() => {
-    const loaded = loadHistoryFromStorage();
-    if (loaded && loaded.length > 0) {
-      setHistory(loaded);
-    }
+  const handleModalityChange = useCallback((m: ModalityType, typeId?: string) => {
+    setModality(m);
+    if (typeId) setSelectedTypeId(typeId);
   }, []);
 
-  const saveHistory = (newHistory: PromptResult[]) => {
-    setHistory(newHistory);
-    saveHistoryToStorage(newHistory);
-  };
+  // Inputs
+  const [references, setReferences] = useState<ReferenceImage[]>([]);
+  const [ideaText, setIdeaText] = useState<string>('');
 
-  const handleSaveBatchToHistory = (item: PromptResult) => {
-    setHistory((prevHistory) => {
-      const newHistoryList = [item, ...prevHistory.filter((h) => h.id !== item.id)].slice(0, 25);
-      saveHistoryToStorage(newHistoryList);
-      return newHistoryList;
-    });
-  };
+  // Settings & Results
+  const [settings, setSettings] = useState<FullSettings>(defaultSettings);
+  const [generation, setGeneration] = useState<GenerationOutput | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [magicStatus, setMagicStatus] = useState<'idle' | 'enhancing' | 'success' | 'error' | 'timeout'>('idle');
+  const isMagicEnhancing = magicStatus === 'enhancing';
+  const [detectedParams, setDetectedParams] = useState<AutoDetectedParams | undefined>(undefined);
 
-  const handleSaveLifestyleToHistory = (item: PromptResult) => {
-    setHistory((prevHistory) => {
-      const newHistoryList = [item, ...prevHistory.filter((h) => h.id !== item.id)].slice(0, 25);
-      saveHistoryToStorage(newHistoryList);
-      return newHistoryList;
-    });
-  };
+  // Modals & Drawers
+  const [isPresetsOpen, setIsPresetsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isLanguageSheetOpen, setIsLanguageSheetOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState<boolean>(() => localStorage.getItem('ep_focus_mode') === 'true');
+  const [toast, setToast] = useState<ToastPayload>(null);
+  const [selectedEngine, setSelectedEngine] = useState<'v1' | 'v2' | 'v3' | 'compare'>('v2');
+  const [isLazyLoadingEngine, setIsLazyLoadingEngine] = useState(false);
+  const isGeneratingRef = useRef<boolean>(false);
+  const generateControllerRef = useRef<AbortController | null>(null);
+  const generateRequestIdRef = useRef(0);
+  const magicRequestIdRef = useRef(0);
+  const magicControllerRef = useRef<AbortController | null>(null);
+  const ideaRevisionRef = useRef(0);
 
-  const handleSelectHistory = (item: PromptResult) => {
-    if (item.isLifestyle && item.lifestyleData) {
-      setActiveLifestyle(item.lifestyleData);
-      setCurrentView('lifestyle');
-      setIsHistoryOpen(false);
-      return;
-    }
-
-    if (item.isBatch && item.batchData) {
-      setActiveBatch(item.batchData);
-      setCurrentView('promptBatches');
-      setIsHistoryOpen(false);
-      return;
-    }
-
-    setGeneratedPrompt({
-      positive: item.positivePrompt,
-      negative: item.negativePrompt,
-      detectedSummary: item.detectedSummary,
-      analysis: item.analysis,
-    });
-    if (item.originalImage) {
-      setPreviewUrl(item.originalImage);
-      setSelectedFile(null);
-    }
-    if (item.identityImage) {
-      setIdentityPreviewUrl(item.identityImage);
-      setIdentityFile(null);
-    }
-    setStatus(AppStatus.SUCCESS);
-    setCurrentView('analyzer');
-    setIsHistoryOpen(false);
-  };
-
-  const handleDeleteHistory = (id: string) => {
-    const newHistory = history.filter((item) => item.id !== id);
-    saveHistory(newHistory);
-  };
-
-  const handleClearHistory = () => {
-    saveHistory([]);
-  };
-
-  const handleFileSelect = async (file: File) => {
-    setSelectedFile(file);
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    setGeneratedPrompt(null);
-    setError(null);
-    setStatus(AppStatus.IDLE);
-
-    try {
-      const exif = await exifr.parse(file, [
-        'Make',
-        'Model',
-        'FNumber',
-        'ExposureTime',
-        'ISO',
-        'FocalLength',
-      ]);
-      if (exif) {
-        setExifData(exif);
-      }
-    } catch (err) {
-      console.error('Failed to parse EXIF data', err);
-    }
-  };
-
-  const handleIdentityFileSelect = (file: File) => {
-    setIdentityFile(file);
-    const url = URL.createObjectURL(file);
-    setIdentityPreviewUrl(url);
-    setError(null);
-  };
-
-  const handleClearScene = () => {
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    setExifData(null);
-    setGeneratedPrompt(null);
-    setStatus(AppStatus.IDLE);
-  };
-
-  const handleClearIdentity = () => {
-    setIdentityFile(null);
-    setIdentityPreviewUrl(null);
-  };
-
-  const handleSwapRoles = () => {
-    const tempFile = selectedFile;
-    const tempUrl = previewUrl;
-    setSelectedFile(identityFile);
-    setPreviewUrl(identityPreviewUrl);
-    setIdentityFile(tempFile);
-    setIdentityPreviewUrl(tempUrl);
-  };
-
-  const readFileAsDataURL = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleGenerate = async () => {
-    if (!selectedFile) return;
-    try {
-      setStatus(AppStatus.ANALYZING);
-      setError(null);
-      setIsMobileSettingsOpen(false);
-
-      const sceneDataUrl = await readFileAsDataURL(selectedFile);
-      let identityDataUrl: string | null = null;
-      if (identityFile) {
-        identityDataUrl = await readFileAsDataURL(identityFile);
-      }
-
-      const prompt = await analyzeImage(
-        sceneDataUrl,
-        selectedFile.type,
-        lensType,
-        detailLevel,
-        addNoise,
-        customInstructions,
-        exifData,
-        aspectRatio,
-        heightCm ? parseFloat(heightCm) : null,
-        weightKg ? parseFloat(weightKg) : null,
-        language,
-        identityDataUrl,
-        identityFile ? identityFile.type : null,
-        keepExactWardrobe,
-        manualBrand
-      );
-
-      setGeneratedPrompt(prompt);
-      setStatus(AppStatus.SUCCESS);
-
+  // Presets & History persistence
+  const [presets, setPresets] = useState<PresetItem[]>(() => {
+    const saved = localStorage.getItem('ep_presets');
+    if (saved) {
       try {
-        const thumbnail = await createThumbnail(sceneDataUrl);
-        const identityThumb = identityDataUrl ? await createThumbnail(identityDataUrl) : undefined;
-
-        const newHistoryItem: PromptResult = {
-          id: Date.now().toString(),
-          originalImage: thumbnail,
-          identityImage: identityThumb,
-          positivePrompt: prompt.positive,
-          negativePrompt: prompt.negative,
-          detectedSummary: prompt.detectedSummary,
-          analysis: prompt.analysis,
-          timestamp: Date.now(),
-        };
-        setHistory((prevHistory) => {
-          const newHistoryList = [newHistoryItem, ...prevHistory].slice(0, 20);
-          saveHistoryToStorage(newHistoryList);
-          return newHistoryList;
-        });
-      } catch (thumbErr) {
-        console.error('Failed to create history thumbnail', thumbErr);
+        const parsed = JSON.parse(saved);
+        return [...defaultPresets, ...parsed];
+      } catch (e) {
+        return defaultPresets;
       }
+    }
+    return defaultPresets;
+  });
+
+  const [history, setHistory] = useState<GenerationOutput[]>(() => {
+    const saved = localStorage.getItem('ep_history');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // Dark Mode Sync with DOM
+  useEffect(() => {
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('ep_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('ep_theme', 'light');
+    }
+  }, [isDark]);
+
+  // Persist Language selections
+  useEffect(() => {
+    localStorage.setItem('ep_lang', lang);
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+  }, [lang]);
+
+  useEffect(() => {
+    localStorage.setItem('ep_prompt_lang', promptLang);
+  }, [promptLang]);
+
+  useEffect(() => {
+    localStorage.setItem('ep_focus_mode', focusMode ? 'true' : 'false');
+  }, [focusMode]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => {
+    // Unmount cleanup is intentionally separate from configuration changes.
+    return () => {
+      magicRequestIdRef.current += 1;
+      magicControllerRef.current?.abort();
+      magicControllerRef.current = null;
+    };
+  }, []);
+
+  const showToast = useCallback((type: 'success' | 'error' | 'info', message: string) => {
+    setToast({ id: Date.now(), type, message });
+  }, []);
+
+  const scrollToSection = useCallback((target: 'input' | 'settings' | 'output') => {
+    const id = target === 'input' ? 'studio-input' : target === 'settings' ? 'studio-settings' : 'studio-output';
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  // Handle Multi-Reference Image Add with automatic client-side optimization
+  const handleAddReferences = useCallback((fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+
+    Array.from(fileList).forEach(async (file) => {
+      const dataUrl = await optimizeReferenceImage(file, 1536);
+      if (!dataUrl) return;
+
+      const newRef: ReferenceImage = {
+        id: `ref_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        dataUrl,
+        name: file.name,
+        roles: ['outfit'],
+        subjectAssignment: 'General'
+      };
+      setReferences(prev => {
+        if (prev.length === 0) newRef.roles = ['full_image'];
+        return [...prev, newRef];
+      });
+    });
+  }, []);
+
+  const handleRemoveReference = useCallback((id: string) => {
+    setReferences(prev => prev.filter(r => r.id !== id));
+  }, []);
+
+  const handleUpdateReferenceRole = useCallback((id: string, roles: ReferenceRole[]) => {
+    setReferences(prev => prev.map(r => r.id === id ? { ...r, roles } : r));
+  }, []);
+
+  const handleUpdateSubjectAssignment = useCallback((id: string, subjectAssignment: 'Subject A' | 'Subject B' | 'General') => {
+    setReferences(prev => prev.map(r => r.id === id ? { ...r, subjectAssignment } : r));
+  }, []);
+
+  const handleIdeaChange = useCallback((nextIdea: string) => {
+    ideaRevisionRef.current += 1;
+    setIdeaText(nextIdea);
+  }, []);
+
+  // Magic Enhance Idea — request lifecycle is fully owned here; prompt logic is untouched.
+  const handleMagicEnhance = useCallback(async () => {
+    const originalIdea = ideaText;
+    if (!originalIdea.trim() || isMagicEnhancing || magicControllerRef.current) return;
+
+    const requestContext = { idea: originalIdea, modality, inputRevision: ideaRevisionRef.current };
+    const requestId = ++magicRequestIdRef.current;
+    magicControllerRef.current?.abort();
+    const controller = new AbortController();
+    magicControllerRef.current = controller;
+    setMagicStatus('enhancing');
+
+    const uiMessage: Record<Language, { failed: string; timeout: string; rateLimit: string }> = {
+      pt: {
+        failed: 'Magic Enhance não conseguiu concluir. Tente novamente.',
+        timeout: 'Magic Enhance demorou demais. Tente novamente.',
+        rateLimit: 'Magic Enhance está com muita demanda agora. Tente novamente em instantes.'
+      },
+      es: {
+        failed: 'Magic Enhance no pudo completarse. Inténtalo de nuevo.',
+        timeout: 'Magic Enhance tardó demasiado. Inténtalo de nuevo.',
+        rateLimit: 'Magic Enhance tiene demasiada demanda ahora. Inténtalo de nuevo en unos instantes.'
+      },
+      en: {
+        failed: 'Magic Enhance couldn’t finish. Try again.',
+        timeout: 'Magic Enhance took too long. Try again.',
+        rateLimit: 'Magic Enhance is under heavy demand right now. Try again in a moment.'
+      }
+    };
+
+    let timedOut = false;
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 42000);
+    const logMagic = (message: string) => {
+      if (import.meta.env.DEV) console.debug(`[MAGIC] ${message}`, requestId);
+    };
+    try {
+      logMagic('request started');
+      const enhanced = await magicEnhanceIdea(requestContext.idea, requestContext.modality, controller.signal);
+      logMagic('API resolved');
+      if (requestId !== magicRequestIdRef.current) return;
+      if (ideaRevisionRef.current === requestContext.inputRevision) {
+        handleIdeaChange(enhanced);
+      }
+      setMagicStatus('success');
+      logMagic('success');
+    } catch (error: any) {
+      if (requestId !== magicRequestIdRef.current) return;
+      if (timedOut || error?.message === 'TIMEOUT') {
+        setMagicStatus('timeout');
+        showToast('error', uiMessage[lang].timeout);
+        logMagic('timeout');
+      } else if (error?.name === 'AbortError') {
+        setMagicStatus('error');
+        logMagic('aborted');
+      } else {
+        setMagicStatus('error');
+        showToast('error', error?.message === 'RATE_LIMIT' ? uiMessage[lang].rateLimit : uiMessage[lang].failed);
+        if (import.meta.env.DEV) console.debug('[MAGIC] error', requestId, error);
+      }
+    } finally {
+      window.clearTimeout(timeoutId);
+      if (magicControllerRef.current === controller) magicControllerRef.current = null;
+      if (requestId === magicRequestIdRef.current) {
+        setMagicStatus(prev => prev === 'enhancing' ? 'error' : prev);
+      }
+      logMagic('cleanup');
+    }
+  }, [ideaText, modality, isMagicEnhancing, lang, showToast, handleIdeaChange]);
+
+  // Generate Prompts with targetEngine support, double-click lock, and request cancellation
+  const handleGenerate = async () => {
+    if (isLoading || isGeneratingRef.current) return;
+    if (mode === 'image' && references.length === 0 && !ideaText.trim()) return;
+    if (mode === 'idea' && !ideaText.trim()) return;
+
+    isGeneratingRef.current = true;
+    generateControllerRef.current?.abort();
+    const controller = new AbortController();
+    generateControllerRef.current = controller;
+    const currentReqId = ++generateRequestIdRef.current;
+
+    setIsLoading(true);
+    try {
+      const resolvedPromptLang: PromptLanguage = promptLang === 'auto' ? lang : promptLang;
+
+      const result = await generateAllPrompts({
+        mode,
+        modality,
+        promptLanguage: resolvedPromptLang,
+        ideaText,
+        references,
+        settings,
+        selectedTypeId,
+        targetEngine: selectedEngine,
+        signal: controller.signal
+      });
+
+      if (currentReqId !== generateRequestIdRef.current) return;
+
+      const newOutput: GenerationOutput = {
+        id: `gen_${Date.now()}`,
+        timestamp: Date.now(),
+        v1: result.v1 || '',
+        v2: result.v2 || '',
+        v3: result.v3 || '',
+        negativePrompt: result.negativePrompt,
+        mode,
+        modality,
+        selectedTypeId,
+        promptLanguage: resolvedPromptLang,
+        inputIdea: ideaText || undefined,
+        referenceImagesMeta: references.map(r => ({ name: r.name, roles: r.roles })),
+        autoDetected: result.autoDetected,
+        settingsSnapshot: { ...settings }
+      };
+
+      setGeneration(newOutput);
+      if (result.autoDetected) {
+        setDetectedParams(result.autoDetected);
+      }
+
+      // Save to History
+      const updatedHistory = [newOutput, ...history.slice(0, 24)];
+      setHistory(updatedHistory);
+      localStorage.setItem('ep_history', JSON.stringify(updatedHistory));
     } catch (err: any) {
-      console.error('Generation error:', err);
-      setError(err.message || t('analysisFailed'));
-      setStatus(AppStatus.ERROR);
+      if (err?.name === 'AbortError') return;
+      console.error(err);
+      showToast('error', err.message || translations[lang].errors.failed);
+    } finally {
+      if (currentReqId === generateRequestIdRef.current) {
+        setIsLoading(false);
+        isGeneratingRef.current = false;
+        generateControllerRef.current = null;
+      }
     }
   };
+
+  // Lazy load single engine on demand when user switches tabs without redoing other engines
+  const handleLazyLoadEngine = useCallback(async (engine: 'v1' | 'v2' | 'v3') => {
+    if (!generation || generation[engine] || isLazyLoadingEngine) return;
+    setIsLazyLoadingEngine(true);
+    try {
+      const resolvedPromptLang: PromptLanguage = promptLang === 'auto' ? lang : promptLang;
+      const res = await generateAllPrompts({
+        mode,
+        modality,
+        promptLanguage: resolvedPromptLang,
+        ideaText,
+        references,
+        settings,
+        selectedTypeId,
+        targetEngine: engine,
+        skipAutoDetect: true
+      });
+      const updatedText = res[engine];
+      if (updatedText) {
+        setGeneration(prev => {
+          if (!prev) return prev;
+          const updated = { ...prev, [engine]: updatedText };
+          setHistory(hist => {
+            const newHist = hist.map(h => h.id === prev.id ? updated : h);
+            try { localStorage.setItem('ep_history', JSON.stringify(newHist)); } catch {}
+            return newHist;
+          });
+          return updated;
+        });
+      }
+    } catch (e: any) {
+      console.error(`Lazy load ${engine} failed:`, e);
+    } finally {
+      setIsLazyLoadingEngine(false);
+    }
+  }, [generation, isLazyLoadingEngine, promptLang, lang, mode, modality, ideaText, references, settings, selectedTypeId]);
+
+  // Refine a single engine without random re-generation
+  const handleRefinePrompt = useCallback(async (engine: 'v1' | 'v2' | 'v3', instruction: string) => {
+    if (!generation) return;
+    const originalText = generation[engine];
+    const refined = await refinePrompt(engine, originalText, instruction);
+
+    const updated: GenerationOutput = {
+      ...generation,
+      [engine]: refined
+    };
+    setGeneration(updated);
+
+    // Update in history as well
+    const updatedHistory = history.map(h => h.id === generation.id ? updated : h);
+    setHistory(updatedHistory);
+    localStorage.setItem('ep_history', JSON.stringify(updatedHistory));
+  }, [generation, history]);
+
+  // Preset operations
+  const handleSaveCurrentPreset = useCallback((name: string) => {
+    const newPreset: PresetItem = {
+      id: `custom_${Date.now()}`,
+      name,
+      settings: { ...settings }
+    };
+    const customOnly = presets.filter(p => !p.isDefault);
+    const updated = [...presets, newPreset];
+    setPresets(updated);
+    localStorage.setItem('ep_presets', JSON.stringify([...customOnly, newPreset]));
+  }, [settings, presets]);
+
+  const handleApplyPreset = (preset: PresetItem) => {
+    setSettings(prev => ({
+      ...prev,
+      ...preset.settings
+    }));
+  };
+
+  const handleDeletePreset = (id: string) => {
+    const updated = presets.filter(p => p.id !== id);
+    setPresets(updated);
+    const customOnly = updated.filter(p => !p.isDefault);
+    localStorage.setItem('ep_presets', JSON.stringify(customOnly));
+  };
+
+  // History operations
+  const handleRestoreFromHistory = (item: GenerationOutput) => {
+    setGeneration(item);
+    setMode(item.mode);
+    setModality(item.modality);
+    if (item.selectedTypeId) setSelectedTypeId(item.selectedTypeId);
+    if (item.inputIdea) setIdeaText(item.inputIdea);
+    if (item.settingsSnapshot) setSettings(item.settingsSnapshot);
+    if (item.autoDetected) setDetectedParams(item.autoDetected);
+  };
+
+  const handleDeleteHistoryItem = (id: string) => {
+    const updated = history.filter(h => h.id !== id);
+    setHistory(updated);
+    localStorage.setItem('ep_history', JSON.stringify(updated));
+  };
+
+  const handleClearAllHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('ep_history');
+  };
+
+  const canGenerate = (mode === 'image' && (references.length > 0 || ideaText.trim().length > 0)) || (mode === 'idea' && ideaText.trim().length > 0);
+
+  const workspaceLabels = {
+    pt: { input: 'Entrada', controls: 'Controles', output: 'Saída', liveWorkspace: 'Workspace ativo' },
+    es: { input: 'Entrada', controls: 'Controles', output: 'Salida', liveWorkspace: 'Workspace activo' },
+    en: { input: 'Input', controls: 'Controls', output: 'Output', liveWorkspace: 'Active workspace' }
+  }[lang];
 
   return (
-    <div className="min-h-screen flex flex-col relative text-[#0F172A] dark:text-[#F1F5F9] selection:bg-[var(--trx-accent)]/20 selection:text-[var(--trx-accent)] transition-colors duration-300">
-      {/* 1. Cinematic Studio Intro */}
-      {showIntro && <IntroSplash onComplete={handleIntroComplete} />}
+    <div className={`app-shell min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 flex flex-col relative transition-colors duration-200 ${focusMode ? 'is-focus-mode' : ''}`}>
 
-      {/* 2. Living Ambient Background with Micro-dot Matrix and Drifting Signal Pixels */}
-      <ProjectTrxBackground />
-
-      {/* 3. Global Tools Modals */}
-      <HistoryPanel
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        history={history}
-        onSelect={handleSelectHistory}
-        onDelete={handleDeleteHistory}
-        onClearAll={handleClearHistory}
+      {/* Application chrome */}
+      <Header
+        lang={lang}
+        onOpenLanguageSheet={() => setIsLanguageSheetOpen(true)}
+        isDark={isDark}
+        onToggleTheme={() => setIsDark(!isDark)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
+        onOpenPresets={() => setIsPresetsOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenCommand={() => setIsCommandOpen(true)}
+        historyCount={history.length}
+        presetsCount={presets.length}
       />
-      <ExamplesModal isOpen={isExamplesOpen} onClose={() => setIsExamplesOpen(false)} />
-      <InspirationModal isOpen={isInspirationOpen} onClose={() => setIsInspirationOpen(false)} />
 
-      {/* 4. WORKSPACE DESKTOP & MOBILE INTEGRATED LAYOUT */}
-      <div className="w-full max-w-[1500px] mx-auto p-2 sm:p-4 lg:p-5 flex flex-col md:flex-row gap-3.5 lg:gap-5 min-h-screen pb-20 md:pb-6 overflow-x-hidden">
-        {/* Left Vertical Studio Rail (Desktop) & Floating Mobile Nav */}
-        <TrxStudioNav
-          currentView={currentView}
-          onSelectView={(view) => {
-            setCurrentView(view);
-            setIsMobileSettingsOpen(false);
-          }}
-          onOpenHistory={() => setIsHistoryOpen(true)}
-          onOpenExamples={() => setIsExamplesOpen(true)}
-          onOpenInspiration={() => setIsInspirationOpen(true)}
-          onOpenMobileSettings={() => setIsMobileSettingsOpen(true)}
-          historyCount={history.length}
-        />
+      {(isLoading || isMagicEnhancing) && <div className="generation-progress" aria-hidden="true"><span /></div>}
 
-        {/* Central Stage & Command Workspace */}
-        <div className="flex-1 min-w-0 flex flex-col gap-3">
-          {/* Mobile Top Header - Clean, compact telemetry bar */}
-          <div className="md:hidden flex items-center justify-between p-2 px-3 rounded-xl bg-white dark:bg-[#11151C] border border-[#CBD5E1] dark:border-[#222A36] shadow-2xs select-none">
-            <div className="flex items-center gap-2">
-              <TrxLogo size="sm" />
-              <div className="flex flex-col">
-                <span className="font-mono font-black text-[11px] tracking-wider uppercase text-[#0F172A] dark:text-[#F1F5F9] leading-none">
-                  PROJECT TRX
-                </span>
-                <span className="font-mono text-[8px] text-[#64748B] dark:text-[#8C9BAE] tracking-tight leading-tight mt-0.5">
-                  OPTICAL SIGNAL STATION
-                </span>
-              </div>
-            </div>
+      <div className="pro-shell lg:pl-[64px]">
+        <main className="studio-main flex-grow w-full relative z-10 pb-28 lg:pb-8">
+          <div className="studio-frame">
+            <StudioStatusRail
+              lang={lang}
+              mode={mode}
+              selectedTypeId={selectedTypeId}
+              settings={settings}
+              referencesCount={references.length}
+              focusMode={focusMode}
+              onToggleFocus={() => setFocusMode(v => !v)}
+              onOpenCommand={() => setIsCommandOpen(true)}
+            />
 
-            <div className="flex items-center gap-1.5">
-              {/* Language Switcher */}
-              <div className="flex items-center bg-[#F1F5F9] dark:bg-[#080A0E] p-0.5 rounded border border-[#CBD5E1] dark:border-[#222A36]">
-                <button
-                  type="button"
-                  onClick={() => setLanguage('es')}
-                  className={`px-1.5 py-0.5 text-[10px] rounded font-mono transition-all cursor-pointer ${
-                    language === 'es'
-                      ? 'bg-white dark:bg-[#181D26] text-[#0F172A] dark:text-[#F1F5F9] font-bold'
-                      : 'text-[#64748B]'
-                  }`}
-                >
-                  ES
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLanguage('en')}
-                  className={`px-1.5 py-0.5 text-[10px] rounded font-mono transition-all cursor-pointer ${
-                    language === 'en'
-                      ? 'bg-white dark:bg-[#181D26] text-[#0F172A] dark:text-[#F1F5F9] font-bold'
-                      : 'text-[#64748B]'
-                  }`}
-                >
-                  EN
-                </button>
-              </div>
-
-              {/* Theme Toggle Button */}
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-1.5 min-h-[30px] min-w-[30px] rounded bg-[#F1F5F9] dark:bg-[#181D26] text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F1F5F9] border border-[#CBD5E1] dark:border-[#2C3645] flex items-center justify-center cursor-pointer font-mono text-[10px]"
-                title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-              >
-                <span className="w-2 h-2 rounded-2xs" style={{ backgroundColor: isDark ? '#FFCC00' : '#00F0FF' }} />
-              </button>
-            </div>
-          </div>
-
-          {/* MAIN STAGE CONTENT */}
-          {currentView === 'analyzer' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 lg:gap-5 items-start">
-              {/* Central Viewport & Result Section (Lg: 8 cols) */}
-              <div className="lg:col-span-8 flex flex-col gap-3">
-                {/* Image Stage Container with Ambient Optical Halo */}
-                <div className="relative rounded-xl overflow-hidden">
-                  <AmbientHalo imageUrl={previewUrl} />
-
-                  {/* Main Uploader with internal self-contained scanning robots */}
-                  <Uploader
-                    onFileSelect={handleFileSelect}
-                    selectedFile={selectedFile}
-                    previewUrl={previewUrl}
-                    onClearScene={handleClearScene}
-                    onIdentityFileSelect={handleIdentityFileSelect}
-                    identityFile={identityFile}
-                    identityPreviewUrl={identityPreviewUrl}
-                    onClearIdentity={handleClearIdentity}
-                    onSwapRoles={handleSwapRoles}
-                    disabled={status === AppStatus.ANALYZING}
-                    isAnalyzing={status === AppStatus.ANALYZING}
-                  />
-                </div>
-
-                {/* Tactical Command Bar (Mobile & Desktop) */}
-                <div className="flex items-center justify-between gap-2 pt-0.5">
-                  {/* Mobile Quick Optics/Settings Button */}
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileSettingsOpen(true)}
-                    className="lg:hidden flex-1 sm:flex-none py-2 px-3 rounded bg-white dark:bg-[#11151C] border border-[#CBD5E1] dark:border-[#222A36] text-xs font-mono font-semibold text-[#0F172A] dark:text-[#F1F5F9] hover:bg-[#F1F5F9] dark:hover:bg-[#181D26] transition-all flex items-center justify-center gap-1.5 min-h-[44px] cursor-pointer shadow-2xs"
-                  >
-                    <svg className="w-3.5 h-3.5 text-[var(--trx-accent,#00F0FF)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                    </svg>
-                    <span>{language === 'es' ? 'Óptica y ajustes' : 'Optics & Settings'}</span>
-                  </button>
-
-                  {/* Primary Generation Execution Button */}
-                  <ChampagneCapsuleButton
-                    onClick={handleGenerate}
-                    disabled={!selectedFile || status === AppStatus.ANALYZING}
-                    isLoading={status === AppStatus.ANALYZING}
-                    loadingText={t('reviewingScene')}
-                    label={t('generateTrxPromptAction')}
-                    className="flex-1 sm:flex-none"
-                  />
-                </div>
-
-                {/* Error Banner */}
-                {error && (
-                  <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded flex flex-col gap-2 shadow-xs select-none">
-                    <div className="flex items-center gap-2 text-rose-900 dark:text-rose-200 text-xs font-mono font-bold">
-                      <svg className="w-4 h-4 text-[#FF3366] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>[ERROR // {t('unexpectedError')}]</span>
-                    </div>
-                    <p className="text-rose-800 dark:text-rose-300 text-xs font-mono leading-relaxed">{error}</p>
-                    <div className="flex gap-2 mt-1">
-                      <button
-                        type="button"
-                        onClick={handleGenerate}
-                        className="py-1 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-mono font-bold rounded transition-colors cursor-pointer min-h-[34px]"
-                      >
-                        [ {t('retry')} ]
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setError(null);
-                          setStatus(AppStatus.IDLE);
-                        }}
-                        className="py-1 px-3 bg-white dark:bg-[#181D26] border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs font-mono font-bold rounded transition-colors cursor-pointer min-h-[34px]"
-                      >
-                        [ {t('clear')} ]
-                      </button>
-                    </div>
+            <div className="studio-grid pro-studio-grid items-start">
+              {/* Input pane */}
+              <section id="studio-input" className="studio-input-pane min-w-0 scroll-mt-24">
+                <div className="pane-heading">
+                  <div>
+                    <span className="pane-eyebrow">{workspaceLabels.input}</span>
+                    <p className="pane-description">{mode === 'image' ? translations[lang].nav.fromImage : translations[lang].nav.fromIdea}</p>
                   </div>
-                )}
+                </div>
 
-                {/* Smooth Morphing Results Section */}
-                {generatedPrompt && (
-                  <div className="animate-in fade-in duration-300">
-                    <ResultCard
-                      prompt={generatedPrompt.positive}
-                      negativePrompt={generatedPrompt.negative}
-                      detectedSummary={generatedPrompt.detectedSummary}
-                      analysis={generatedPrompt.analysis}
-                      onPromptChange={(updated) => {
-                        setGeneratedPrompt((prev) => (prev ? { ...prev, positive: updated } : null));
-                      }}
+                <InputZone
+                  lang={lang}
+                  mode={mode}
+                  onModeChange={setMode}
+                  modality={modality}
+                  onModalityChange={handleModalityChange}
+                  selectedTypeId={selectedTypeId}
+                  ideaText={ideaText}
+                  onIdeaChange={handleIdeaChange}
+                  references={references}
+                  onAddReferences={handleAddReferences}
+                  onRemoveReference={handleRemoveReference}
+                  onUpdateReferenceRole={handleUpdateReferenceRole}
+                  onUpdateSubjectAssignment={handleUpdateSubjectAssignment}
+                  onMagicEnhance={handleMagicEnhance}
+                  isMagicEnhancing={isMagicEnhancing}
+                  camera={settings.device}
+                  cameraMode={settings.cameraMode}
+                  captureProfile={settings.captureProfile}
+                />
+              </section>
+
+              {/* Controls pane */}
+              <section id="studio-settings" className="studio-settings-pane min-w-0 scroll-mt-24">
+                <div className="pane-heading pane-heading-controls">
+                  <div>
+                    <span className="pane-eyebrow">{workspaceLabels.controls}</span>
+                    <p className="pane-description">{viewMode === 'simple' ? translations[lang].simple.modeHint : translations[lang].advanced.modeHint}</p>
+                  </div>
+
+                  <div className="mode-switch" role="tablist" aria-label={translations[lang].nav.simpleMode}>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('simple')}
+                      className={viewMode === 'simple' ? 'is-active' : ''}
+                    >
+                      {translations[lang].nav.simpleMode}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('advanced')}
+                      className={viewMode === 'advanced' ? 'is-active' : ''}
+                    >
+                      {translations[lang].nav.advancedMode}
+                    </button>
+                  </div>
+                </div>
+
+                {viewMode === 'simple' ? (
+                  <div className="workspace-panel controls-panel p-4 sm:p-5">
+                    <SimpleControls
+                      lang={lang}
+                      settings={settings}
+                      onChange={setSettings}
+                      onGenerate={handleGenerate}
+                      isLoading={isLoading}
+                      canGenerate={canGenerate}
+                    />
+                  </div>
+                ) : (
+                  <div className="advanced-panel-shell">
+                    <AdvancedControls
+                      lang={lang}
+                      settings={settings}
+                      onChange={setSettings}
+                      onGenerate={handleGenerate}
+                      isLoading={isLoading}
+                      canGenerate={canGenerate}
+                      detectedParams={detectedParams}
+                      modality={modality}
+                      selectedTypeId={selectedTypeId}
                     />
                   </div>
                 )}
-              </div>
+              </section>
 
-              {/* Desktop Right Inspector Panel (Lg: 4 cols) */}
-              <div className="hidden lg:block lg:col-span-4 sticky top-4">
-                <TrxInspectorPanel
-                  lensType={lensType}
-                  setLensType={setLensType}
-                  aspectRatio={aspectRatio}
-                  setAspectRatio={setAspectRatio}
-                  heightCm={heightCm}
-                  setHeightCm={setHeightCm}
-                  weightKg={weightKg}
-                  setWeightKg={setWeightKg}
-                  detailLevel={detailLevel}
-                  setDetailLevel={setDetailLevel}
-                  addNoise={addNoise}
-                  setAddNoise={setAddNoise}
-                  keepExactWardrobe={keepExactWardrobe}
-                  setKeepExactWardrobe={setKeepExactWardrobe}
-                  manualBrand={manualBrand}
-                  setManualBrand={setManualBrand}
-                  customInstructions={customInstructions}
-                  setCustomInstructions={setCustomInstructions}
-                  exifData={exifData}
-                  isAnalyzing={status === AppStatus.ANALYZING}
-                  onGenerate={handleGenerate}
-                  hasReference={!!selectedFile}
-                  onSaveSettings={handleSaveSettings}
-                  onResetSettings={handleResetSettings}
-                  onLoadSavedSettings={handleLoadSavedSettings}
-                  autoSaveEnabled={autoSaveEnabled}
-                  onToggleAutoSave={handleToggleAutoSave}
-                  hasCustomSettingsSaved={hasSavedSettings}
-                  savedNotification={savedNotification}
+              {/* Output pane */}
+              <section id="studio-output" className="studio-output-pane min-w-0 scroll-mt-24">
+                <div className="pane-heading">
+                  <div>
+                    <span className="pane-eyebrow">{workspaceLabels.output}</span>
+                    <p className="pane-description">V1 · V2 · V3</p>
+                  </div>
+                </div>
+                <PromptDisplay
+                  lang={lang}
+                  generation={generation}
+                  isLoading={isLoading}
+                  selectedEngine={selectedEngine}
+                  onSelectEngine={setSelectedEngine}
+                  onRefinePrompt={handleRefinePrompt}
+                  onSaveToPresets={handleSaveCurrentPreset}
+                  onLazyLoadEngine={handleLazyLoadEngine}
+                  isLazyLoading={isLazyLoadingEngine}
                 />
-              </div>
+              </section>
             </div>
-          ) : currentView === 'ideaBuilder' ? (
-            /* CONSTRUYE TU IDEA STAGE */
-            <div className="w-full">
-              <IdeaBuilderSection />
-            </div>
-          ) : currentView === 'promptBatches' ? (
-            /* LOTES DE PROMPTS STAGE */
-            <div className="w-full">
-              <PromptBatchSection
-                initialBatch={activeBatch}
-                onSaveToHistory={handleSaveBatchToHistory}
-              />
-            </div>
-          ) : (
-            /* LIFESTYLE STAGE */
-            <div className="w-full">
-              <LifestyleSection
-                initialResult={activeLifestyle}
-                onSaveToHistory={handleSaveLifestyleToHistory}
-              />
-            </div>
-          )}
-        </div>
+          </div>
+        </main>
       </div>
 
-      {/* ──────────────────────────────────────────────────────────
-          MOBILE BOTTOM SHEET: "Óptica y ajustes"
-         ────────────────────────────────────────────────────────── */}
-      {isMobileSettingsOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex flex-col justify-end animate-in fade-in"
-          onClick={() => setIsMobileSettingsOpen(false)}
-        >
-          <div
-            className="w-full max-h-[85vh] bg-white dark:bg-[#11151C] rounded-t-2xl border-t border-[#CBD5E1] dark:border-[#222A36] p-3.5 sm:p-4 flex flex-col gap-3 shadow-2xl overflow-y-auto select-none"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto shrink-0" />
-            <div className="flex items-center justify-between pb-2 border-b border-[#CBD5E1] dark:border-[#222A36]">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-[var(--trx-accent,#00F0FF)]" />
-                <span className="font-mono font-bold text-xs tracking-wider uppercase text-[#0F172A] dark:text-[#F1F5F9]">
-                  03 // {language === 'es' ? 'Óptica y ajustes' : 'Optics & Settings'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsMobileSettingsOpen(false)}
-                className="w-8 h-8 rounded bg-[#F1F5F9] dark:bg-[#181D26] text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F1F5F9] flex items-center justify-center text-xs font-mono font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
+      <footer className="studio-footer mt-auto lg:pl-[64px]">
+        <span className="studio-footer-line" />
+      </footer>
 
-            <TrxInspectorPanel
-              lensType={lensType}
-              setLensType={setLensType}
-              aspectRatio={aspectRatio}
-              setAspectRatio={setAspectRatio}
-              heightCm={heightCm}
-              setHeightCm={setHeightCm}
-              weightKg={weightKg}
-              setWeightKg={setWeightKg}
-              detailLevel={detailLevel}
-              setDetailLevel={setDetailLevel}
-              addNoise={addNoise}
-              setAddNoise={setAddNoise}
-              keepExactWardrobe={keepExactWardrobe}
-              setKeepExactWardrobe={setKeepExactWardrobe}
-              manualBrand={manualBrand}
-              setManualBrand={setManualBrand}
-              customInstructions={customInstructions}
-              setCustomInstructions={setCustomInstructions}
-              exifData={exifData}
-              isAnalyzing={status === AppStatus.ANALYZING}
-              onGenerate={() => {
-                setIsMobileSettingsOpen(false);
-                handleGenerate();
-              }}
-              hasReference={!!selectedFile}
-              onSaveSettings={handleSaveSettings}
-              onResetSettings={handleResetSettings}
-              onLoadSavedSettings={handleLoadSavedSettings}
-              autoSaveEnabled={autoSaveEnabled}
-              onToggleAutoSave={handleToggleAutoSave}
-              hasCustomSettingsSaved={hasSavedSettings}
-              savedNotification={savedNotification}
-              hideHeader={true}
-              className="border-none shadow-none p-0 bg-transparent"
-            />
-          </div>
-        </div>
-      )}
+      {/* 4. Presets Modal */}
+      <PresetsModal
+        isOpen={isPresetsOpen}
+        onClose={() => setIsPresetsOpen(false)}
+        lang={lang}
+        presets={presets}
+        onApplyPreset={handleApplyPreset}
+        onSaveCurrentPreset={handleSaveCurrentPreset}
+        onDeletePreset={handleDeletePreset}
+      />
+
+      {/* 5. History Drawer */}
+      <HistoryDrawer
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        lang={lang}
+        history={history}
+        onRestore={handleRestoreFromHistory}
+        onDelete={handleDeleteHistoryItem}
+        onClearAll={handleClearAllHistory}
+      />
+
+      {/* 6. Language Bottom Sheet */}
+      <LanguageBottomSheet
+        isOpen={isLanguageSheetOpen}
+        onClose={() => setIsLanguageSheetOpen(false)}
+        currentLang={lang}
+        currentPromptLang={promptLang}
+        onApply={(newLang, newPromptLang) => {
+          setLang(normalizeInterfaceLanguage(newLang));
+          setPromptLang(normalizePromptLanguage(newPromptLang));
+        }}
+      />
+
+      {/* 7. Settings Sheet */}
+      <SettingsSheet
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        lang={lang}
+        onOpenLanguage={() => {
+          setIsSettingsOpen(false);
+          setIsLanguageSheetOpen(true);
+        }}
+        isDark={isDark}
+        onToggleTheme={() => setIsDark(!isDark)}
+        settings={settings}
+        onUpdateSettings={setSettings}
+        onOpenHistory={() => {
+          setIsSettingsOpen(false);
+          setIsHistoryOpen(true);
+        }}
+        onOpenPresets={() => {
+          setIsSettingsOpen(false);
+          setIsPresetsOpen(true);
+        }}
+        historyCount={history.length}
+        presetsCount={presets.length}
+        focusMode={focusMode}
+        onToggleFocus={() => setFocusMode(v => !v)}
+      />
+
+      <CommandPalette
+        isOpen={isCommandOpen}
+        onClose={() => setIsCommandOpen(false)}
+        lang={lang}
+        isDark={isDark}
+        focusMode={focusMode}
+        viewMode={viewMode}
+        onOpenLanguage={() => setIsLanguageSheetOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenPresets={() => setIsPresetsOpen(true)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
+        onToggleTheme={() => setIsDark(v => !v)}
+        onToggleFocus={() => setFocusMode(v => !v)}
+        onSetViewMode={setViewMode}
+        onJump={scrollToSection}
+      />
+
+      <MobileCommandDock
+        lang={lang}
+        viewMode={viewMode}
+        onSetViewMode={setViewMode}
+        onGenerate={handleGenerate}
+        onScrollOutput={() => scrollToSection('output')}
+        canGenerate={canGenerate}
+        isLoading={isLoading}
+        hasOutput={Boolean(generation)}
+      />
+
+      <ToastHost toast={toast} onClose={() => setToast(null)} />
+
     </div>
   );
 };

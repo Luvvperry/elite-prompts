@@ -1,9 +1,8 @@
 {
-  "name": "Remix MI MEJOR ",
-  "description": "A high-fidelity tool that transforms reference images into ultra-realistic, \u0027captured-on-phone\u0027 image generation prompts focusing on natural imperfections and believable details.",
-  "requestFramePermissions": [],
-  "capabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  "name": "Elite Prompts",
+  "description": "Premium Image-to-Prompt generator specializing in ultra-realistic photography prompts with professional camera settings analysis.",
+  "requestFramePermissions": [
+    "camera"
   ],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

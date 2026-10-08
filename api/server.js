@@ -1,94 +1,92 @@
 import express from 'express';
-import type { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
-
+import { GoogleGenAI, Type } from '@google/genai';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
-
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
 // Helper to get GoogleGenAI client with required User-Agent header
 const getAiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured on the server. Please check your environment variables.");
-  }
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      },
-    },
-  });
-};
-
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-const withDeadline = async <T>(promise: Promise<T>, ms: number, code = 'REQUEST_TIMEOUT'): Promise<T> => {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(code)), ms);
-      })
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
-};
-
-const isRateLimit = (err: any): boolean => {
-  if (!err) return false;
-  const status = err.status || err.code || err.statusCode;
-  if (status === 429) return true;
-  const str = String(err?.message || err || '');
-  return /429|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(str);
-};
-
-const isTransientError = (err: any): boolean => {
-  if (!err) return false;
-  const status = err.status || err.code || err.statusCode;
-  if (status === 503 || status === 500) return true;
-  const str = String(err?.message || err || '');
-  return /503|UNAVAILABLE|high demand|temporar/i.test(str);
-};
-
-const cleanErrorMessage = (err: any): string => {
-  if (!err) return "High model demand. Please try again shortly.";
-  let str = err?.message || String(err);
-  try {
-    const jsonMatch = str.match(/\{[\s\S]*"message"\s*:\s*"([^"]+)"[\s\S]*\}/);
-    if (jsonMatch && jsonMatch[1]) {
-      str = jsonMatch[1];
-    } else {
-      const parsed = JSON.parse(str);
-      if (parsed?.error?.message) str = parsed.error.message;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+        throw new Error("GEMINI_API_KEY is not configured on the server. Please check your environment variables.");
     }
-  } catch {}
-
-  if (/503|UNAVAILABLE|high demand/i.test(str)) {
-    return "The model is currently experiencing high demand. Please try again in a few moments.";
-  }
-  if (/429|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(str)) {
-    return "AI generation rate limit reached. Please wait a moment before trying again.";
-  }
-  if (/TIMEOUT/i.test(str)) {
-    return "Request took too long. Please try again.";
-  }
-  return str.replace(/https?:\/\/[^\s]+/g, '').trim() || "Failed to process request.";
+    return new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+            headers: {
+                'User-Agent': 'aistudio-build',
+            },
+        },
+    });
 };
-
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const withDeadline = async (promise, ms, code = 'REQUEST_TIMEOUT') => {
+    let timer;
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(code)), ms);
+            })
+        ]);
+    }
+    finally {
+        if (timer)
+            clearTimeout(timer);
+    }
+};
+const isRateLimit = (err) => {
+    if (!err)
+        return false;
+    const status = err.status || err.code || err.statusCode;
+    if (status === 429)
+        return true;
+    const str = String(err?.message || err || '');
+    return /429|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(str);
+};
+const isTransientError = (err) => {
+    if (!err)
+        return false;
+    const status = err.status || err.code || err.statusCode;
+    if (status === 503 || status === 500)
+        return true;
+    const str = String(err?.message || err || '');
+    return /503|UNAVAILABLE|high demand|temporar/i.test(str);
+};
+const cleanErrorMessage = (err) => {
+    if (!err)
+        return "High model demand. Please try again shortly.";
+    let str = err?.message || String(err);
+    try {
+        const jsonMatch = str.match(/\{[\s\S]*"message"\s*:\s*"([^"]+)"[\s\S]*\}/);
+        if (jsonMatch && jsonMatch[1]) {
+            str = jsonMatch[1];
+        }
+        else {
+            const parsed = JSON.parse(str);
+            if (parsed?.error?.message)
+                str = parsed.error.message;
+        }
+    }
+    catch { }
+    if (/503|UNAVAILABLE|high demand/i.test(str)) {
+        return "The model is currently experiencing high demand. Please try again in a few moments.";
+    }
+    if (/429|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(str)) {
+        return "AI generation rate limit reached. Please wait a moment before trying again.";
+    }
+    if (/TIMEOUT/i.test(str)) {
+        return "Request took too long. Please try again.";
+    }
+    return str.replace(/https?:\/\/[^\s]+/g, '').trim() || "Failed to process request.";
+};
 // ============================================================================
 // V1 SMART NATURAL PROMPT DEFINITION
 // ============================================================================
@@ -145,245 +143,242 @@ V1 QUALITY BAR:
 - Daylight defaults to flash off unless requested/physically justified. Direct phone flash at night has strong near-field exposure, rapid falloff, localized reflections, short nearby shadows, and a darker distant background.
 - Low light uses digital/high-ISO/shadow/chroma noise, never analog film grain unless explicitly requested.
 `;
-
 // Helper to format settings guidance for prompt generation
-const formatSettingsContext = (settings: any): string => {
-  if (!settings) return '';
-  const parts: string[] = [];
-
-  if (settings.device) parts.push(`- Model/Device: ${settings.device}`);
-  if (settings.look || settings.sharpness || settings.hdr) {
-    parts.push(`- Look: ${settings.look || 'RAW'}, Sharpness: ${settings.sharpness || 'Natural'}, Dynamic Range: ${settings.hdr || 'Natural'}`);
-  }
-  if (settings.aspectRatio) parts.push(`- Aspect Ratio: ${settings.aspectRatio}`);
-  if (settings.outputFormat && settings.outputFormat !== 'auto') parts.push(`- Output Format / Platform: ${settings.outputFormat}`);
-  if (settings.photographicStyle) parts.push(`- Photographic Style: ${settings.photographicStyle}`);
-  if (settings.realismLevel !== undefined) parts.push(`- Realism Priority: ${settings.realismLevel}%`);
-  parts.push(`- Imperfection Level: ${settings.imperfectionLevel ?? 45}%, Cinematic Level: ${settings.cinematicLevel ?? 10}%, Stylization Level: ${settings.stylizationLevel ?? 0}%, Background Detail: ${settings.backgroundDetailLevel ?? 80}%, Blur Level: ${settings.blurLevel ?? 5}%`);
-
-  if (settings.subjectCount && settings.subjectCount !== 'auto') parts.push(`- Subjects Count: ${settings.subjectCount}`);
-  if (settings.bodyPosition && settings.bodyPosition !== 'auto') parts.push(`- Body Position: ${settings.bodyPosition}`);
-  if (settings.orientation && settings.orientation !== 'auto') parts.push(`- Orientation: ${settings.orientation}`);
-  if (settings.weightDistribution && settings.weightDistribution !== 'auto') parts.push(`- Weight Distribution: ${settings.weightDistribution}`);
-  if (settings.posture && settings.posture !== 'auto') parts.push(`- Posture: ${settings.posture} ${settings.customPosture ? `(${settings.customPosture})` : ''}`);
-  if (settings.expression && settings.expression !== 'auto') parts.push(`- Expression: ${settings.expression} ${settings.customExpression ? `(${settings.customExpression})` : ''}`);
-  if (settings.gaze && settings.gaze !== 'auto') parts.push(`- Gaze: ${settings.gaze}`);
-  if (settings.actionDescription) parts.push(`- Action Description: ${settings.actionDescription}`);
-
-  if (settings.cameraDevice && settings.cameraDevice !== 'auto') parts.push(`- Camera Device: ${settings.cameraDevice}`);
-  if (settings.cameraLens && settings.cameraLens !== 'auto') parts.push(`- Lens: ${settings.cameraLens}`);
-  if (settings.cameraDistance && settings.cameraDistance !== 'auto') parts.push(`- Distance: ${settings.cameraDistance}`);
-  if (settings.cameraHeight && settings.cameraHeight !== 'auto') parts.push(`- Height: ${settings.cameraHeight}`);
-  if (settings.cameraAngle && settings.cameraAngle !== 'auto') parts.push(`- Angle: ${settings.cameraAngle}`);
-  if (settings.cameraFraming && settings.cameraFraming !== 'auto') parts.push(`- Framing: ${settings.cameraFraming}`);
-
-  if (settings.lightTime && settings.lightTime !== 'auto') parts.push(`- Light Time: ${settings.lightTime}`);
-  if (settings.lightSource && settings.lightSource !== 'auto') parts.push(`- Light Source: ${settings.lightSource}`);
-  if (settings.flashMode && settings.flashMode !== 'auto') parts.push(`- Flash: ${settings.flashMode} (${settings.flashBehavior || 'normal'})`);
-
-  if (settings.captureProfile && settings.captureProfile !== 'auto') {
-    const profileMap: Record<string, string> = {
-      raw_smartphone: 'Casual raw smartphone photo, authentic mobile sensor processing, natural subtle imperfections, handheld glance',
-      clean_smartphone: 'Clean crisp smartphone photography, sharp optics, natural daylight balance, zero fake studio look',
-      night_flash: 'Direct mobile phone flash, darker background falloff, harsh specular contact shadows, fast shutter, authentic indoor/night phone snap',
-      low_light: 'Realistic low-light digital grain, high ISO noise texture, natural exposure latitude, slightly softer focus',
-      candid: 'Spontaneous candid capture, unposed body posture, authentic fleeting glance, natural framing',
-      social_media: 'Authentic social media UGC photo, realistic smartphone perspective, relatable casual setting, zero commercial polish',
-      pov: 'Authentic first-person point-of-view perspective, eye or chest height glance, realistic foreground interaction',
-      mirror: 'Authentic mirror selfie or mirror reflection, natural phone held up, true mirror glass behavior and reflections',
-      selfie: 'Authentic front-facing smartphone camera selfie, wide-angle arm-distance perspective, natural facial skin texture',
-      documentary: 'Authentic photojournalistic documentary snapshot, neutral observation, natural scene reality, zero cinematic color grade',
-      automotive_casual: 'Casual smartphone car snapshot, authentic automotive paint reflections, natural parking/street environment, no commercial car ad gloss',
-      object_pov_raw: 'Tangible casual object photograph in first person, real surface context, authentic contact shadows and tactile hand interaction'
-    };
-    parts.push(`- Capture Profile Forensic Intent: ${profileMap[settings.captureProfile] || settings.captureProfile}`);
-  }
-
-  if (settings.cameraMode && settings.cameraMode !== 'auto') {
-    parts.push(`- Camera Mode: ${settings.cameraMode}`);
-  }
-  if (settings.cameraFeel && settings.cameraFeel !== 'auto') {
-    parts.push(`- Camera Feel / Capture Demeanor: ${settings.cameraFeel}`);
-  }
-  if (settings.actionMoment && settings.actionMoment !== 'auto') {
-    parts.push(`- Action Moment: ${settings.actionMoment}`);
-  }
-  if (settings.flashExpanded && settings.flashExpanded !== 'auto') {
-    parts.push(`- Flash Behavior: ${settings.flashExpanded}`);
-  }
-
-  const activeImperfections: string[] = [];
-  if (settings.imperfections) {
-    Object.entries(settings.imperfections)
-      .filter(([_, v]) => v)
-      .forEach(([k]) => activeImperfections.push(k.replace(/([A-Z])/g, ' $1').toLowerCase()));
-  }
-  if (settings.activeImperfections && settings.activeImperfections.length > 0) {
-    settings.activeImperfections.forEach((imp: string) => activeImperfections.push(imp.replace(/_/g, ' ')));
-  }
-  if (activeImperfections.length > 0) {
-    parts.push(`- Specific Imperfections Required: ${Array.from(new Set(activeImperfections)).join(', ')}`);
-  }
-
-  if (settings.wardrobe) {
-    const w = settings.wardrobe;
-    const wardrobeItems = [
-      w.top && `Top: ${w.top}`,
-      w.bottom && `Bottom: ${w.bottom}`,
-      w.shoes && `Shoes: ${w.shoes}`,
-      w.outerwear && `Outerwear: ${w.outerwear}`,
-      w.accessories && `Accessories: ${w.accessories}`,
-      w.headwear && `Headwear: ${w.headwear}`,
-      w.jewelryWatch && `Jewelry/Watch: ${w.jewelryWatch}`,
-      w.customDetails && `Custom Details: ${w.customDetails}`
-    ].filter(Boolean);
-    if (wardrobeItems.length > 0) {
-      parts.push(`- Wardrobe (${w.referenceLock ? 'Strict Lock' : 'Standard'}): ${wardrobeItems.join('; ')}`);
+const formatSettingsContext = (settings) => {
+    if (!settings)
+        return '';
+    const parts = [];
+    if (settings.device)
+        parts.push(`- Model/Device: ${settings.device}`);
+    if (settings.look || settings.sharpness || settings.hdr) {
+        parts.push(`- Look: ${settings.look || 'RAW'}, Sharpness: ${settings.sharpness || 'Natural'}, Dynamic Range: ${settings.hdr || 'Natural'}`);
     }
-  }
-
-  if (settings.vehicle && settings.vehicle.customVehicle) {
-    const v = settings.vehicle;
-    parts.push(`- Vehicle Forensics: ${v.customVehicle} (Ext: ${v.exteriorColor || 'standard'}, Int: ${v.interiorColor || 'standard'}, Seat: ${v.driverPassenger}, Door: ${v.doorState}, Relation: ${v.subjectRelation}, Lock: ${v.modelLock ? 'Strict' : 'Flexible'})`);
-  }
-
-  if (settings.environment) {
-    const e = settings.environment;
-    const envItems = [
-      e.location && `Location: ${e.location}`,
-      e.setting && `Setting: ${e.setting}`,
-      e.background && `Background: ${e.background}`,
-      e.timeOfDay && `Time: ${e.timeOfDay}`,
-      e.weather && `Weather: ${e.weather}`,
-      e.crowd && `Crowd: ${e.crowd}`,
-      e.condition && e.condition !== 'auto' ? `Condition: ${e.condition}` : '',
-      `Atmosphere Tier: ${e.mood || 'ordinary'}`,
-      e.naturalClutter ? 'Include natural everyday clutter' : '',
-      e.avoidPostcard ? 'Avoid postcard aesthetic' : '',
-      e.avoidGenericLuxury ? 'Avoid generic luxury aesthetic' : ''
-    ].filter(Boolean);
-    if (envItems.length > 0) {
-      parts.push(`- Environment Guidance: ${envItems.join('; ')}`);
+    if (settings.aspectRatio)
+        parts.push(`- Aspect Ratio: ${settings.aspectRatio}`);
+    if (settings.outputFormat && settings.outputFormat !== 'auto')
+        parts.push(`- Output Format / Platform: ${settings.outputFormat}`);
+    if (settings.photographicStyle)
+        parts.push(`- Photographic Style: ${settings.photographicStyle}`);
+    if (settings.realismLevel !== undefined)
+        parts.push(`- Realism Priority: ${settings.realismLevel}%`);
+    parts.push(`- Imperfection Level: ${settings.imperfectionLevel ?? 45}%, Cinematic Level: ${settings.cinematicLevel ?? 10}%, Stylization Level: ${settings.stylizationLevel ?? 0}%, Background Detail: ${settings.backgroundDetailLevel ?? 80}%, Blur Level: ${settings.blurLevel ?? 5}%`);
+    if (settings.subjectCount && settings.subjectCount !== 'auto')
+        parts.push(`- Subjects Count: ${settings.subjectCount}`);
+    if (settings.bodyPosition && settings.bodyPosition !== 'auto')
+        parts.push(`- Body Position: ${settings.bodyPosition}`);
+    if (settings.orientation && settings.orientation !== 'auto')
+        parts.push(`- Orientation: ${settings.orientation}`);
+    if (settings.weightDistribution && settings.weightDistribution !== 'auto')
+        parts.push(`- Weight Distribution: ${settings.weightDistribution}`);
+    if (settings.posture && settings.posture !== 'auto')
+        parts.push(`- Posture: ${settings.posture} ${settings.customPosture ? `(${settings.customPosture})` : ''}`);
+    if (settings.expression && settings.expression !== 'auto')
+        parts.push(`- Expression: ${settings.expression} ${settings.customExpression ? `(${settings.customExpression})` : ''}`);
+    if (settings.gaze && settings.gaze !== 'auto')
+        parts.push(`- Gaze: ${settings.gaze}`);
+    if (settings.actionDescription)
+        parts.push(`- Action Description: ${settings.actionDescription}`);
+    if (settings.cameraDevice && settings.cameraDevice !== 'auto')
+        parts.push(`- Camera Device: ${settings.cameraDevice}`);
+    if (settings.cameraLens && settings.cameraLens !== 'auto')
+        parts.push(`- Lens: ${settings.cameraLens}`);
+    if (settings.cameraDistance && settings.cameraDistance !== 'auto')
+        parts.push(`- Distance: ${settings.cameraDistance}`);
+    if (settings.cameraHeight && settings.cameraHeight !== 'auto')
+        parts.push(`- Height: ${settings.cameraHeight}`);
+    if (settings.cameraAngle && settings.cameraAngle !== 'auto')
+        parts.push(`- Angle: ${settings.cameraAngle}`);
+    if (settings.cameraFraming && settings.cameraFraming !== 'auto')
+        parts.push(`- Framing: ${settings.cameraFraming}`);
+    if (settings.lightTime && settings.lightTime !== 'auto')
+        parts.push(`- Light Time: ${settings.lightTime}`);
+    if (settings.lightSource && settings.lightSource !== 'auto')
+        parts.push(`- Light Source: ${settings.lightSource}`);
+    if (settings.flashMode && settings.flashMode !== 'auto')
+        parts.push(`- Flash: ${settings.flashMode} (${settings.flashBehavior || 'normal'})`);
+    if (settings.captureProfile && settings.captureProfile !== 'auto') {
+        const profileMap = {
+            raw_smartphone: 'Casual raw smartphone photo, authentic mobile sensor processing, natural subtle imperfections, handheld glance',
+            clean_smartphone: 'Clean crisp smartphone photography, sharp optics, natural daylight balance, zero fake studio look',
+            night_flash: 'Direct mobile phone flash, darker background falloff, harsh specular contact shadows, fast shutter, authentic indoor/night phone snap',
+            low_light: 'Realistic low-light digital grain, high ISO noise texture, natural exposure latitude, slightly softer focus',
+            candid: 'Spontaneous candid capture, unposed body posture, authentic fleeting glance, natural framing',
+            social_media: 'Authentic social media UGC photo, realistic smartphone perspective, relatable casual setting, zero commercial polish',
+            pov: 'Authentic first-person point-of-view perspective, eye or chest height glance, realistic foreground interaction',
+            mirror: 'Authentic mirror selfie or mirror reflection, natural phone held up, true mirror glass behavior and reflections',
+            selfie: 'Authentic front-facing smartphone camera selfie, wide-angle arm-distance perspective, natural facial skin texture',
+            documentary: 'Authentic photojournalistic documentary snapshot, neutral observation, natural scene reality, zero cinematic color grade',
+            automotive_casual: 'Casual smartphone car snapshot, authentic automotive paint reflections, natural parking/street environment, no commercial car ad gloss',
+            object_pov_raw: 'Tangible casual object photograph in first person, real surface context, authentic contact shadows and tactile hand interaction'
+        };
+        parts.push(`- Capture Profile Forensic Intent: ${profileMap[settings.captureProfile] || settings.captureProfile}`);
     }
-  }
-
-  if (settings.fineControl) {
-    const fc = settings.fineControl;
-    if (fc.subject) parts.push(`- Explicit Subject Override: ${fc.subject}`);
-    if (fc.action) parts.push(`- Explicit Action: ${fc.action}`);
-    if (fc.location) parts.push(`- Explicit Location: ${fc.location}`);
-    if (fc.environment) parts.push(`- Explicit Environment: ${fc.environment}`);
-    if (fc.background) parts.push(`- Explicit Background: ${fc.background}`);
-    if (fc.atmosphere) parts.push(`- Explicit Atmosphere: ${fc.atmosphere}`);
-    if (fc.imperfections) parts.push(`- Explicit Imperfections: ${fc.imperfections}`);
-    if (fc.textInsideImage) parts.push(`- Text Inside Image: ${fc.textInsideImage}`);
-    if (fc.avoid) parts.push(`- Strictly Avoid: ${fc.avoid}`);
-    if (fc.additionalInstructions) parts.push(`- Additional Instructions: ${fc.additionalInstructions}`);
-  }
-
-  if (settings.realismTier) parts.push(`- Realism Tier: ${settings.realismTier.toUpperCase()}`);
-  if (settings.aiCleanup && settings.aiCleanup !== 'none') parts.push(`- Anti-AI Artifact Suppression: ${settings.aiCleanup.toUpperCase()}`);
-
-  if (settings.preserveLocks) {
-    const activeLocks = Object.entries(settings.preserveLocks)
-      .filter(([_, v]) => v)
-      .map(([k]) => k.toUpperCase());
-    if (activeLocks.length > 0) {
-      parts.push(`- Preserved Subject/Scene Locks: ${activeLocks.join(', ')}`);
+    if (settings.cameraMode && settings.cameraMode !== 'auto') {
+        parts.push(`- Camera Mode: ${settings.cameraMode}`);
     }
-  }
-
-  if (settings.pov) {
-    const pov = settings.pov;
-    const povItems = [
-      pov.handVisibility && pov.handVisibility !== 'auto' && `Hands in Frame: ${pov.handVisibility}`,
-      pov.gripType && pov.gripType !== 'auto' && `Interaction Grip: ${pov.gripType}`,
-      pov.heldObject && `Held/Focused Object: ${pov.heldObject}`,
-      pov.pointOfViewHeight && pov.pointOfViewHeight !== 'auto' && `POV Perspective Height: ${pov.pointOfViewHeight}`,
-      pov.surface && pov.surface !== 'auto' && `Surface: ${pov.surface}${pov.customSurface ? ` (${pov.customSurface})` : ''}`,
-      pov.objectRealism && `Object Realism: ${pov.objectRealism}`,
-      pov.objectDistance && pov.objectDistance !== 'auto' && `Distance: ${pov.objectDistance}`,
-      pov.objectPosition && pov.objectPosition !== 'auto' && `Position: ${pov.objectPosition}`
-    ].filter(Boolean);
-    if (povItems.length > 0) {
-      parts.push(`- First-Person POV Forensics: ${povItems.join(', ')}`);
+    if (settings.cameraFeel && settings.cameraFeel !== 'auto') {
+        parts.push(`- Camera Feel / Capture Demeanor: ${settings.cameraFeel}`);
     }
-  }
-
-  if (settings.referencePriority) {
-    parts.push(`- Reference Priority: ${settings.referencePriority.toUpperCase()}`);
-  }
-
-  return parts.join('\n');
+    if (settings.actionMoment && settings.actionMoment !== 'auto') {
+        parts.push(`- Action Moment: ${settings.actionMoment}`);
+    }
+    if (settings.flashExpanded && settings.flashExpanded !== 'auto') {
+        parts.push(`- Flash Behavior: ${settings.flashExpanded}`);
+    }
+    const activeImperfections = [];
+    if (settings.imperfections) {
+        Object.entries(settings.imperfections)
+            .filter(([_, v]) => v)
+            .forEach(([k]) => activeImperfections.push(k.replace(/([A-Z])/g, ' $1').toLowerCase()));
+    }
+    if (settings.activeImperfections && settings.activeImperfections.length > 0) {
+        settings.activeImperfections.forEach((imp) => activeImperfections.push(imp.replace(/_/g, ' ')));
+    }
+    if (activeImperfections.length > 0) {
+        parts.push(`- Specific Imperfections Required: ${Array.from(new Set(activeImperfections)).join(', ')}`);
+    }
+    if (settings.wardrobe) {
+        const w = settings.wardrobe;
+        const wardrobeItems = [
+            w.top && `Top: ${w.top}`,
+            w.bottom && `Bottom: ${w.bottom}`,
+            w.shoes && `Shoes: ${w.shoes}`,
+            w.outerwear && `Outerwear: ${w.outerwear}`,
+            w.accessories && `Accessories: ${w.accessories}`,
+            w.headwear && `Headwear: ${w.headwear}`,
+            w.jewelryWatch && `Jewelry/Watch: ${w.jewelryWatch}`,
+            w.customDetails && `Custom Details: ${w.customDetails}`
+        ].filter(Boolean);
+        if (wardrobeItems.length > 0) {
+            parts.push(`- Wardrobe (${w.referenceLock ? 'Strict Lock' : 'Standard'}): ${wardrobeItems.join('; ')}`);
+        }
+    }
+    if (settings.vehicle && settings.vehicle.customVehicle) {
+        const v = settings.vehicle;
+        parts.push(`- Vehicle Forensics: ${v.customVehicle} (Ext: ${v.exteriorColor || 'standard'}, Int: ${v.interiorColor || 'standard'}, Seat: ${v.driverPassenger}, Door: ${v.doorState}, Relation: ${v.subjectRelation}, Lock: ${v.modelLock ? 'Strict' : 'Flexible'})`);
+    }
+    if (settings.environment) {
+        const e = settings.environment;
+        const envItems = [
+            e.location && `Location: ${e.location}`,
+            e.setting && `Setting: ${e.setting}`,
+            e.background && `Background: ${e.background}`,
+            e.timeOfDay && `Time: ${e.timeOfDay}`,
+            e.weather && `Weather: ${e.weather}`,
+            e.crowd && `Crowd: ${e.crowd}`,
+            e.condition && e.condition !== 'auto' ? `Condition: ${e.condition}` : '',
+            `Atmosphere Tier: ${e.mood || 'ordinary'}`,
+            e.naturalClutter ? 'Include natural everyday clutter' : '',
+            e.avoidPostcard ? 'Avoid postcard aesthetic' : '',
+            e.avoidGenericLuxury ? 'Avoid generic luxury aesthetic' : ''
+        ].filter(Boolean);
+        if (envItems.length > 0) {
+            parts.push(`- Environment Guidance: ${envItems.join('; ')}`);
+        }
+    }
+    if (settings.fineControl) {
+        const fc = settings.fineControl;
+        if (fc.subject)
+            parts.push(`- Explicit Subject Override: ${fc.subject}`);
+        if (fc.action)
+            parts.push(`- Explicit Action: ${fc.action}`);
+        if (fc.location)
+            parts.push(`- Explicit Location: ${fc.location}`);
+        if (fc.environment)
+            parts.push(`- Explicit Environment: ${fc.environment}`);
+        if (fc.background)
+            parts.push(`- Explicit Background: ${fc.background}`);
+        if (fc.atmosphere)
+            parts.push(`- Explicit Atmosphere: ${fc.atmosphere}`);
+        if (fc.imperfections)
+            parts.push(`- Explicit Imperfections: ${fc.imperfections}`);
+        if (fc.textInsideImage)
+            parts.push(`- Text Inside Image: ${fc.textInsideImage}`);
+        if (fc.avoid)
+            parts.push(`- Strictly Avoid: ${fc.avoid}`);
+        if (fc.additionalInstructions)
+            parts.push(`- Additional Instructions: ${fc.additionalInstructions}`);
+    }
+    if (settings.realismTier)
+        parts.push(`- Realism Tier: ${settings.realismTier.toUpperCase()}`);
+    if (settings.aiCleanup && settings.aiCleanup !== 'none')
+        parts.push(`- Anti-AI Artifact Suppression: ${settings.aiCleanup.toUpperCase()}`);
+    if (settings.preserveLocks) {
+        const activeLocks = Object.entries(settings.preserveLocks)
+            .filter(([_, v]) => v)
+            .map(([k]) => k.toUpperCase());
+        if (activeLocks.length > 0) {
+            parts.push(`- Preserved Subject/Scene Locks: ${activeLocks.join(', ')}`);
+        }
+    }
+    if (settings.pov) {
+        const pov = settings.pov;
+        const povItems = [
+            pov.handVisibility && pov.handVisibility !== 'auto' && `Hands in Frame: ${pov.handVisibility}`,
+            pov.gripType && pov.gripType !== 'auto' && `Interaction Grip: ${pov.gripType}`,
+            pov.heldObject && `Held/Focused Object: ${pov.heldObject}`,
+            pov.pointOfViewHeight && pov.pointOfViewHeight !== 'auto' && `POV Perspective Height: ${pov.pointOfViewHeight}`,
+            pov.surface && pov.surface !== 'auto' && `Surface: ${pov.surface}${pov.customSurface ? ` (${pov.customSurface})` : ''}`,
+            pov.objectRealism && `Object Realism: ${pov.objectRealism}`,
+            pov.objectDistance && pov.objectDistance !== 'auto' && `Distance: ${pov.objectDistance}`,
+            pov.objectPosition && pov.objectPosition !== 'auto' && `Position: ${pov.objectPosition}`
+        ].filter(Boolean);
+        if (povItems.length > 0) {
+            parts.push(`- First-Person POV Forensics: ${povItems.join(', ')}`);
+        }
+    }
+    if (settings.referencePriority) {
+        parts.push(`- Reference Priority: ${settings.referencePriority.toUpperCase()}`);
+    }
+    return parts.join('\n');
 };
-
 // ============================================================================
 // API ROUTES
 // ============================================================================
-
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', serverTime: new Date().toISOString() });
+app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok', serverTime: new Date().toISOString() });
 });
-
-const serverPromptCache = new Map<string, { data: any; ts: number }>();
+const serverPromptCache = new Map();
 const SERVER_CACHE_MAX = 40;
 const SERVER_CACHE_TTL = 15 * 60 * 1000; // 15 mins
-
 // Generate All Prompts (V1, V2, V3 + Auto Detection)
-app.post('/api/generate-prompts', async (req: Request, res: Response) => {
-  try {
-    const {
-      mode,
-      modality,
-      selectedTypeId = modality,
-      promptLanguage,
-      promptLang,
-      ideaText,
-      references,
-      settings,
-      targetEngine = 'v2',
-      skipAutoDetect = false
-    } = req.body;
-
-    // Check server cache for identical requests
-    const refSignatures = (references || []).map((r: any) => `${r.name || 'img'}_${(r.roles || []).join(',')}_${r.dataUrl ? r.dataUrl.length + '_' + r.dataUrl.slice(-60) : ''}`);
-    const cacheKey = JSON.stringify({
-      mode,
-      modality,
-      selectedTypeId,
-      promptLanguage: promptLanguage || promptLang,
-      ideaText: (ideaText || '').trim(),
-      targetEngine,
-      skipAutoDetect: !!skipAutoDetect,
-      settings,
-      refs: refSignatures
-    });
-    const cached = serverPromptCache.get(cacheKey);
-    if (cached && Date.now() - cached.ts < SERVER_CACHE_TTL) {
-      return res.json(cached.data);
-    }
-
-    const ai = getAiClient();
-    const settingsContext = formatSettingsContext(settings);
-
-    const isTargetV1 = targetEngine === 'v1';
-    const isTargetV2 = targetEngine === 'v2';
-    const isTargetV3 = targetEngine === 'v3';
-    const isTargetAll = targetEngine === 'all' || targetEngine === 'compare' || (!isTargetV1 && !isTargetV2 && !isTargetV3);
-
-    // Normalize UI codes and locale names so language selection never silently falls back.
-    const rawPromptLanguage = String(promptLanguage || promptLang || '').trim().toLowerCase();
-    const normalizedPromptLanguage =
-      rawPromptLanguage === 'pt' || rawPromptLanguage === 'pt-br' || rawPromptLanguage.includes('portugu') ? 'pt' :
-      rawPromptLanguage === 'es' || rawPromptLanguage.includes('span') || rawPromptLanguage.includes('españ') ? 'es' :
-      'en';
-    const isSpanish = normalizedPromptLanguage === 'es';
-    const isPortuguese = normalizedPromptLanguage === 'pt';
-    const isEnglish = normalizedPromptLanguage === 'en';
-    const requestedLanguageName = isPortuguese ? 'Brazilian Portuguese' : isSpanish ? 'Spanish' : 'English';
-    const shouldIncludeAutoDetect = !skipAutoDetect && settings?.autoDetect !== false;
-
-    const systemPrompt = `
+app.post('/api/generate-prompts', async (req, res) => {
+    try {
+        const { mode, modality, selectedTypeId = modality, promptLanguage, promptLang, ideaText, references, settings, targetEngine = 'v2', skipAutoDetect = false } = req.body;
+        // Check server cache for identical requests
+        const refSignatures = (references || []).map((r) => `${r.name || 'img'}_${(r.roles || []).join(',')}_${r.dataUrl ? r.dataUrl.length + '_' + r.dataUrl.slice(-60) : ''}`);
+        const cacheKey = JSON.stringify({
+            mode,
+            modality,
+            selectedTypeId,
+            promptLanguage: promptLanguage || promptLang,
+            ideaText: (ideaText || '').trim(),
+            targetEngine,
+            skipAutoDetect: !!skipAutoDetect,
+            settings,
+            refs: refSignatures
+        });
+        const cached = serverPromptCache.get(cacheKey);
+        if (cached && Date.now() - cached.ts < SERVER_CACHE_TTL) {
+            return res.json(cached.data);
+        }
+        const ai = getAiClient();
+        const settingsContext = formatSettingsContext(settings);
+        const isTargetV1 = targetEngine === 'v1';
+        const isTargetV2 = targetEngine === 'v2';
+        const isTargetV3 = targetEngine === 'v3';
+        const isTargetAll = targetEngine === 'all' || targetEngine === 'compare' || (!isTargetV1 && !isTargetV2 && !isTargetV3);
+        // Normalize UI codes and locale names so language selection never silently falls back.
+        const rawPromptLanguage = String(promptLanguage || promptLang || '').trim().toLowerCase();
+        const normalizedPromptLanguage = rawPromptLanguage === 'pt' || rawPromptLanguage === 'pt-br' || rawPromptLanguage.includes('portugu') ? 'pt' :
+            rawPromptLanguage === 'es' || rawPromptLanguage.includes('span') || rawPromptLanguage.includes('españ') ? 'es' :
+                'en';
+        const isSpanish = normalizedPromptLanguage === 'es';
+        const isPortuguese = normalizedPromptLanguage === 'pt';
+        const isEnglish = normalizedPromptLanguage === 'en';
+        const requestedLanguageName = isPortuguese ? 'Brazilian Portuguese' : isSpanish ? 'Spanish' : 'English';
+        const shouldIncludeAutoDetect = !skipAutoDetect && settings?.autoDetect !== false;
+        const systemPrompt = `
 YOU ARE THE WORLD'S FOREMOST OPTICAL FORENSICS AND PHOTOGRAPHIC PROMPT ARCHITECT.
 HARD OUTPUT LANGUAGE LOCK: The requested output language is ${requestedLanguageName}.
 Write V1, V2, V3, and every natural-language value in autoDetected in ${requestedLanguageName}.
@@ -736,50 +731,42 @@ Return ONLY the final V3 prompt text.
 ==================================================
 LANGUAGE LOCALIZATION DIRECTIVE:
 ==================================================
-${isTargetV2 ? (
-  isSpanish
-    ? `- V2: Output 100% in Spanish using the structured modular blocks format starting with "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características." followed by (**ángulo y cámara:**, **escenario:**, **pose y acción:**, **ropa:**, **efectos:**, **piel:**, **sombra:**, **rostro:**, **física y realismo:**, **formato:**).`
-    : isPortuguese
-    ? `- V2: Output 100% in Brazilian Portuguese using the structured modular blocks format starting with "faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele." followed by (**ângulo e câmera:**, **cenário:**, **pose e ação:**, **roupa:**, **efeitos:**, **pele:**, **sombra:**, **rosto:**, **física e realismo:**, **formato:**).`
-    : `- V2: Output 100% in English using the structured modular blocks format starting with "Make an image of the man from the submitted photo, following 100% of his characteristics." followed by (**angle and camera:**, **scene:**, **pose and action:**, **clothing:**, **effects:**, **skin:**, **shadow:**, **face:**, **physics and realism:**, **format:**).`
-) : isTargetV1 ? (
-  isSpanish
-    ? `- V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.`
-    : isPortuguese
-    ? `- V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.`
-    : `- V1: Output 100% in natural English using the smart adaptive curly-brace format.`
-) : isTargetV3 ? (
-  isSpanish
-    ? `- V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
-    : isPortuguese
-    ? `- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
-    : `- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
-) : isSpanish
-  ? `CRITICAL LANGUAGE REQUIREMENT:
+${isTargetV2 ? (isSpanish
+            ? `- V2: Output 100% in Spanish using the structured modular blocks format starting with "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características." followed by (**ángulo y cámara:**, **escenario:**, **pose y acción:**, **ropa:**, **efectos:**, **piel:**, **sombra:**, **rostro:**, **física y realismo:**, **formato:**).`
+            : isPortuguese
+                ? `- V2: Output 100% in Brazilian Portuguese using the structured modular blocks format starting with "faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele." followed by (**ângulo e câmera:**, **cenário:**, **pose e ação:**, **roupa:**, **efeitos:**, **pele:**, **sombra:**, **rosto:**, **física e realismo:**, **formato:**).`
+                : `- V2: Output 100% in English using the structured modular blocks format starting with "Make an image of the man from the submitted photo, following 100% of his characteristics." followed by (**angle and camera:**, **scene:**, **pose and action:**, **clothing:**, **effects:**, **skin:**, **shadow:**, **face:**, **physics and realism:**, **format:**).`) : isTargetV1 ? (isSpanish
+            ? `- V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.`
+            : isPortuguese
+                ? `- V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.`
+                : `- V1: Output 100% in natural English using the smart adaptive curly-brace format.`) : isTargetV3 ? (isSpanish
+            ? `- V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+            : isPortuguese
+                ? `- V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
+                : `- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`) : isSpanish
+            ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural Spanish using the smart adaptive curly-brace format.
 - V2: Output 100% in Spanish using the structured modular blocks format starting with "Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características." followed by (**ángulo y cámara:**, **escenario:**, **pose y acción:**, **ropa:**, **efectos:**, **piel:**, **sombra:**, **rostro:**, **física y realismo:**, **formato:**).
 - V3: Output 100% in Spanish as a direct final prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
-  : isPortuguese
-  ? `CRITICAL LANGUAGE REQUIREMENT:
+            : isPortuguese
+                ? `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in Brazilian Portuguese using the smart adaptive curly-brace format.
 - V2: Output 100% in Brazilian Portuguese using the structured modular blocks format starting with "faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele." followed by (**ângulo e câmera:**, **cenário:**, **pose e ação:**, **roupa:**, **efeitos:**, **pele:**, **sombra:**, **rosto:**, **física e realismo:**, **formato:**).
 - V3: Output 100% in Brazilian Portuguese, including every block label, clause, material, camera term, lighting term, and quality descriptor. Use natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
-  : `CRITICAL LANGUAGE REQUIREMENT:
+                : `CRITICAL LANGUAGE REQUIREMENT:
 - V1: Output 100% in natural English using the smart adaptive curly-brace format.
 - V2: Output 100% in English using the structured modular blocks format starting with "Make an image of the man from the submitted photo, following 100% of his characteristics." followed by (**angle and camera:**, **scene:**, **pose and action:**, **clothing:**, **effects:**, **skin:**, **shadow:**, **face:**, **physics and realism:**, **format:**).
-- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`
-}
+- V3: Output 100% in English as a direct final image prompt using natural-language clauses and curly braces {}. Do NOT use blueprint headings.`}
 ${shouldIncludeAutoDetect ? `
 ==================================================
 AUTO DETECT EXTRACTION:
 ==================================================
 Return key detected parameters (subjectCount, pose, behavior, gaze, expression, camera, lens, distance, framing, flash, time, environment, vehicle, activity, lighting) in the language requested.` : ''}
 `;
-
-    const contentsParts: any[] = [];
-    let userTextDescription = "";
-    if (mode === 'idea') {
-      userTextDescription = `
+        const contentsParts = [];
+        let userTextDescription = "";
+        if (mode === 'idea') {
+            userTextDescription = `
 USER SCENE IDEA (PRIMARY SOURCE OF TRUTH):
 """${ideaText}"""
 
@@ -788,8 +775,9 @@ SELECTED TYPE: ${selectedTypeId}
 SETTINGS & GUIDANCE:
 ${settingsContext}
 `;
-    } else {
-      userTextDescription = `
+        }
+        else {
+            userTextDescription = `
 USER UPLOADED REFERENCE(S) ANALYSIS REQUEST:
 MODALITY: ${modality}
 SELECTED TYPE: ${selectedTypeId}
@@ -797,228 +785,211 @@ ADDITIONAL USER IDEA / DIRECTIVES:
 """${ideaText || 'Recreate and forensically analyze the uploaded reference photo with extreme visual evidence.'}"""
 
 REFERENCES METADATA:
-${(references || []).map((r: any, i: number) => `Image ${i + 1}: Name="${r.name}", Roles=[${(r.roles || []).join(', ')}], Assignment=${r.subjectAssignment || 'General'}`).join('\n')}
+${(references || []).map((r, i) => `Image ${i + 1}: Name="${r.name}", Roles=[${(r.roles || []).join(', ')}], Assignment=${r.subjectAssignment || 'General'}`).join('\n')}
 
 SETTINGS & GUIDANCE:
 ${settingsContext}
 `;
-    }
-
-    let engineFocusDirective = "";
-    if (isTargetV2) {
-      engineFocusDirective = `\nSPEED FOCUS DIRECTIVE: The user requested ONLY the V2 engine. You MUST generate ONLY the v2 prompt field according to the V2 rigid template. Do NOT spend tokens generating v1 or v3.\n`;
-    } else if (isTargetV1) {
-      engineFocusDirective = `\nSPEED FOCUS DIRECTIVE: The user requested ONLY the V1 engine. You MUST generate ONLY the v1 prompt field according to the V1 smart natural snapshot format. Do NOT spend tokens generating v2 or v3.\n`;
-    } else if (isTargetV3) {
-      engineFocusDirective = `\nSPEED FOCUS DIRECTIVE: The user requested ONLY the V3 engine. You MUST generate ONLY the v3 prompt field according to the V3 forensic deep prompt format. Do NOT spend tokens generating v1 or v2.\n`;
-    } else {
-      engineFocusDirective = `\nGenerate V1, V2, and V3 prompts.\n`;
-    }
-
-    const targetEnginesLabel = isTargetV1 ? 'V1' : isTargetV2 ? 'V2' : isTargetV3 ? 'V3' : 'V1, V2, and V3';
-    const v2HeaderReminder = (isTargetV2 || isTargetAll) ? (isSpanish
-      ? `\nFor V2, start with the exact Spanish opening sentence (\"Haz una imagen del hombre de la foto enviada, siguiendo el 100% de sus características.\") and use only these Spanish bold block headers: (**ángulo y cámara:**, **escenario:**, **pose y acción:**, **ropa:**, **efectos:**, **piel:**, **sombra:**, **rostro:**, **física y realismo:**, **formato:**). Never output Portuguese or English block headers.\n`
-      : isPortuguese
-      ? `\nFor V2, start with the exact Portuguese opening sentence (\"faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele.\") and use only these Portuguese bold block headers: (**ângulo e câmera:**, **cenário:**, **pose e ação:**, **roupa:**, **efeitos:**, **pele:**, **sombra:**, **rosto:**, **física e realismo:**, **formato:**). Never output Spanish or English block headers.\n`
-      : `\nFor V2, start with the exact English opening sentence (\"Make an image of the man from the submitted photo, following 100% of his characteristics.\") and use only these English bold block headers: (**angle and camera:**, **scene:**, **pose and action:**, **clothing:**, **effects:**, **skin:**, **shadow:**, **face:**, **physics and realism:**, **format:**). Never output Portuguese or Spanish block headers.\n`
-    ) : '';
-
-    contentsParts.push({
-      text: `OUTPUT LANGUAGE LOCK: Generate ${targetEnginesLabel}${shouldIncludeAutoDetect ? ' and any detected parameters' : ''} entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts. Translate every heading, label, camera term, material term, lighting term, negative prompt, and natural-language value. Do not copy example labels from another language. If any output fragment appears in another language, rewrite that fragment before returning JSON.${v2HeaderReminder}
+        }
+        let engineFocusDirective = "";
+        if (isTargetV2) {
+            engineFocusDirective = `\nSPEED FOCUS DIRECTIVE: The user requested ONLY the V2 engine. You MUST generate ONLY the v2 prompt field according to the V2 rigid template. Do NOT spend tokens generating v1 or v3.\n`;
+        }
+        else if (isTargetV1) {
+            engineFocusDirective = `\nSPEED FOCUS DIRECTIVE: The user requested ONLY the V1 engine. You MUST generate ONLY the v1 prompt field according to the V1 smart natural snapshot format. Do NOT spend tokens generating v2 or v3.\n`;
+        }
+        else if (isTargetV3) {
+            engineFocusDirective = `\nSPEED FOCUS DIRECTIVE: The user requested ONLY the V3 engine. You MUST generate ONLY the v3 prompt field according to the V3 forensic deep prompt format. Do NOT spend tokens generating v1 or v2.\n`;
+        }
+        else {
+            engineFocusDirective = `\nGenerate V1, V2, and V3 prompts.\n`;
+        }
+        const targetEnginesLabel = isTargetV1 ? 'V1' : isTargetV2 ? 'V2' : isTargetV3 ? 'V3' : 'V1, V2, and V3';
+        const v2HeaderReminder = (isTargetV2 || isTargetAll) ? `\nFor V2, you MUST start with the exact mandatory opening sentence ("faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele.") and write the bold block headers (**ângulo e câmera:**, **cenário:**, **pose e ação:**, **roupa:**, **efeitos:**, **pele:**, **sombra:**, **rosto:**, **física e realismo:**, **formato:**).\n` : '';
+        contentsParts.push({
+            text: `OUTPUT LANGUAGE LOCK: Generate ${targetEnginesLabel}${shouldIncludeAutoDetect ? ' and any detected parameters' : ''} entirely in ${requestedLanguageName}. Do not mix interface languages into the generated prompts.${v2HeaderReminder}
 ${engineFocusDirective}
 ${userTextDescription}`
-    });
-
-    if (references && references.length > 0) {
-      for (const ref of references) {
-        if (ref.dataUrl && ref.dataUrl.includes(',')) {
-          const [meta, base64] = ref.dataUrl.split(',');
-          const mimeType = meta.split(';')[0].replace('data:', '') || 'image/jpeg';
-          contentsParts.push({
-            inlineData: { mimeType, data: base64 }
-          });
-        }
-      }
-    }
-
-    const schemaProperties: any = {};
-    const requiredProperties: string[] = [];
-
-    if (isTargetAll || isTargetV1) {
-      schemaProperties.v1 = { type: Type.STRING };
-      requiredProperties.push("v1");
-    }
-    if (isTargetAll || isTargetV2) {
-      schemaProperties.v2 = { type: Type.STRING };
-      requiredProperties.push("v2");
-    }
-    if (isTargetAll || isTargetV3) {
-      schemaProperties.v3 = { type: Type.STRING };
-      requiredProperties.push("v3");
-    }
-
-    if (shouldIncludeAutoDetect) {
-      schemaProperties.autoDetected = {
-        type: Type.OBJECT,
-        properties: {
-          subjectCount: { type: Type.STRING },
-          pose: { type: Type.STRING },
-          behavior: { type: Type.STRING },
-          gaze: { type: Type.STRING },
-          expression: { type: Type.STRING },
-          camera: { type: Type.STRING },
-          lens: { type: Type.STRING },
-          distance: { type: Type.STRING },
-          framing: { type: Type.STRING },
-          flash: { type: Type.STRING },
-          time: { type: Type.STRING },
-          environment: { type: Type.STRING },
-          vehicle: { type: Type.STRING },
-          activity: { type: Type.STRING },
-          lighting: { type: Type.STRING }
-        }
-      };
-      requiredProperties.push("autoDetected");
-    }
-
-    const MODELS_CASCADE = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
-    let lastError: any = null;
-
-    for (let attempt = 0; attempt < MODELS_CASCADE.length; attempt++) {
-      const currentModel = MODELS_CASCADE[attempt];
-      try {
-        const response = await ai.models.generateContent({
-          model: currentModel,
-          contents: contentsParts,
-          config: {
-            systemInstruction: systemPrompt,
-            temperature: 0.15,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: schemaProperties,
-              required: requiredProperties
-            }
-          }
         });
-
-        let responseText = response.text?.trim() || "";
-        if (!responseText && response.candidates?.[0]?.content?.parts) {
-          const parts = response.candidates[0].content.parts;
-          const textPart = parts.find((p: any) => !p.thought && typeof p.text === 'string' && p.text.trim());
-          if (textPart) {
-            responseText = textPart.text.trim();
-          } else {
-            responseText = parts.map((p: any) => p.text || '').join('').trim();
-          }
+        if (references && references.length > 0) {
+            for (const ref of references) {
+                if (ref.dataUrl && ref.dataUrl.includes(',')) {
+                    const [meta, base64] = ref.dataUrl.split(',');
+                    const mimeType = meta.split(';')[0].replace('data:', '') || 'image/jpeg';
+                    contentsParts.push({
+                        inlineData: { mimeType, data: base64 }
+                    });
+                }
+            }
         }
-        if (!responseText) throw new Error("Empty response from model.");
-
-        if (responseText.startsWith('```')) {
-          responseText = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        const schemaProperties = {};
+        const requiredProperties = [];
+        if (isTargetAll || isTargetV1) {
+            schemaProperties.v1 = { type: Type.STRING };
+            requiredProperties.push("v1");
         }
-
-        let parsed: any = null;
-        try {
-          parsed = JSON.parse(responseText);
-        } catch {
-          const firstBrace = responseText.indexOf('{');
-          const lastBrace = responseText.lastIndexOf('}');
-          if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-            parsed = JSON.parse(responseText.slice(firstBrace, lastBrace + 1));
-          } else {
-            throw new Error("Invalid JSON structure in model output.");
-          }
+        if (isTargetAll || isTargetV2) {
+            schemaProperties.v2 = { type: Type.STRING };
+            requiredProperties.push("v2");
         }
-
-        const defaultNegativePrompt = isPortuguese
-          ? "aparência de IA, CGI, renderização 3D, pele plástica e lisa, pele aerografada, cartoon, anime, ilustração, cores saturadas demais, iluminação artificial de estúdio, bokeh cinematográfico raso, desfoque falso exagerado, dedos extras, mãos deformadas, anatomia distorcida, membros ausentes, objetos flutuando, marca d'água, assinatura, artefatos de texto, olhos estranhos, brilhos especulares artificiais"
-          : isSpanish
-          ? "apariencia de IA, CGI, render 3D, piel plástica y lisa, piel retocada, dibujo animado, anime, ilustración, colores sobresaturados, iluminación artificial de estudio, bokeh cinematográfico poco profundo, desenfoque falso exagerado, dedos extra, manos deformes, anatomía distorsionada, extremidades ausentes, objetos flotantes, marca de agua, firma, artefactos de texto, ojos extraños, brillos especulares artificiales"
-          : "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed skin, cartoon, anime, illustration, oversaturated colors, artificial studio lighting, shallow cinematic bokeh, exaggerated fake blur, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, watermark, signature, text artifacts, weird eyes, unnatural specular highlights";
-
-        let finalV2 = parsed.v2?.trim() || "";
-        if (isPortuguese || (!isSpanish && !isEnglish)) {
-          const mandatoryPrefix = "faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele.";
-          const legacyPrefix = /^Use a foto do rosto em anexo como refer[êe]ncia da identidade da pessoa[^\n]*\n*/i;
-          if (legacyPrefix.test(finalV2)) {
-            finalV2 = finalV2.replace(legacyPrefix, `${mandatoryPrefix}\n\n`).trim();
-          } else if (!finalV2.toLowerCase().startsWith("faça uma imagem do homem da foto enviada")) {
-            finalV2 = `${mandatoryPrefix}\n\n${finalV2}`.trim();
-          }
+        if (isTargetAll || isTargetV3) {
+            schemaProperties.v3 = { type: Type.STRING };
+            requiredProperties.push("v3");
         }
-        // Ensure clean block separation with double line breaks between bold headers and blocks
-        finalV2 = finalV2
-          .replace(/\s*(\*\*[^*]+:\*\*)\s*/g, "\n\n$1\n\n")
-          .replace(/\n{3,}/g, "\n\n")
-          .trim();
-
-        const payload = {
-          v1: parsed.v1?.trim() || "",
-          v2: finalV2,
-          v3: parsed.v3?.trim() || "",
-          negativePrompt: defaultNegativePrompt,
-          autoDetected: parsed.autoDetected || {}
-        };
-
-        if (serverPromptCache.size >= SERVER_CACHE_MAX) {
-          const oldestKey = serverPromptCache.keys().next().value;
-          if (oldestKey) serverPromptCache.delete(oldestKey);
+        if (shouldIncludeAutoDetect) {
+            schemaProperties.autoDetected = {
+                type: Type.OBJECT,
+                properties: {
+                    subjectCount: { type: Type.STRING },
+                    pose: { type: Type.STRING },
+                    behavior: { type: Type.STRING },
+                    gaze: { type: Type.STRING },
+                    expression: { type: Type.STRING },
+                    camera: { type: Type.STRING },
+                    lens: { type: Type.STRING },
+                    distance: { type: Type.STRING },
+                    framing: { type: Type.STRING },
+                    flash: { type: Type.STRING },
+                    time: { type: Type.STRING },
+                    environment: { type: Type.STRING },
+                    vehicle: { type: Type.STRING },
+                    activity: { type: Type.STRING },
+                    lighting: { type: Type.STRING }
+                }
+            };
+            requiredProperties.push("autoDetected");
         }
-        serverPromptCache.set(cacheKey, { data: payload, ts: Date.now() });
-
-        return res.json(payload);
-      } catch (err: any) {
-        lastError = err;
-        if (isRateLimit(err)) {
-          console.info(`[GENERATE] Model ${currentModel} reached rate/quota limit. Attempting fallback...`);
-        } else if (isTransientError(err)) {
-          console.info(`[GENERATE] Model ${currentModel} temporarily busy (503). Retrying...`);
-        } else {
-          console.warn(`[GENERATE] Attempt ${attempt + 1} with model ${currentModel} failed: ${cleanErrorMessage(err)}`);
+        const MODELS_CASCADE = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+        let lastError = null;
+        for (let attempt = 0; attempt < MODELS_CASCADE.length; attempt++) {
+            const currentModel = MODELS_CASCADE[attempt];
+            try {
+                const response = await ai.models.generateContent({
+                    model: currentModel,
+                    contents: contentsParts,
+                    config: {
+                        systemInstruction: systemPrompt,
+                        temperature: 0.15,
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.OBJECT,
+                            properties: schemaProperties,
+                            required: requiredProperties
+                        }
+                    }
+                });
+                let responseText = response.text?.trim() || "";
+                if (!responseText && response.candidates?.[0]?.content?.parts) {
+                    const parts = response.candidates[0].content.parts;
+                    const textPart = parts.find((p) => !p.thought && typeof p.text === 'string' && p.text.trim());
+                    if (textPart) {
+                        responseText = textPart.text.trim();
+                    }
+                    else {
+                        responseText = parts.map((p) => p.text || '').join('').trim();
+                    }
+                }
+                if (!responseText)
+                    throw new Error("Empty response from model.");
+                if (responseText.startsWith('```')) {
+                    responseText = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+                }
+                let parsed = null;
+                try {
+                    parsed = JSON.parse(responseText);
+                }
+                catch {
+                    const firstBrace = responseText.indexOf('{');
+                    const lastBrace = responseText.lastIndexOf('}');
+                    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                        parsed = JSON.parse(responseText.slice(firstBrace, lastBrace + 1));
+                    }
+                    else {
+                        throw new Error("Invalid JSON structure in model output.");
+                    }
+                }
+                const defaultNegativePrompt = "fake AI look, CGI, 3D render, plastic smooth skin, airbrushed, cartoon, anime, illustration, oversaturated, artificial studio lighting, shallow cinematic bokeh, exaggerated fake blur, extra fingers, mutated hands, distorted anatomy, missing limbs, floating objects, watermark, signature, text artifacts, weird eyes, unnatural specular highlights";
+                let finalV2 = parsed.v2?.trim() || "";
+                if (isPortuguese || (!isSpanish && !isEnglish)) {
+                    const mandatoryPrefix = "faça uma imagem do homem da foto enviada, seguindo 100% das caracteristicas dele.";
+                    const legacyPrefix = /^Use a foto do rosto em anexo como refer[êe]ncia da identidade da pessoa[^\n]*\n*/i;
+                    if (legacyPrefix.test(finalV2)) {
+                        finalV2 = finalV2.replace(legacyPrefix, `${mandatoryPrefix}\n\n`).trim();
+                    }
+                    else if (!finalV2.toLowerCase().startsWith("faça uma imagem do homem da foto enviada")) {
+                        finalV2 = `${mandatoryPrefix}\n\n${finalV2}`.trim();
+                    }
+                }
+                // Ensure clean block separation with double line breaks between bold headers and blocks
+                finalV2 = finalV2
+                    .replace(/\s*(\*\*[^*]+:\*\*)\s*/g, "\n\n$1\n\n")
+                    .replace(/\n{3,}/g, "\n\n")
+                    .trim();
+                const payload = {
+                    v1: parsed.v1?.trim() || "",
+                    v2: finalV2,
+                    v3: parsed.v3?.trim() || "",
+                    negativePrompt: defaultNegativePrompt,
+                    autoDetected: parsed.autoDetected || {}
+                };
+                if (serverPromptCache.size >= SERVER_CACHE_MAX) {
+                    const oldestKey = serverPromptCache.keys().next().value;
+                    if (oldestKey)
+                        serverPromptCache.delete(oldestKey);
+                }
+                serverPromptCache.set(cacheKey, { data: payload, ts: Date.now() });
+                return res.json(payload);
+            }
+            catch (err) {
+                lastError = err;
+                if (isRateLimit(err)) {
+                    console.info(`[GENERATE] Model ${currentModel} reached rate/quota limit. Attempting fallback...`);
+                }
+                else if (isTransientError(err)) {
+                    console.info(`[GENERATE] Model ${currentModel} temporarily busy (503). Retrying...`);
+                }
+                else {
+                    console.warn(`[GENERATE] Attempt ${attempt + 1} with model ${currentModel} failed: ${cleanErrorMessage(err)}`);
+                }
+                if (attempt < MODELS_CASCADE.length - 1) {
+                    await wait(750 * (attempt + 1));
+                    continue;
+                }
+                break;
+            }
         }
-        if (attempt < MODELS_CASCADE.length - 1) {
-          await wait(750 * (attempt + 1));
-          continue;
-        }
-        break;
-      }
+        const isQuota = isRateLimit(lastError);
+        const clientMsg = cleanErrorMessage(lastError);
+        return res.status(isQuota ? 429 : 500).json({ error: clientMsg });
     }
-
-    const isQuota = isRateLimit(lastError);
-    const clientMsg = cleanErrorMessage(lastError);
-    return res.status(isQuota ? 429 : 500).json({ error: clientMsg });
-  } catch (error: any) {
-    const isQuota = isRateLimit(error);
-    const clientMsg = cleanErrorMessage(error);
-    if (!isQuota && !isTransientError(error)) {
-      console.error("Generate prompts error:", clientMsg);
+    catch (error) {
+        const isQuota = isRateLimit(error);
+        const clientMsg = cleanErrorMessage(error);
+        if (!isQuota && !isTransientError(error)) {
+            console.error("Generate prompts error:", clientMsg);
+        }
+        return res.status(isQuota ? 429 : 500).json({ error: clientMsg });
     }
-    return res.status(isQuota ? 429 : 500).json({ error: clientMsg });
-  }
 });
-
 // Magic Enhance Idea
-app.post('/api/magic-enhance', async (req: Request, res: Response) => {
-  const startedAt = Date.now();
-  let clientClosed = false;
-  req.on('aborted', () => {
-    clientClosed = true;
-  });
-  res.on('close', () => {
-    if (!res.writableEnded) clientClosed = true;
-  });
-
-  try {
-    const rawIdea = typeof req.body?.rawIdea === 'string' ? req.body.rawIdea.trim() : '';
-    const modality = String(req.body?.modality || 'person');
-
-    if (!rawIdea) {
-      return res.status(400).json({ error: 'EMPTY_ENHANCE_INPUT' });
-    }
-
-    const ai = getAiClient();
-    const prompt = `
+app.post('/api/magic-enhance', async (req, res) => {
+    const startedAt = Date.now();
+    let clientClosed = false;
+    req.on('aborted', () => {
+        clientClosed = true;
+    });
+    res.on('close', () => {
+        if (!res.writableEnded)
+            clientClosed = true;
+    });
+    try {
+        const rawIdea = typeof req.body?.rawIdea === 'string' ? req.body.rawIdea.trim() : '';
+        const modality = String(req.body?.modality || 'person');
+        if (!rawIdea) {
+            return res.status(400).json({ error: 'EMPTY_ENHANCE_INPUT' });
+        }
+        const ai = getAiClient();
+        const prompt = `
 You are the hidden reconstruction engine behind Magic Enhance.
 The user's original idea is the highest authority and must remain intact.
 
@@ -1058,79 +1029,74 @@ OUTPUT:
 - Keep the user's facts and tone; enrich physical/spatial/camera evidence.
 - Do not show analysis, headings like PASS 1/PASS 2, checklists, JSON, explanations, or commentary.
 `;
-
-    // Prefer fast, high-quota model with fallback to handle rate limits seamlessly.
-    const magicModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
-    let lastError: any = null;
-
-    for (let index = 0; index < magicModels.length; index++) {
-      if (clientClosed || res.destroyed) return;
-      const model = magicModels[index];
-      try {
-        const result = await withDeadline(
-          ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-              temperature: 0.18
+        // Prefer fast, high-quota model with fallback to handle rate limits seamlessly.
+        const magicModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+        let lastError = null;
+        for (let index = 0; index < magicModels.length; index++) {
+            if (clientClosed || res.destroyed)
+                return;
+            const model = magicModels[index];
+            try {
+                const result = await withDeadline(ai.models.generateContent({
+                    model,
+                    contents: prompt,
+                    config: {
+                        temperature: 0.18
+                    }
+                }), 38000, 'MAGIC_MODEL_TIMEOUT');
+                let enhanced = result.text?.trim() || '';
+                if (!enhanced && result.candidates?.[0]?.content?.parts) {
+                    const parts = result.candidates[0].content.parts;
+                    const textPart = parts.find((p) => !p.thought && typeof p.text === 'string' && p.text.trim());
+                    if (textPart) {
+                        enhanced = textPart.text.trim();
+                    }
+                    else {
+                        enhanced = parts.map((p) => p.text || '').join('').trim();
+                    }
+                }
+                if (!enhanced)
+                    throw new Error('EMPTY_ENHANCE_RESPONSE');
+                if (!clientClosed && !res.destroyed && !res.headersSent) {
+                    return res.json({ enhanced, elapsedMs: Date.now() - startedAt });
+                }
+                return;
             }
-          }),
-          38000,
-          'MAGIC_MODEL_TIMEOUT'
-        );
-
-        let enhanced = result.text?.trim() || '';
-        if (!enhanced && result.candidates?.[0]?.content?.parts) {
-          const parts = result.candidates[0].content.parts;
-          const textPart = parts.find((p: any) => !p.thought && typeof p.text === 'string' && p.text.trim());
-          if (textPart) {
-            enhanced = textPart.text.trim();
-          } else {
-            enhanced = parts.map((p: any) => p.text || '').join('').trim();
-          }
+            catch (error) {
+                lastError = error;
+                if (isRateLimit(error)) {
+                    console.info(`[MAGIC] model=${model} hit quota/rate limit. Attempting next model...`);
+                }
+                else {
+                    console.warn(`[MAGIC] model=${model} failed: ${error?.message || error}`);
+                }
+                if (clientClosed || res.destroyed)
+                    return;
+            }
         }
-
-        if (!enhanced) throw new Error('EMPTY_ENHANCE_RESPONSE');
-
+        const message = String(lastError?.message || 'MAGIC_ENHANCE_FAILED');
+        const isTimeout = /TIMEOUT/i.test(message);
+        const isQuota = isRateLimit(lastError);
+        const status = isTimeout ? 504 : isQuota ? 429 : 500;
         if (!clientClosed && !res.destroyed && !res.headersSent) {
-          return res.json({ enhanced, elapsedMs: Date.now() - startedAt });
+            return res.status(status).json({ error: isTimeout ? 'MAGIC_TIMEOUT' : isQuota ? 'RATE_LIMIT' : 'MAGIC_ENHANCE_FAILED' });
         }
-        return;
-      } catch (error: any) {
-        lastError = error;
-        if (isRateLimit(error)) {
-          console.info(`[MAGIC] model=${model} hit quota/rate limit. Attempting next model...`);
-        } else {
-          console.warn(`[MAGIC] model=${model} failed: ${error?.message || error}`);
+    }
+    catch (error) {
+        if (!isRateLimit(error)) {
+            console.error('[MAGIC] error:', error?.message || error);
         }
-        if (clientClosed || res.destroyed) return;
-      }
+        if (!clientClosed && !res.destroyed && !res.headersSent) {
+            return res.status(500).json({ error: error?.message || 'MAGIC_ENHANCE_FAILED' });
+        }
     }
-
-    const message = String(lastError?.message || 'MAGIC_ENHANCE_FAILED');
-    const isTimeout = /TIMEOUT/i.test(message);
-    const isQuota = isRateLimit(lastError);
-    const status = isTimeout ? 504 : isQuota ? 429 : 500;
-    if (!clientClosed && !res.destroyed && !res.headersSent) {
-      return res.status(status).json({ error: isTimeout ? 'MAGIC_TIMEOUT' : isQuota ? 'RATE_LIMIT' : 'MAGIC_ENHANCE_FAILED' });
-    }
-  } catch (error: any) {
-    if (!isRateLimit(error)) {
-      console.error('[MAGIC] error:', error?.message || error);
-    }
-    if (!clientClosed && !res.destroyed && !res.headersSent) {
-      return res.status(500).json({ error: error?.message || 'MAGIC_ENHANCE_FAILED' });
-    }
-  }
 });
-
 // Refine Prompt
-app.post('/api/refine-prompt', async (req: Request, res: Response) => {
-  try {
-    const { targetEngine, originalPrompt, refinementDirective } = req.body;
-    const ai = getAiClient();
-
-    const prompt = `
+app.post('/api/refine-prompt', async (req, res) => {
+    try {
+        const { targetEngine, originalPrompt, refinementDirective } = req.body;
+        const ai = getAiClient();
+        const prompt = `
 YOU ARE A PRECISION PHOTOGRAPHIC PROMPT SURGEON.
 You are given an existing generated prompt (${(targetEngine || 'v1').toUpperCase()} ENGINE) and a user modification request.
 
@@ -1149,156 +1115,149 @@ CRITICAL RULES:
    - If V3: Maintain the direct natural-language curly-brace {} format and the same scene-specific block order; never convert it into a blueprint or meta-prompt.
 4. Return ONLY the updated prompt text. No preamble or conversational filler.
 `;
-
-    const refineModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
-    let refinedText = '';
-    for (const model of refineModels) {
-      try {
-        const result = await ai.models.generateContent({
-          model,
-          contents: prompt,
-          config: { temperature: 0.1 }
-        });
-        let text = result.text?.trim() || '';
-        if (!text && result.candidates?.[0]?.content?.parts) {
-          const parts = result.candidates[0].content.parts;
-          const textPart = parts.find((p: any) => !p.thought && typeof p.text === 'string' && p.text.trim());
-          if (textPart) text = textPart.text.trim();
-        }
-        if (text) {
-          refinedText = text;
-          break;
-        }
-      } catch (err: any) {
-        if (!isRateLimit(err)) {
-          console.warn(`Refine prompt model ${model} failed:`, err?.message || err);
-        }
-      }
-    }
-
-    res.json({ refined: refinedText || originalPrompt });
-  } catch (error: any) {
-    if (!isRateLimit(error)) {
-      console.error("Refine prompt error:", error);
-    }
-    res.status(500).json({ error: error.message || "Failed to refine prompt" });
-  }
-});
-
-// Detect Contextual Params
-app.post('/api/detect-params', async (req: Request, res: Response) => {
-  try {
-    const { text, images } = req.body;
-    const ai = getAiClient();
-    const contentsParts: any[] = [];
-
-    contentsParts.push({
-      text: `Analyze this scene request and deduce the most authentic optical and physical parameters:
-Request: "${text}"`
-    });
-
-    if (images && images.length > 0) {
-      for (const img of images.slice(0, 2)) {
-        if (img.dataUrl && img.dataUrl.includes(',')) {
-          const [meta, base64] = img.dataUrl.split(',');
-          const mimeType = meta.split(';')[0].replace('data:', '') || 'image/jpeg';
-          contentsParts.push({
-            inlineData: { mimeType, data: base64 }
-          });
-        }
-      }
-    }
-
-    const detectModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
-    let detectedData: any = {};
-
-    for (const model of detectModels) {
-      try {
-        const response = await ai.models.generateContent({
-          model,
-          contents: contentsParts,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                pose: { type: Type.STRING },
-                behavior: { type: Type.STRING },
-                gaze: { type: Type.STRING },
-                expression: { type: Type.STRING },
-                camera: { type: Type.STRING },
-                lens: { type: Type.STRING },
-                distance: { type: Type.STRING },
-                framing: { type: Type.STRING },
-                flash: { type: Type.STRING },
-                time: { type: Type.STRING },
-                environment: { type: Type.STRING },
-                vehicle: { type: Type.STRING },
-                activity: { type: Type.STRING }
-              }
+        const refineModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+        let refinedText = '';
+        for (const model of refineModels) {
+            try {
+                const result = await ai.models.generateContent({
+                    model,
+                    contents: prompt,
+                    config: { temperature: 0.1 }
+                });
+                let text = result.text?.trim() || '';
+                if (!text && result.candidates?.[0]?.content?.parts) {
+                    const parts = result.candidates[0].content.parts;
+                    const textPart = parts.find((p) => !p.thought && typeof p.text === 'string' && p.text.trim());
+                    if (textPart)
+                        text = textPart.text.trim();
+                }
+                if (text) {
+                    refinedText = text;
+                    break;
+                }
             }
-          }
-        });
-
-        let respText = response.text?.trim() || '';
-        if (!respText && response.candidates?.[0]?.content?.parts) {
-          const parts = response.candidates[0].content.parts;
-          const textPart = parts.find((p: any) => !p.thought && typeof p.text === 'string' && p.text.trim());
-          if (textPart) respText = textPart.text.trim();
+            catch (err) {
+                if (!isRateLimit(err)) {
+                    console.warn(`Refine prompt model ${model} failed:`, err?.message || err);
+                }
+            }
         }
-
-        if (respText) {
-          if (respText.startsWith('```')) {
-            respText = respText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-          }
-          detectedData = JSON.parse(respText);
-          break;
-        }
-      } catch (err: any) {
-        if (!isRateLimit(err)) {
-          console.warn(`Detect params model ${model} failed:`, err?.message || err);
-        }
-      }
+        res.json({ refined: refinedText || originalPrompt });
     }
-
-    res.json(detectedData);
-  } catch (error: any) {
-    if (!isRateLimit(error)) {
-      console.error("Detect params error:", error);
+    catch (error) {
+        if (!isRateLimit(error)) {
+            console.error("Refine prompt error:", error);
+        }
+        res.status(500).json({ error: error.message || "Failed to refine prompt" });
     }
-    res.json({});
-  }
 });
-
+// Detect Contextual Params
+app.post('/api/detect-params', async (req, res) => {
+    try {
+        const { text, images } = req.body;
+        const ai = getAiClient();
+        const contentsParts = [];
+        contentsParts.push({
+            text: `Analyze this scene request and deduce the most authentic optical and physical parameters:
+Request: "${text}"`
+        });
+        if (images && images.length > 0) {
+            for (const img of images.slice(0, 2)) {
+                if (img.dataUrl && img.dataUrl.includes(',')) {
+                    const [meta, base64] = img.dataUrl.split(',');
+                    const mimeType = meta.split(';')[0].replace('data:', '') || 'image/jpeg';
+                    contentsParts.push({
+                        inlineData: { mimeType, data: base64 }
+                    });
+                }
+            }
+        }
+        const detectModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+        let detectedData = {};
+        for (const model of detectModels) {
+            try {
+                const response = await ai.models.generateContent({
+                    model,
+                    contents: contentsParts,
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.OBJECT,
+                            properties: {
+                                pose: { type: Type.STRING },
+                                behavior: { type: Type.STRING },
+                                gaze: { type: Type.STRING },
+                                expression: { type: Type.STRING },
+                                camera: { type: Type.STRING },
+                                lens: { type: Type.STRING },
+                                distance: { type: Type.STRING },
+                                framing: { type: Type.STRING },
+                                flash: { type: Type.STRING },
+                                time: { type: Type.STRING },
+                                environment: { type: Type.STRING },
+                                vehicle: { type: Type.STRING },
+                                activity: { type: Type.STRING }
+                            }
+                        }
+                    }
+                });
+                let respText = response.text?.trim() || '';
+                if (!respText && response.candidates?.[0]?.content?.parts) {
+                    const parts = response.candidates[0].content.parts;
+                    const textPart = parts.find((p) => !p.thought && typeof p.text === 'string' && p.text.trim());
+                    if (textPart)
+                        respText = textPart.text.trim();
+                }
+                if (respText) {
+                    if (respText.startsWith('```')) {
+                        respText = respText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+                    }
+                    detectedData = JSON.parse(respText);
+                    break;
+                }
+            }
+            catch (err) {
+                if (!isRateLimit(err)) {
+                    console.warn(`Detect params model ${model} failed:`, err?.message || err);
+                }
+            }
+        }
+        res.json(detectedData);
+    }
+    catch (error) {
+        if (!isRateLimit(error)) {
+            console.error("Detect params error:", error);
+        }
+        res.json({});
+    }
+});
 // ============================================================================
 // VITE / STATIC SERVING
 // ============================================================================
 export default app;
-
 async function startServer() {
-  if (!isProd) {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
+    if (!isProd) {
+        const { createServer: createViteServer } = await import('vite');
+        const vite = await createViteServer({
+            server: { middlewareMode: true },
+            appType: 'spa',
+        });
+        app.use(vite.middlewares);
+    }
+    else {
+        const distPath = path.resolve(__dirname, 'dist');
+        app.use(express.static(distPath));
+        app.use((_req, res) => {
+            res.sendFile(path.resolve(distPath, 'index.html'));
+        });
+    }
+    app.listen(PORT, () => {
+        console.log(`Server listening on http://localhost:${PORT} (${isProd ? 'production' : 'development'})`);
     });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.resolve(__dirname, 'dist');
-    app.use(express.static(distPath));
-    app.use((_req: Request, res: Response) => {
-      res.sendFile(path.resolve(distPath, 'index.html'));
-    });
-  }
-
-  app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT} (${isProd ? 'production' : 'development'})`);
-  });
 }
-
 if (process.env.VERCEL !== '1') {
-  startServer().catch(err => {
-    console.error("Failed to start server:", err);
-    process.exit(1);
-  });
+    startServer().catch(err => {
+        console.error("Failed to start server:", err);
+        process.exit(1);
+    });
 }

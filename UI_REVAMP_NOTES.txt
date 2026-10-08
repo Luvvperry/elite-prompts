@@ -1,0 +1,26 @@
+PROFESSIONAL STUDIO V3
+
+UI-only redesign. Prompt generation logic was intentionally left untouched.
+
+Changed:
+- Replaced the previous landing-page-like top chrome with a desktop instrument rail and compact mobile toolbar.
+- Removed fake LIVE/workspace decorations and numbered stage chrome from the main flow.
+- Rebuilt the desktop workspace into a professional three-pane creative-suite layout: Input / Controls / Output.
+- On medium desktop sizes, Input + Controls stack beside a sticky Output pane.
+- On mobile, the flow remains Input -> Controls -> Output with a compact action dock.
+- Reworked visual system to flat black/charcoal/white surfaces with restrained borders and almost no decorative gradients/glows.
+- Reduced the overuse of uppercase/monospace styling.
+- Reworked contextual metadata into a quiet context bar rather than a fake status dashboard.
+- Refined prompt output into an editor-like console instead of a marketing card.
+- Refined sheets, command palette, controls, spacing and mobile touch behavior.
+- Preserved dark/light mode and all existing features.
+
+Locked / unchanged:
+- services/geminiService.ts
+- server.ts
+- translations.ts
+- types.ts
+- V1 / V2 / V3 prompt generation behavior
+- Magic Enhance generation behavior
+- Auto Detect logic
+- Camera/type libraries and settings logic
