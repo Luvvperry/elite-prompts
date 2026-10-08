@@ -5,7 +5,7 @@ import { getStoredSettings, saveStoredSettings, subscribeToSettings } from '../s
 import ChampagneCapsuleButton from './ChampagneCapsuleButton';
 import TextStructureCanvas from './TextStructureCanvas';
 
-const TEMPLATE_EXAMPLE = `A hyper-realistic RAW photo of [sujeto, edad, expresión], wearing [ropa detallada, colores, texturas], standing in [entorno, lugar específico]. [Iluminación exacta: tipo de luz, sombras, dirección]. Shot on 35mm lens, f/2.8, natural skin texture, realistic imperfections.`;
+const TEMPLATE_EXAMPLE = `Subject A: [exact action with a real object and natural body position]. Wardrobe: [fabric, fit, seams, folds, contact points and small imperfections]. Environment: [specific location, foreground objects, middle distance and ordinary background]. Camera: rear smartphone camera, 24mm equivalent main lens at 1x, camera height [ ], distance [ ], vertical 9:16, focus on [ ]. Light: [real source, direction, falloff and shadow softness]. Capture imperfections: [one or two plausible phone defects only]. Use the separate personal reference image for identity only; do not describe or copy another person's face or body.`;
 
 const IdeaBuilderSection: React.FC = () => {
   const { t, language } = useLanguage();

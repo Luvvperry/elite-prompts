@@ -201,19 +201,29 @@ app.post('/api/generate-idea-prompt', async (req: Request, res: Response) => {
       measurementsStr = `peso ${validWeight} kg`;
     }
 
-    const taskPrompt = `Transforma la siguiente idea en un prompt fotográfico forense ultra-realista de smartphone:
+    const taskPrompt = `Transforma la siguiente idea en un prompt fotográfico forense ultra-realista de smartphone. Antes de escribir, interpreta silenciosamente la escena en este orden: elementos realmente visibles; posición, altura y distancia física de la cámara; recorte del cuerpo; mecánica exacta de espalda, hombros, brazos, manos, piernas, pies, cabeza y mirada; recorrido real de la luz y sombras; una o dos imperfecciones plausibles de smartphone; y comportamiento físico de materiales y reflejos.
+
+IDEA DEL USUARIO:
 """
 ${ideaText}
 """
 Modo: ${mode}
-Gesto: ${gestureOption}
-Estado de ánimo: ${moodOption}
-Relación de aspecto: ${aspectRatio}
-${measurementsStr ? `Medidas de usuario para Sujeto A: ${measurementsStr}` : ''}
-${isEs ? 'Idioma: Español' : 'Language: English'}
+Gesto seleccionado: ${gestureOption}
+Estado de ánimo seleccionado: ${moodOption}
+Relación de aspecto: ${aspectRatio === 'auto' ? '9:16' : aspectRatio}
+${measurementsStr ? `Medidas de usuario para Sujeto A: ${measurementsStr}` : 'No inventes altura, peso, edad, cabello, piel, facciones, etnia ni complexión.'}
+${isEs ? 'Idioma de salida: Español puro. Todos los encabezados y valores deben estar en español.' : 'Output language: English only. All headings and values must be in English.'}
 
-Genera un JSON con {"positive": "...", "negative": "..."}.
-El prompt positivo debe iniciar directamente con "Subject A:" si hay personas, incluir cámara de celular 24mm f/1.8 equivalente a 1x y perspectiva 9:16 natural.`;
+REGLAS DE REALISMO:
+- La imagen debe parecer una foto cotidiana tomada por la cámara traseira de un smartphone real, nunca una campaña, render 3D, CGI o composición cinematográfica.
+- Usa 24-26 mm equivalente, cámara principal 1x, altura y distancia concretas, recorte coherente y vertical 9:16 salvo que el usuario pida otra proporción.
+- No describas ni copies el rostro, cabello, tono de piel, facciones ni apariencia corporal de ninguna referencia; la identidad viene de la foto personal separada.
+- Describe ropa por tejido, peso, costuras, tensión, arrugas, caída, compresión y puntos de contacto. Describe la acción usando un objeto real, evitando poses genéricas.
+- Si aparece vidrio, espejo, agua, metal, coche, mesa pulida o piedra brillante, especifica qué se refleja, intensidad y nitidez del reflejo, acabado, entrada de luz, sombras de contacto y cómo los objetos apoyados rompen el reflejo.
+- El prompt positivo debe tener 850-1250 palabras y seguir este orden: sujetos/acción, ropa/materiales, entorno, composición, cámara, luz, piel sin identidad, imperfecciones y cierre de identidad externa.
+- El prompt negativo debe iniciar con [PROMPT NEGATIVO], ser específico de la escena y no excluir elementos solicitados por el usuario.
+
+Genera exactamente un JSON con {"positive": "...", "negative": "...", "detectedSummary": "..."}. El prompt positivo debe iniciar directamente con "Subject A:" si hay personas.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.5-flash',
