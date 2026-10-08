@@ -151,7 +151,7 @@ ${isEs ? 'Idioma de salida: Español.' : 'Output language: English.'}`;
     parts.push({ text: promptText });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       contents: { parts },
       config: {
         systemInstruction: ANALYZER_SYSTEM_INSTRUCTION,
@@ -216,7 +216,7 @@ Genera un JSON con {"positive": "...", "negative": "..."}.
 El prompt positivo debe iniciar directamente con "Subject A:" si hay personas, incluir cámara de celular 24mm f/1.8 equivalente a 1x y perspectiva 9:16 natural.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       contents: { parts: [{ text: taskPrompt }] },
       config: {
         temperature: 0.5,
@@ -294,7 +294,7 @@ INSTRUCCIONES DE CONTEO Y FORMATO DE SUJETOS:
 4. Prompt negativo: Crea para cada variante su prompt negativo quirúrgico que inicie con "[PROMPT NEGATIVO]\\n\\n".`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       contents: { parts: [{ text: chunkPrompt }] },
       config: {
         systemInstruction: BATCH_ANALYZER_SYSTEM_INSTRUCTION,
@@ -385,7 +385,7 @@ app.post('/api/generate-lifestyle-prompts', async (req: Request, res: Response) 
       ? `\nPreviously generated concepts to avoid repeating:\n${previousConcepts.map((item: string) => `- ${item}`).join('\n')}` : '';
     const prompt = `Analyze this reference only as an aesthetic and environmental guide, then generate exactly five different lifestyle photography prompt proposals. Do not copy the exact main subject or identical composition. Keep every proposal plausible, ordinary and physically coherent; no people, no readable text and no commercial logos. Vary the core concept across local wildlife (at most one proposal), native flora, a contextual vehicle, vernacular architecture, and geology/expedition textures when they fit the reference. Use a real smartphone capture, vertical 9:16, and casual imperfections instead of cinematic polish. ${isEs ? 'Escribe todos los valores en español natural y fotográfico.' : 'Write every value in natural photographic English.'}${previousBlock}`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash', contents: { parts: [imagePart, { text: prompt }] },
+      model: 'gemini-3.5-flash', contents: { parts: [imagePart, { text: prompt }] },
       config: { temperature: 0.65, responseMimeType: 'application/json', responseSchema: {
         type: Type.OBJECT, properties: {
           aestheticSummary: { type: Type.STRING }, colorPalette: { type: Type.ARRAY, items: { type: Type.STRING } },
