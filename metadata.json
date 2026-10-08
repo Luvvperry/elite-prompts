@@ -1,0 +1,11 @@
+{
+  "name": "Remix MI MEJOR ",
+  "description": "A high-fidelity tool that transforms reference images into ultra-realistic, \u0027captured-on-phone\u0027 image generation prompts focusing on natural imperfections and believable details.",
+  "requestFramePermissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
