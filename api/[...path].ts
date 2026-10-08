@@ -29,15 +29,21 @@ const isTransient = (error: any) => {
 
 const generateWithRetry = async (ai: GoogleGenAI, request: any) => {
   let lastError: any;
-  const models = [request.model, 'gemini-3.1-flash', 'gemini-3.5-flash'].filter((model, index, all) => model && all.indexOf(model) === index);
+  // One bounded provider attempt keeps the UI responsive. The route-level
+  // fallbacks handle temporary provider outages instead of waiting on a chain
+  // of congested models.
+  const models = [request.model].filter(Boolean);
   for (const model of models) {
     for (let attempt = 0; attempt < 1; attempt += 1) {
       try {
-        return await ai.models.generateContent({ ...request, model });
+        const generation = ai.models.generateContent({ ...request, model });
+        return await Promise.race([
+          generation,
+          new Promise<never>((_, reject) => setTimeout(() => reject(Object.assign(new Error('AI request timeout'), { status: 503 })), 14000)),
+        ]);
       } catch (error: any) {
         lastError = error;
         if (!isTransient(error)) break;
-        await new Promise((resolve) => setTimeout(resolve, 250));
       }
     }
   }
